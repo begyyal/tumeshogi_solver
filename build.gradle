@@ -1,0 +1,8 @@
+apply plugin: 'application'
+apply plugin: 'eclipse'
+
+mainClassName = 'shogi.Entrypoint'
+
+dependencies {
+	compile files('resource/jar/java_commons.jar')
+}
