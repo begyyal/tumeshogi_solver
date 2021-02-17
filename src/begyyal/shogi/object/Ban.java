@@ -7,7 +7,7 @@ import begyyal.commons.util.object.SuperList.SuperListGen;
 
 public class Ban {
 
-    private final MasuState[][] matrixOrigin;
+    private MasuState[][] matrixOrigin;
 
     private Ban(String[] args) {
 	// インデックスの振り順は将棋盤の読み方に倣う

@@ -81,8 +81,7 @@ public enum Koma {
     }
     
     public static Koma of(String id) {
-	return Arrays.asList(Koma.values())
-		.stream()
+	return Arrays.stream(Koma.values())
 		.filter(p -> StringUtils.equals(id, p.id))
 		.findFirst()
 		.orElse(null);

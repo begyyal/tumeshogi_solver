@@ -9,15 +9,14 @@ public enum Player {
     Self("x"),
     Opponent("y");
     
-    private final String id;
+    public final String id;
     
     private Player(String id) {
 	this.id = id;
     }
     
     public static Player of(String id) {
-	return Arrays.asList(Player.values())
-		.stream()
+	return Arrays.stream(Player.values())
 		.filter(p -> StringUtils.equals(id, p.id))
 		.findFirst()
 		.orElse(null);
