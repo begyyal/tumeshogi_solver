@@ -3,6 +3,11 @@ apply plugin: 'eclipse'
 
 mainClassName = 'shogi.Entrypoint'
 
+repositories {
+	mavenCentral()
+}
+
 dependencies {
 	compile files('resource/jar/java_commons.jar')
+	compile 'org.apache.commons:commons-lang3:latest.release'
 }

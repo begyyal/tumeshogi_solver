@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="output" path="bin/default"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8/"/>
+	<classpathentry sourcepath="C:/Users/kazam/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-lang3/3.11/24014867e470db3942db53b17a4902f4215d5ea8/commons-lang3-3.11-sources.jar" kind="lib" path="C:/Users/kazam/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-lang3/3.11/68e9a6adf7cf8eb7e9d31bbc554c7c75eeaac568/commons-lang3-3.11.jar">
+		<attributes>
+			<attribute name="gradle_used_by_scope" value="main,test"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="C:/pgwork/pleiades/workspace2/TumeshogiResolver/resource/jar/java_commons.jar">
 		<attributes>
 			<attribute name="gradle_used_by_scope" value="main,test"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre"/>
-	<classpathentry kind="output" path="bin/default"/>
 </classpath>
