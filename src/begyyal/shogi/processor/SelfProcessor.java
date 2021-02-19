@@ -1,19 +1,21 @@
 package begyyal.shogi.processor;
 
 import begyyal.shogi.def.Player;
-import begyyal.shogi.object.Ban;
+import begyyal.shogi.object.BanContext;
 
 public class SelfProcessor extends PlayerProcessorBase {
 
-    private SelfProcessor(String arg) {
-	super(Player.Self, arg);
+    public static final Player PlayerType = Player.Self;
+    
+    private SelfProcessor() {
+	super();
     }
     
-    public Ban[] spread(Ban ban) {
+    public BanContext[] spread(BanContext context) {
 	return null;
     }
     
-    public static SelfProcessor newi(String arg) {
-	return new SelfProcessor(arg);
+    public static SelfProcessor newi() {
+	return new SelfProcessor();
     }
 }

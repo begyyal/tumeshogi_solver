@@ -1,28 +1,19 @@
 package begyyal.shogi.processor;
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
 
-import begyyal.commons.util.object.PairList;
-import begyyal.commons.util.object.PairList.PairListGen;
-import begyyal.commons.util.object.SuperBool;
 import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
-import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
 import begyyal.shogi.object.MasuState;
 
 public class BattleProcessor {
 
-    private final SelfProcessor self;
-    private final OpponentProcessor opponent;
     private final SuperList<BanContext> contexts;
 
     private BattleProcessor(String motigomaStr, String[] banStrs) {
-	this.self = SelfProcessor.newi(motigomaStr);
-	this.opponent = OpponentProcessor.newi(motigomaStr);
-	this.contexts = SuperListGen.of(BanContext.newi(banStrs));
+	this.contexts = SuperListGen.of(BanContext.newi(banStrs, motigomaStr));
     }
 
     /**
@@ -57,30 +48,20 @@ public class BattleProcessor {
 
 	this.contexts.removeIf(c -> c.id == acon.id);
 
-	var candidates = this.self.spread(acon.getLatestBan());
-	if (candidates == null)
-	    return;
-
-	for (Ban candidate : candidates) {
-	    var newCon = acon.copy();
-	    newCon.addLatestBan(candidate);
-	    this.contexts.add(newCon);
-	}
+	var branches = SelfProcessor.newi().spread(acon);
+	if (branches != null)
+	    this.contexts.addAll(branches);
     }
 
     private BanContext processOpponent(BanContext acon) {
 
 	this.contexts.removeIf(c -> c.id == acon.id);
 
-	var candidates = this.opponent.spread(acon.getLatestBan());
-	if (candidates == null)
+	var branches = OpponentProcessor.newi().spread(acon);
+	if (branches == null)
 	    return acon;
-
-	for (Ban candidate : candidates) {
-	    var newCon = acon.copy();
-	    newCon.addLatestBan(candidate);
-	    this.contexts.add(newCon);
-	}
+	
+	this.contexts.addAll(branches);
 	return null;
     }
 
@@ -95,9 +76,8 @@ public class BattleProcessor {
 	    from = to;
 	}
 
-	var turnFlg = SuperBool.of(true);
 	return tejun.stream()
-		.map(s -> writeItte(s, turnFlg.getAndReverse()))
+		.map(s -> writeItte(s))
 		.toArray(String[]::new);
     }
 
@@ -112,9 +92,9 @@ public class BattleProcessor {
 		.get();
     }
 
-    private String writeItte(MasuState state, boolean isSelf) {
+    private String writeItte(MasuState state) {
 	var sb = new StringBuilder();
-	sb.append(isSelf ? Player.Self : Player.Opponent);
+	sb.append(state.player());
 	sb.append(" -> ");
 	sb.append(state.suzi());
 	sb.append(state.dan());
