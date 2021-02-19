@@ -8,11 +8,11 @@ import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 
-public abstract class ProcessorBase {
+public abstract class PlayerProcessorBase {
 
     protected final SuperList<Koma> motigoma;
     
-    protected ProcessorBase(Player player, String arg) {
+    protected PlayerProcessorBase(Player player, String arg) {
 	
 	motigoma = SuperListGen.newi();
 	int xIndex = arg.indexOf(Player.Self.id);

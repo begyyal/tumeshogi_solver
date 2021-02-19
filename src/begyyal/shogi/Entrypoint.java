@@ -3,6 +3,7 @@ package begyyal.shogi;
 import java.util.Arrays;
 
 import begyyal.shogi.object.Ban;
+import begyyal.shogi.processor.BattleProcessor;
 
 public class Entrypoint {
 
@@ -14,32 +15,11 @@ public class Entrypoint {
      */
     public static void main(String args[]) {
 	
-	var ban = Ban.of(Arrays.copyOfRange(args, 1, args.length));
-
-	// 【重要】
-	// 持ち駒の考慮を入れる
-	// 2歩を筆頭とした特殊ルール
-	
-	// *****************************
-	
-	// 1.
-	// 自分の駒を探す
-	// それぞれで可動域で動かす
-	// 動かした先の可動域に王がいる場合、動かして相手に回す
-	
-	// 2.
-	// 可動域に王がいるように持ち駒を打って相手に回す
-	
-	// *****************************
-	
-	// 1.
-	// 王を動かして王手がかからないようにする
-	
-	// 2.
-	// 駒を取って王手がかからないようにする
-
-	// *****************************
-	
-	// パフォーマンスの話は後回し
+	try {
+	    var battle = BattleProcessor.of(args[0], Arrays.copyOfRange(args, 1, args.length));
+	}catch(Exception e) {
+	    System.out.println(e.getMessage());
+	    System.out.println(e.getStackTrace());
+	}
     }
 }
