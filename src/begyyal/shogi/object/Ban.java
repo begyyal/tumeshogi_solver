@@ -1,10 +1,8 @@
 package begyyal.shogi.object;
 
 import java.util.Arrays;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
-import begyyal.commons.util.matrix.MatrixResolver;
 import begyyal.commons.util.matrix.Vector;
 import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
@@ -45,80 +43,49 @@ public class Ban implements Cloneable {
     }
 
     /**
-     * 主体のマトリクスを1手進める。
+     * 主体のマトリクスを1手進める。<br> 
+     * 中間地点の探査無し。
      * 
      * @param state
      * @param v
      * @param player
      * @param motigomaBucket
-     * @return １手も進められなかった場合にfalse
+     * @return 進行状況
      */
-    public boolean advanceItte(MasuState state, Vector v, Player player, Koma[] motigomaBucket) {
+    public AdvanceState advanceItte(MasuState state, Vector v, Player player, Koma[] motigomaBucket) {
 
 	int x = state.suzi() - 1, y = state.dan() - 1;
-	int vx = v.x(), vy = v.y();
-	int[] result = new int[] { -1, -1 }; // 0=x,1=y
-
-	if (vx != 1 && vx != -1 && vy != 1 && vy != -1) {
-	    
-	    int start = 0, distance = 0;
-	    Function<Integer, Integer> xSupplier = i -> i, ySupplier = i -> i;
-	    if (vx == vy) {
-		start = x;
-		distance = x + vx;
-	    } else if (vx == 0) {
-		start = y;
-		distance = y + vy;
-		xSupplier = i -> x;
-	    } else if (vy == 0) {
-		start = x;
-		distance = x + vx;
-		ySupplier = i -> y;
-	    }
-
-	    for (int i : MatrixResolver.vectorOrderedStream(start, distance).toArray())
-		if (this.advanceItimasu(
-			result, 
-			xSupplier.apply(i), 
-			ySupplier.apply(i), 
-			player,
-			motigomaBucket))
-		    break;
-	}
-
-	if (result[0] == -1)
-	    return false;
+	int vx = x + v.x(), vy = y + v.y();
+	if (validateCoordinate(vx, vy))
+	    return AdvanceState.NoPassage;
+	
+	AdvanceState result;
+	var dest = this.matrix[vx][vy];
+	if (dest != null) {
+	    if (dest.player() != player) {
+		motigomaBucket[0] = dest.koma();
+		result = AdvanceState.KnockDown;
+	    } else
+		return AdvanceState.NoPassage;
+	} else
+	    result = AdvanceState.None;
 
 	var destState = new MasuState(
 		player,
 		state.koma(),
-		result[0] + 1,
-		result[1] + 1,
-		state.nariFlag() || result[y] < 3);
+		vx + 1,
+		vy + 1,
+		state.nariFlag() || vy < 3);
 	this.matrix[x][y] = null;
-	this.matrix[result[0]][result[1]] = destState;
+	this.matrix[vx][vy] = destState;
 
-	return true;
+	return result;
     }
 
-    // trueで一手終了
-    private boolean
-	advanceItimasu(int[] result, int x, int y, Player player, Koma[] motigomaBucket) {
-
-	var dest = this.matrix[x][y];
-	if (dest == null) {
-	    result[0] = x;
-	    result[1] = y;
-	    return false;
-	} else if (dest.player() != player) {
-	    result[0] = x;
-	    result[1] = y;
-	    this.matrix[x][y] = null;
-	    motigomaBucket[0] = dest.koma();
-	}
-	return true;
+    private boolean validateCoordinate(int x, int y) {
+	return 0 <= x && x < 9 && 0 <= y && y < 9;  
     }
-
+    
     @Override
     public Ban clone() {
 	var newMatrix = new MasuState[9][9];
@@ -130,5 +97,11 @@ public class Ban implements Cloneable {
 
     public static Ban of(String[] args) {
 	return new Ban(args);
+    }
+    
+    public enum AdvanceState {
+	None,
+	NoPassage,
+	KnockDown;
     }
 }
