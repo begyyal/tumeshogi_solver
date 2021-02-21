@@ -2,10 +2,16 @@ package begyyal.shogi.object;
 
 import org.apache.commons.lang3.StringUtils;
 
+import begyyal.commons.util.matrix.Vector;
+import begyyal.commons.util.object.SuperList.ImmutableSuperList;
 import begyyal.shogi.def.*;
 
 @SuppressWarnings("preview")
 public record MasuState(Player player, Koma koma, int suzi, int dan, boolean nariFlag) {
+    
+    public ImmutableSuperList<Vector> getTerritory(){
+	return this.nariFlag ? koma.nariTerri : koma.territory;
+    }
     
     /**
      * player(x/y) + koma(a~h) + nari(z/) <br>

@@ -67,7 +67,7 @@ public class BattleProcessor {
 
     private String[] summarize(Ban[] bans) {
 
-	SuperList<MasuState> tejun = SuperListGen.newi();
+	var tejun = SuperListGen.<MasuState>newi();
 
 	Ban from = null;
 	for (Ban to : bans) {
