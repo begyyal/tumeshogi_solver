@@ -42,14 +42,18 @@ public class BanContext {
 	this.log.add(ban);
     }
 
-    public BanContext branch(Ban latestBan, Koma koma, Player player) {
+    public BanContext branch(Ban latestBan, Koma koma, Player player, boolean isAddition) {
+	
 	var newContext = this.copy();
 	newContext.log.add(latestBan);
+	var motigoma = player == Player.Self ? newContext.selfMotigoma : newContext.opponentMotigoma;
+	
 	if (koma != null)
-	    if (player == Player.Self)
-		newContext.selfMotigoma.remove(koma);
+	    if (isAddition)
+		motigoma.add(koma);
 	    else
-		newContext.opponentMotigoma.remove(koma);
+		motigoma.remove(koma);
+	
 	return newContext;
     }
 

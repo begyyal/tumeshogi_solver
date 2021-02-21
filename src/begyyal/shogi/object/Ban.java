@@ -11,9 +11,7 @@ import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 
-public class Ban
-	implements
-	Cloneable {
+public class Ban implements Cloneable {
 
     private MasuState[][] matrix;
 
@@ -52,16 +50,17 @@ public class Ban
      * @param state
      * @param v
      * @param player
-     * @param motigoma
+     * @param motigomaBucket
      * @return １手も進められなかった場合にfalse
      */
-    public boolean advanceItte(MasuState state, Vector v, Player player, SuperList<Koma> motigoma) {
+    public boolean advanceItte(MasuState state, Vector v, Player player, Koma[] motigomaBucket) {
 
 	int x = state.suzi() - 1, y = state.dan() - 1;
 	int vx = v.x(), vy = v.y();
 	int[] result = new int[] { -1, -1 }; // 0=x,1=y
 
 	if (vx != 1 && vx != -1 && vy != 1 && vy != -1) {
+	    
 	    int start = 0, distance = 0;
 	    Function<Integer, Integer> xSupplier = i -> i, ySupplier = i -> i;
 	    if (vx == vy) {
@@ -76,19 +75,24 @@ public class Ban
 		distance = x + vx;
 		ySupplier = i -> y;
 	    }
-	
+
 	    for (int i : MatrixResolver.vectorOrderedStream(start, distance).toArray())
-		if (this.advanceItimasu(result, xSupplier.apply(i), ySupplier.apply(i), player, motigoma))
+		if (this.advanceItimasu(
+			result, 
+			xSupplier.apply(i), 
+			ySupplier.apply(i), 
+			player,
+			motigomaBucket))
 		    break;
 	}
-	
+
 	if (result[0] == -1)
 	    return false;
 
 	var destState = new MasuState(
-		player, 
-		state.koma(), 
-		result[0] + 1, 
+		player,
+		state.koma(),
+		result[0] + 1,
 		result[1] + 1,
 		state.nariFlag() || result[y] < 3);
 	this.matrix[x][y] = null;
@@ -99,7 +103,7 @@ public class Ban
 
     // trueで一手終了
     private boolean
-	    advanceItimasu(int[] result, int x, int y, Player player, SuperList<Koma> motigoma) {
+	advanceItimasu(int[] result, int x, int y, Player player, Koma[] motigomaBucket) {
 
 	var dest = this.matrix[x][y];
 	if (dest == null) {
@@ -110,7 +114,7 @@ public class Ban
 	    result[0] = x;
 	    result[1] = y;
 	    this.matrix[x][y] = null;
-	    motigoma.add(dest.koma());
+	    motigomaBucket[0] = dest.koma();
 	}
 	return true;
     }
