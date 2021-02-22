@@ -19,6 +19,8 @@ public class BanContext {
     public final SuperList<Koma> selfMotigoma;
     public final SuperList<Koma> opponentMotigoma;
 
+    public MasuState latestState;
+    
     private BanContext(String[] banStrs, String motigomaStr) {
 	this.log = SuperListGen.of(Ban.of(banStrs));
 	this.selfMotigoma = parseMotigoma(Player.Self, motigomaStr);

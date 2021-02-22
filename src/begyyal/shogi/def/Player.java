@@ -7,7 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 public enum Player {
     
     Self("x"),
-    Opponent("y");
+    Opponent("y"),
+    None("*");
     
     public final String id;
     

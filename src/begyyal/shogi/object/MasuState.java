@@ -6,11 +6,18 @@ import begyyal.commons.util.matrix.Vector;
 import begyyal.commons.util.object.SuperList.ImmutableSuperList;
 import begyyal.shogi.def.*;
 
+// nullは入れない方針
 @SuppressWarnings("preview")
 public record MasuState(Player player, Koma koma, int suzi, int dan, boolean nariFlag) {
     
+    public static final MasuState Invalid = new MasuState(Player.None, Koma.Empty, -1, -1, false); 
+    
     public ImmutableSuperList<Vector> getTerritory(){
 	return this.nariFlag ? koma.nariTerri : koma.territory;
+    }
+    
+    public static MasuState emptyOf( int suzi, int dan ) {
+	return new MasuState(Player.None, Koma.Empty, suzi, dan, false);
     }
     
     /**
