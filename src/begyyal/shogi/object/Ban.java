@@ -69,7 +69,7 @@ public class Ban implements Cloneable {
     public MasuState exploration(MasuState state, Vector v) {
 	int x = state.suzi() - 1, y = state.dan() - 1;
 	int vx = x + v.x(), vy = y + v.y();
-	return validateCoordinate(vx, vy) ? MasuState.Invalid : this.matrix[vx][vy];
+	return validateCoordinate(vx, vy) ? this.matrix[vx][vy] : MasuState.Invalid;
     }
 
     /**
