@@ -27,8 +27,8 @@ public class SelfProcessor extends PlayerProcessorBase {
 	var ban = context.getLatestBan();
 
 	var contextList = ban.search(s -> s.player() == PlayerType)
-	    .stream()
 	    .flatMap(s -> spreadMasuState(s, ban)
+		.filter(range -> ban.validateState(range))
 		.filter(range -> spreadMasuState(range, ban)
 		    .anyMatch(range2 -> range2.koma() == Koma.Ou && range2.player() != PlayerType))
 		.map(range -> Pair.of(s, range)))
@@ -41,7 +41,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 
 	context.selfMotigoma
 	    .stream()
-	    .flatMap(m -> null);
+	    .flatMap(k -> null);
 
 	return null;
     }

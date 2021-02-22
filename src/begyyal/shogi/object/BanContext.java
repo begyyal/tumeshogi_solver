@@ -18,8 +18,6 @@ public class BanContext {
     // 持ち駒は最新断面のみ
     public final SuperList<Koma> selfMotigoma;
     public final SuperList<Koma> opponentMotigoma;
-
-    public MasuState latestState;
     
     private BanContext(String[] banStrs, String motigomaStr) {
 	this.log = SuperListGen.of(Ban.of(banStrs));

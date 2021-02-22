@@ -2,6 +2,7 @@ package begyyal.shogi.object;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import begyyal.commons.util.matrix.Vector;
 import begyyal.commons.util.object.SuperList;
@@ -20,9 +21,9 @@ public class Ban implements Cloneable {
 		matrix[x][y] = MasuState.emptyOf(x + 1, y + 1);
 	EmptyMatrix = matrix;
     }
-    
+
     private MasuState[][] matrix;
-    
+
     private Ban(String[] args) {
 	// インデックスの振り順は将棋盤の読み方に倣う
 	var matrix = new MasuState[9][9];
@@ -33,9 +34,9 @@ public class Ban implements Cloneable {
 	}
 	for (int x = 0; x < 9; x++)
 	    for (int y = 0; y < 9; y++)
-		if( matrix[x][y] == null )
+		if (matrix[x][y] == null)
 		    matrix[x][y] = EmptyMatrix[x][y];
-		
+
 	this.matrix = matrix;
     }
 
@@ -43,18 +44,19 @@ public class Ban implements Cloneable {
 	this.matrix = matrix;
     }
 
-    public SuperList<MasuState> search(Predicate<MasuState> filter) {
-	var stateList = SuperListGen.<MasuState>newi();
+    public Stream<MasuState> search(Predicate<MasuState> filter) {
+	var result = new MasuState[81];
+	int count = 0;
 	for (int x = 0; x < 9; x++)
 	    for (int y = 0; y < 9; y++)
-		if (filter.test(matrix[x][y]))
-		    stateList.add(matrix[x][y]);
-	return stateList;
+		if (filter.test(matrix[x][y]) && ++count != 0)
+		    result[x * 9 + y] = matrix[x][y];
+	return Arrays.stream(result, 0, count);
     }
 
     public SuperList<MasuState> serializeMatrix() {
 	return Arrays.stream(this.matrix).flatMap(l -> Arrays.stream(l))
-		.collect(SuperListGen.collect());
+	    .collect(SuperListGen.collect());
     }
 
     /**
@@ -69,7 +71,7 @@ public class Ban implements Cloneable {
 	int vx = x + v.x(), vy = y + v.y();
 	return validateCoordinate(vx, vy) ? MasuState.Invalid : this.matrix[vx][vy];
     }
-    
+
     /**
      * 主体のマトリクスに対してfromからtoへの駒の移動を行う。<br>
      * 中間地点および移動先の検査無し。
@@ -83,23 +85,52 @@ public class Ban implements Cloneable {
 
 	emptyMasu(from.suzi(), from.dan());
 	this.matrix[to.suzi() - 1][to.dan() - 1] = new MasuState(
-	    player, 
-	    from.koma(), 
-	    to.suzi(), 
-	    to.dan(), 
+	    player,
+	    from.koma(),
+	    to.suzi(),
+	    to.dan(),
 	    from.nariFlag() || to.dan() <= 3);
 
 	return to.koma() != Koma.Empty ? to.koma() : null;
     }
-    
+
+    /**
+     * 主体のマトリクスに対して対象のステートを当てはめた際の特殊ルールの検査を行う。
+     * 
+     * @param state
+     * @return 違反しなければtrue
+     */
+    public boolean validateState(MasuState state) {
+
+	if (state.koma() == Koma.Hu) {
+	    if (state.dan() == 1)
+		return false;
+	    if (search(s -> s.suzi() == state.suzi()
+		    && s.koma() == Koma.Hu
+		    && s.player() == state.player())
+			.findAny().isPresent())
+		return false;
+
+	} else if (state.koma() == Koma.Kyousha) {
+	    if (state.dan() == 1)
+		return false;
+
+	} else if (state.koma() == Koma.Keima) {
+	    if (state.dan() < 3)
+		return false;
+	}
+
+	return true;
+    }
+
     private void emptyMasu(int suzi, int dan) {
-	this.matrix[suzi - 1][dan - 1] = EmptyMatrix[suzi - 1][dan - 1];	
+	this.matrix[suzi - 1][dan - 1] = EmptyMatrix[suzi - 1][dan - 1];
     }
-    
+
     private boolean validateCoordinate(int x, int y) {
-	return 0 <= x && x < 9 && 0 <= y && y < 9;  
+	return 0 <= x && x < 9 && 0 <= y && y < 9;
     }
-    
+
     @Override
     public Ban clone() {
 	var newMatrix = new MasuState[9][9];
