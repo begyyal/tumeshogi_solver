@@ -51,7 +51,7 @@ public class Ban implements Cloneable {
 	    for (int y = 0; y < 9; y++)
 		if (filter.test(matrix[x][y]) && ++count != 0)
 		    result[x * 9 + y] = matrix[x][y];
-	return Arrays.stream(result, 0, count);
+	return count == 0 ? Stream.empty() : Arrays.stream(result, 0, count);
     }
 
     public SuperList<MasuState> serializeMatrix() {

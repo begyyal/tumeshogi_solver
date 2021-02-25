@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import begyyal.commons.util.matrix.MatrixResolver;
 import begyyal.commons.util.matrix.Vector;
+import begyyal.commons.util.object.PairList.PairListGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
@@ -26,16 +27,18 @@ public class SelfProcessor extends PlayerProcessorBase {
 
 	var ban = context.getLatestBan();
 
-	var contextStream1 = ban.search(s -> s.player() == PlayerType)
-	    .flatMap(s -> spreadMasuState(s, ban)
-		.filter(getOuteFilter(ban))
-		.map(dest -> Pair.of(s, dest)))
+	// 駒の移動による王手(開き王手は除く)
+	var moveSpread = ban.search(s -> s.player() == PlayerType)
+	    .flatMap(s -> spreadMasuState(s, ban).map(dest -> Pair.of(s, dest)));
+	var contextStream1 = moveSpread
+	    .filter(sp -> getOuteFilter(ban).test(sp.getLeft()))
 	    .map(sp -> {
 		var newBan = ban.clone();
 		var k = newBan.advance(sp.getLeft(), sp.getRight(), PlayerType);
 		return context.branch(newBan, sp.getRight(), k, PlayerType, true);
 	    });
 
+	// 持ち駒配置による王手
 	var contextStream2 = context.selfMotigoma
 	    .stream()
 	    .flatMap(k -> ban
@@ -48,7 +51,24 @@ public class SelfProcessor extends PlayerProcessorBase {
 		return context.branch(newBan, s, s.koma(), PlayerType, false);
 	    });
 
-	return Stream.concat(contextStream1, contextStream2).toArray(BanContext[]::new);
+	// 開き王手
+	var candidates = ban.search(s -> s.player() == PlayerType &&
+		(s.koma() == Koma.Kyousha && s.nariFlag() == false ||
+			s.koma() == Koma.Hisha ||
+			s.koma() == Koma.Kaku));
+	var contextStream3 = candidates.count() == 0 ? candidates : 
+	    moveSpread
+	    	.collect(PairListGen.collect())
+	    	.toMap()
+	    	.entrySet()
+	    	.stream()
+	    	.filter(e -> {
+	    	    return true;
+	    	});
+
+	return Stream.concat(
+	    contextStream1,
+	    contextStream2).toArray(BanContext[]::new);
     }
 
     private Predicate<MasuState> getOuteFilter(Ban ban) {
@@ -56,6 +76,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .anyMatch(s2 -> s2.koma() == Koma.Ou && s2.player() != PlayerType);
     }
 
+    // 引数のステートから移動可能なステート全てを移動後のステートにしてStreamで返却
     private Stream<MasuState> spreadMasuState(MasuState state, Ban ban) {
 	return state.getTerritory()
 	    .stream()
@@ -86,7 +107,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 
 	return i == 0 ? Stream.empty() : Arrays.stream(stateBucket, 0, i);
     }
-    
+
     private boolean canAdvanceTo(MasuState state) {
 	return state != MasuState.Invalid
 		&& (state.koma() == Koma.Empty || state.player() != PlayerType);
