@@ -82,16 +82,10 @@ public class Ban implements Cloneable {
      * @return 取得した駒。無ければnull
      */
     public Koma advance(MasuState from, MasuState to, Player player) {
-
 	emptyMasu(from.suzi(), from.dan());
-	this.matrix[to.suzi() - 1][to.dan() - 1] = new MasuState(
-	    player,
-	    from.koma(),
-	    to.suzi(),
-	    to.dan(),
-	    from.nariFlag() || to.dan() <= 3);
-
-	return to.koma() != Koma.Empty ? to.koma() : null;
+	var occupied = this.matrix[to.suzi() - 1][to.dan() - 1];
+	this.matrix[to.suzi() - 1][to.dan() - 1] = to;
+	return occupied.koma() != Koma.Empty ? occupied.koma() : null;
     }
     
     /**
@@ -132,7 +126,7 @@ public class Ban implements Cloneable {
 
 	return true;
     }
-
+    
     private void emptyMasu(int suzi, int dan) {
 	this.matrix[suzi - 1][dan - 1] = EmptyMatrix[suzi - 1][dan - 1];
     }

@@ -28,11 +28,11 @@ public class SelfProcessor extends PlayerProcessorBase {
 
 	var contextStream1 = ban.search(s -> s.player() == PlayerType)
 	    .flatMap(s -> spreadMasuState(s, ban)
-		.filter(isOute(ban))
+		.filter(getOuteFilter(ban))
 		.map(range -> Pair.of(s, range)))
-	    .map(s -> {
+	    .map(sp -> {
 		var newBan = ban.clone();
-		var k = newBan.advance(s.getLeft(), s.getRight(), PlayerType);
+		var k = newBan.advance(sp.getLeft(), sp.getRight(), PlayerType);
 		return context.branch(newBan, k, PlayerType, true);
 	    });
 
@@ -41,7 +41,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .flatMap(k -> ban
 		.search(s -> s.koma() == Koma.Empty)
 		.map(s -> new MasuState(PlayerType, k, s.suzi(), s.dan(), false))
-		.filter(isOute(ban)))
+		.filter(getOuteFilter(ban)))
 	    .map(s -> {
 		var newBan = ban.clone();
 		newBan.advance(s);
@@ -51,7 +51,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	return Stream.concat(contextStream1, contextStream2).toArray(BanContext[]::new);
     }
 
-    private Predicate<MasuState> isOute(Ban ban) {
+    private Predicate<MasuState> getOuteFilter(Ban ban) {
 	return s -> ban.validateState(s) && spreadMasuState(s, ban)
 	    .anyMatch(s2 -> s2.koma() == Koma.Ou && s2.player() != PlayerType);
     }
@@ -69,7 +69,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 
 	if (Math.abs(v.x()) == 1 || Math.abs(v.y()) == 1) {
 	    var result = ban.exploration(s, v);
-	    return canAdvanceTo(result) ? Stream.of(result) : Stream.empty();
+	    return canAdvanceTo(result) ? Stream.of(occupy(s, result)) : Stream.empty();
 	}
 
 	var stateBucket = new MasuState[8];
@@ -77,7 +77,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	for (var miniV : MatrixResolver.decompose(v)) {
 	    var result = ban.exploration(s, miniV);
 	    if (canAdvanceTo(result)) {
-		stateBucket[i] = result;
+		stateBucket[i] = occupy(s, result);
 		i++;
 	    }
 	    if (result == MasuState.Invalid || result.koma() != Koma.Empty)
@@ -86,7 +86,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 
 	return i == 0 ? Stream.empty() : Arrays.stream(stateBucket, 0, i);
     }
-
+    
     private boolean canAdvanceTo(MasuState state) {
 	return state != MasuState.Invalid
 		&& (state.koma() == Koma.Empty || state.player() != PlayerType);
