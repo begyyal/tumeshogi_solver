@@ -1,6 +1,7 @@
 package begyyal.shogi.processor;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -52,23 +53,42 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    });
 
 	// 開き王手
-	var candidates = ban.search(s -> s.player() == PlayerType &&
-		(s.koma() == Koma.Kyousha && s.nariFlag() == false ||
-			s.koma() == Koma.Hisha ||
-			s.koma() == Koma.Kaku));
-	var contextStream3 = candidates.count() == 0 ? candidates : 
-	    moveSpread
-	    	.collect(PairListGen.collect())
-	    	.toMap()
-	    	.entrySet()
-	    	.stream()
-	    	.filter(e -> {
-	    	    return true;
-	    	});
+	var contextStream3 = getAkiOuteContextStream(ban, moveSpread);
 
 	return Stream.concat(
 	    contextStream1,
 	    contextStream2).toArray(BanContext[]::new);
+    }
+
+    private Stream<BanContext> getAkiOuteContextStream(
+	Ban ban,
+	Stream<Pair<MasuState, MasuState>> moveSpread) {
+
+	var candidates = ban.search(s -> s.player() == PlayerType &&
+		(s.koma() == Koma.Kyousha && s.nariFlag() == false ||
+			s.koma() == Koma.Hisha ||
+			s.koma() == Koma.Kaku));
+	if (candidates.count() == 0)
+	    return Stream.empty();
+
+	var moveSpreadMap = moveSpread.collect(PairListGen.collect()).toMap();
+	var ineffectiveKeys = moveSpreadMap
+	    .keySet()
+	    .stream()
+	    .filter(k -> !candidates.map(c -> getAkiObstruction(ban, c).orElse(null))
+		.filter(s -> s != null && s.equals(k))
+		.findFirst()
+		.isPresent())
+	    .toArray();
+	for(var k : ineffectiveKeys)
+    	    moveSpreadMap.remove(k);
+	
+	// 軌道上の移動は除外しないとだめ
+//	return moveSpreadMap.entrySet()
+//		.stream()
+//		.map(e -> null)
+	
+	return null;
     }
 
     private Predicate<MasuState> getOuteFilter(Ban ban) {
@@ -80,10 +100,10 @@ public class SelfProcessor extends PlayerProcessorBase {
     private Stream<MasuState> spreadMasuState(MasuState state, Ban ban) {
 	return state.getTerritory()
 	    .stream()
-	    .flatMap(v -> spreadOneVector(ban, v, state));
+	    .flatMap(v -> spreadVector(ban, v, state));
     }
 
-    private Stream<MasuState> spreadOneVector(
+    private Stream<MasuState> spreadVector(
 	Ban ban,
 	Vector v,
 	MasuState s) {
@@ -106,6 +126,52 @@ public class SelfProcessor extends PlayerProcessorBase {
 	}
 
 	return i == 0 ? Stream.empty() : Arrays.stream(stateBucket, 0, i);
+    }
+
+    // 1ステートからの空き王手は複数にならない
+    private Optional<MasuState> getAkiObstruction(
+	Ban ban,
+	MasuState state) {
+	return state.getTerritory()
+	    .stream()
+	    .map(v -> getAkiObstructionOnVector(ban, v, state))
+	    .filter(s -> s != null)
+	    .findFirst();
+    }
+
+    private MasuState getAkiObstructionOnVector(
+	Ban ban,
+	Vector v,
+	MasuState state) {
+
+	var decomposed = MatrixResolver.decompose(v);
+	if (decomposed.length == 1)
+	    return null;
+
+	int i = 0;
+	MasuState obstruction = null;
+	for (var miniV : MatrixResolver.decompose(v)) {
+
+	    var result = ban.exploration(state, miniV);
+
+	    if (result == MasuState.Invalid)
+		break;
+	    if (result.player() == Player.None)
+		continue;
+	    if (i == 0) {
+		if (result.player() == PlayerType) {
+		    obstruction = result;
+		    i++;
+		} else
+		    break;
+	    } else if (i == 1)
+		if (result.player() != PlayerType && result.koma() == Koma.Ou) {
+		    return obstruction;
+		} else
+		    break;
+	}
+
+	return null;
     }
 
     private boolean canAdvanceTo(MasuState state) {
