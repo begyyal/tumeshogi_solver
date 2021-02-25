@@ -29,11 +29,11 @@ public class SelfProcessor extends PlayerProcessorBase {
 	var contextStream1 = ban.search(s -> s.player() == PlayerType)
 	    .flatMap(s -> spreadMasuState(s, ban)
 		.filter(getOuteFilter(ban))
-		.map(range -> Pair.of(s, range)))
+		.map(dest -> Pair.of(s, dest)))
 	    .map(sp -> {
 		var newBan = ban.clone();
 		var k = newBan.advance(sp.getLeft(), sp.getRight(), PlayerType);
-		return context.branch(newBan, k, PlayerType, true);
+		return context.branch(newBan, sp.getRight(), k, PlayerType, true);
 	    });
 
 	var contextStream2 = context.selfMotigoma
@@ -45,7 +45,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .map(s -> {
 		var newBan = ban.clone();
 		newBan.advance(s);
-		return context.branch(newBan, s.koma(), PlayerType, false);
+		return context.branch(newBan, s, s.koma(), PlayerType, false);
 	    });
 
 	return Stream.concat(contextStream1, contextStream2).toArray(BanContext[]::new);

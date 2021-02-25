@@ -18,6 +18,7 @@ public class BanContext {
     // 持ち駒は最新断面のみ
     public final SuperList<Koma> selfMotigoma;
     public final SuperList<Koma> opponentMotigoma;
+    public MasuState latestState;
     
     private BanContext(String[] banStrs, String motigomaStr) {
 	this.log = SuperListGen.of(Ban.of(banStrs));
@@ -42,7 +43,12 @@ public class BanContext {
 	this.log.add(ban);
     }
 
-    public BanContext branch(Ban latestBan, Koma koma, Player player, boolean isAddition) {
+    public BanContext branch(
+	Ban latestBan, 
+	MasuState latestState, 
+	Koma koma, 
+	Player player, 
+	boolean isAddition) {
 	
 	var newContext = this.copy();
 	newContext.log.add(latestBan);
@@ -54,6 +60,7 @@ public class BanContext {
 	    else
 		motigoma.remove(koma);
 	
+	newContext.latestState = latestState;
 	return newContext;
     }
 
