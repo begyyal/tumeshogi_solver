@@ -93,6 +93,16 @@ public class Ban implements Cloneable {
 
 	return to.koma() != Koma.Empty ? to.koma() : null;
     }
+    
+    /**
+     * 主体のマトリクスに対して駒の配置を行う。<br>
+     * 配置先の検査無し。
+     * 
+     * @param state
+     */
+    public void advance(MasuState state) {
+	this.matrix[state.suzi() - 1][state.dan() - 1] = state;
+    }
 
     /**
      * 主体のマトリクスに対して対象のステートを当てはめた際の特殊ルールの検査を行う。

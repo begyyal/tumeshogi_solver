@@ -1,13 +1,13 @@
 package begyyal.shogi.processor;
 
 import java.util.Arrays;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import begyyal.commons.util.matrix.MatrixResolver;
 import begyyal.commons.util.matrix.Vector;
-import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
@@ -26,24 +26,34 @@ public class SelfProcessor extends PlayerProcessorBase {
 
 	var ban = context.getLatestBan();
 
-	var contextList = ban.search(s -> s.player() == PlayerType)
+	var contextStream1 = ban.search(s -> s.player() == PlayerType)
 	    .flatMap(s -> spreadMasuState(s, ban)
-		.filter(range -> ban.validateState(range))
-		.filter(range -> spreadMasuState(range, ban)
-		    .anyMatch(range2 -> range2.koma() == Koma.Ou && range2.player() != PlayerType))
+		.filter(isOute(ban))
 		.map(range -> Pair.of(s, range)))
 	    .map(s -> {
 		var newBan = ban.clone();
 		var k = newBan.advance(s.getLeft(), s.getRight(), PlayerType);
 		return context.branch(newBan, k, PlayerType, true);
-	    })
-	    .collect(SuperListGen.collect());
+	    });
 
-	context.selfMotigoma
+	var contextStream2 = context.selfMotigoma
 	    .stream()
-	    .flatMap(k -> null);
+	    .flatMap(k -> ban
+		.search(s -> s.koma() == Koma.Empty)
+		.map(s -> new MasuState(PlayerType, k, s.suzi(), s.dan(), false))
+		.filter(isOute(ban)))
+	    .map(s -> {
+		var newBan = ban.clone();
+		newBan.advance(s);
+		return context.branch(newBan, s.koma(), PlayerType, false);
+	    });
 
-	return null;
+	return Stream.concat(contextStream1, contextStream2).toArray(BanContext[]::new);
+    }
+
+    private Predicate<MasuState> isOute(Ban ban) {
+	return s -> ban.validateState(s) && spreadMasuState(s, ban)
+	    .anyMatch(s2 -> s2.koma() == Koma.Ou && s2.player() != PlayerType);
     }
 
     private Stream<MasuState> spreadMasuState(MasuState state, Ban ban) {
