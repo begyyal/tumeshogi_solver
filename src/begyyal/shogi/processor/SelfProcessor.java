@@ -33,7 +33,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	var moveSpread = ban.search(s -> s.player() == PlayerType)
 	    .flatMap(s -> spreadMasuState(s, ban).map(dest -> Pair.of(s, dest)));
 	var contextStream1 = moveSpread
-	    .filter(sp -> getOuteFilter(ban).test(sp.getLeft()))
+	    .filter(sp -> getOuteFilter(ban).test(sp.getRight()))
 	    .map(sp -> {
 		var newBan = ban.clone();
 		var k = newBan.advance(sp.getLeft(), sp.getRight(), PlayerType);
