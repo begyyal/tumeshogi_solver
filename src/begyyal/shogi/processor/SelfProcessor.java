@@ -32,32 +32,33 @@ public class SelfProcessor extends PlayerProcessorBase {
 	// 駒の移動による王手(開き王手は除く)
 	var moveSpread = ban.search(s -> s.player() == PlayerType)
 	    .flatMap(s -> spreadMasuState(s, ban).map(dest -> Pair.of(s, dest)));
-	var contextStream1 = moveSpread
-	    .filter(sp -> getOuteFilter(ban).test(sp.getRight()))
+	var cs1 = moveSpread
+	    .filter(sp -> isOute(ban, sp.getRight()))
 	    .map(sp -> {
 		var newBan = ban.clone();
 		var k = newBan.advance(sp.getLeft(), sp.getRight(), PlayerType);
-		return context.branch(newBan, sp.getRight(), k, PlayerType, true);
-	    });
-
-	// 持ち駒配置による王手
-	var contextStream2 = context.selfMotigoma
-	    .stream()
-	    .flatMap(k -> ban
-		.search(s -> s.koma() == Koma.Empty)
-		.map(s -> new MasuState(PlayerType, k, s.x(), s.y(), false))
-		.filter(getOuteFilter(ban)))
-	    .map(s -> {
-		var newBan = ban.clone();
-		newBan.advance(s);
-		return context.branch(newBan, s, s.koma(), PlayerType, false);
+		return context.branch(newBan, sp.getRight(), sp.getLeft(), k, PlayerType, true);
 	    });
 
 	// 開き王手
-	var contextStream3 = getAkiOuteContextStream(ban, context, moveSpread);
+	var cs2 = getAkiOuteContextStream(ban, context, moveSpread);
 
-	return Stream.of(contextStream1, contextStream2, contextStream3)
-	    .flatMap(s -> s)
+	// 持ち駒配置による王手
+	var cs3 = context.selfMotigoma
+	    .stream()
+	    .flatMap(k -> ban
+		.search(s -> s.koma() == Koma.Empty)
+		.map(s -> Pair.of(s, new MasuState(PlayerType, k, s.x(), s.y(), false)))
+		.filter(sp -> isOute(ban, sp.getRight())))
+	    .map(sp -> {
+		var newBan = ban.clone();
+		var s = sp.getRight();
+		newBan.advance(s);
+		return context.branch(newBan, s, sp.getLeft(), s.koma(), PlayerType, false);
+	    });
+
+	// 駒移動系は空き王手と他で重複し得るのでdistinctする
+	return Stream.concat(Stream.concat(cs1, cs2).distinct(), cs3)
 	    .toArray(BanContext[]::new);
     }
 
@@ -67,7 +68,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	Stream<Pair<MasuState, MasuState>> moveSpread) {
 
 	var candidates = ban.search(s -> s.player() == PlayerType &&
-		(s.koma() == Koma.Kyousha && s.nariFlag() == false ||
+		(s.koma() == Koma.Kyousha && !s.nariFlag() ||
 			s.koma() == Koma.Hisha ||
 			s.koma() == Koma.Kaku));
 	if (candidates.count() == 0)
@@ -98,13 +99,13 @@ public class SelfProcessor extends PlayerProcessorBase {
 		.map(s -> {
 		    var newBan = ban.clone();
 		    var k = newBan.advance(t.getLeft().getKey(), s, PlayerType);
-		    return context.branch(newBan, s, k, PlayerType, true);
+		    return context.branch(newBan, s, t.getLeft().getKey(), k, PlayerType, true);
 		});
 	});
     }
 
-    private Predicate<MasuState> getOuteFilter(Ban ban) {
-	return s -> ban.validateState(s) && spreadMasuState(s, ban)
+    private boolean isOute(Ban ban, MasuState s) {
+	return ban.validateState(s) && spreadMasuState(s, ban)
 	    .anyMatch(s2 -> s2.koma() == Koma.Ou && s2.player() != PlayerType);
     }
 
