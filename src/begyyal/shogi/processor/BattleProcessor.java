@@ -96,8 +96,8 @@ public class BattleProcessor {
 	var sb = new StringBuilder();
 	sb.append(state.player());
 	sb.append(" -> ");
-	sb.append(state.suzi());
-	sb.append(state.dan());
+	sb.append(state.getSuzi());
+	sb.append(state.getDan());
 	sb.append(state.koma());
 	sb.append(state.nariFlag());
 	return sb.toString();

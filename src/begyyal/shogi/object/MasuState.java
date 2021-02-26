@@ -8,12 +8,24 @@ import begyyal.shogi.def.*;
 
 // nullは入れない方針
 @SuppressWarnings("preview")
-public record MasuState(Player player, Koma koma, int suzi, int dan, boolean nariFlag) {
+public record MasuState(Player player, Koma koma, int x, int y, boolean nariFlag) {
     
     public static final MasuState Invalid = new MasuState(Player.None, Koma.Empty, -1, -1, false); 
     
+    public int getSuzi() {
+	return 9 - x;
+    }
+
+    public int getDan() {
+	return 9 - y;
+    }
+    
     public ImmutableSuperList<Vector> getTerritory(){
 	return this.nariFlag ? koma.nariTerri : koma.territory;
+    }
+    
+    public Vector getVectorTo(MasuState s) {
+	return new Vector(s.x - this.x, s.y - this.y);
     }
     
     public static MasuState emptyOf( int suzi, int dan ) {
@@ -39,6 +51,6 @@ public record MasuState(Player player, Koma koma, int suzi, int dan, boolean nar
 	
 	boolean nari = value.length() > 2 && StringUtils.equals(value.substring(2, 3), "z");
 	
-	return new MasuState(p, k, suzi, dan, nari);
+	return new MasuState(p, k, 9 - suzi, 9 - dan, nari);
     }
 }

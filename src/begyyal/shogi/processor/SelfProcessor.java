@@ -44,7 +44,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .stream()
 	    .flatMap(k -> ban
 		.search(s -> s.koma() == Koma.Empty)
-		.map(s -> new MasuState(PlayerType, k, s.suzi(), s.dan(), false))
+		.map(s -> new MasuState(PlayerType, k, s.x(), s.y(), false))
 		.filter(getOuteFilter(ban)))
 	    .map(s -> {
 		var newBan = ban.clone();

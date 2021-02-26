@@ -12,8 +12,8 @@ public abstract class PlayerProcessorBase {
 		: new MasuState(
 		    from.player(), 
 		    from.koma(),
-		    to.suzi(), 
-		    to.dan(), 
-		    from.nariFlag() || to.dan() <= 3);
+		    to.x(), 
+		    to.y(), 
+		    from.nariFlag() || to.y() <= 3);
     }
 }

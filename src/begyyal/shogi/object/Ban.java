@@ -18,14 +18,14 @@ public class Ban implements Cloneable {
 	var matrix = new MasuState[9][9];
 	for (int x = 0; x < 9; x++)
 	    for (int y = 0; y < 9; y++)
-		matrix[x][y] = MasuState.emptyOf(x + 1, y + 1);
+		matrix[x][y] = MasuState.emptyOf(x, y);
 	EmptyMatrix = matrix;
     }
 
+    // インデックスの振り順は将棋盤の読み方に倣わない。x/y座標で見る。
     private MasuState[][] matrix;
 
     private Ban(String[] args) {
-	// インデックスの振り順は将棋盤の読み方に倣う
 	var matrix = new MasuState[9][9];
 	for (String arg : args) {
 	    int x = Integer.valueOf(arg.substring(0, 1));
@@ -67,7 +67,7 @@ public class Ban implements Cloneable {
      * @return ステート
      */
     public MasuState exploration(MasuState state, Vector v) {
-	int x = state.suzi() - 1, y = state.dan() - 1;
+	int x = state.x(), y = state.y();
 	int vx = x + v.x(), vy = y + v.y();
 	return validateCoordinate(vx, vy) ? this.matrix[vx][vy] : MasuState.Invalid;
     }
@@ -82,9 +82,9 @@ public class Ban implements Cloneable {
      * @return 取得した駒。無ければnull
      */
     public Koma advance(MasuState from, MasuState to, Player player) {
-	emptyMasu(from.suzi(), from.dan());
-	var occupied = this.matrix[to.suzi() - 1][to.dan() - 1];
-	this.matrix[to.suzi() - 1][to.dan() - 1] = to;
+	emptyMasu(from.x(), from.y());
+	var occupied = this.matrix[to.x()][to.y()];
+	this.matrix[to.x()][to.y()] = to;
 	return occupied.koma() != Koma.Empty ? occupied.koma() : null;
     }
     
@@ -95,7 +95,7 @@ public class Ban implements Cloneable {
      * @param state
      */
     public void advance(MasuState state) {
-	this.matrix[state.suzi() - 1][state.dan() - 1] = state;
+	this.matrix[state.x()][state.y()] = state;
     }
 
     /**
@@ -107,28 +107,28 @@ public class Ban implements Cloneable {
     public boolean validateState(MasuState state) {
 
 	if (state.koma() == Koma.Hu) {
-	    if (state.dan() == 1)
+	    if (state.y() == 1)
 		return false;
-	    if (search(s -> s.suzi() == state.suzi()
+	    if (search(s -> s.x() == state.x()
 		    && s.koma() == Koma.Hu
 		    && s.player() == state.player())
 			.findAny().isPresent())
 		return false;
 
 	} else if (state.koma() == Koma.Kyousha) {
-	    if (state.dan() == 1)
+	    if (state.y() == 1)
 		return false;
 
 	} else if (state.koma() == Koma.Keima) {
-	    if (state.dan() < 3)
+	    if (state.y() < 3)
 		return false;
 	}
 
 	return true;
     }
     
-    private void emptyMasu(int suzi, int dan) {
-	this.matrix[suzi - 1][dan - 1] = EmptyMatrix[suzi - 1][dan - 1];
+    private void emptyMasu(int x, int y) {
+	this.matrix[x][y] = EmptyMatrix[x][y];
     }
 
     private boolean validateCoordinate(int x, int y) {
