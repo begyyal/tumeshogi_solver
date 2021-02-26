@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import begyyal.commons.util.matrix.MatrixResolver;
@@ -53,15 +54,16 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    });
 
 	// 開き王手
-	var contextStream3 = getAkiOuteContextStream(ban, moveSpread);
+	var contextStream3 = getAkiOuteContextStream(ban, context, moveSpread);
 
-	return Stream.concat(
-	    contextStream1,
-	    contextStream2).toArray(BanContext[]::new);
+	return Stream.of(contextStream1, contextStream2, contextStream3)
+	    .flatMap(s -> s)
+	    .toArray(BanContext[]::new);
     }
 
     private Stream<BanContext> getAkiOuteContextStream(
 	Ban ban,
+	BanContext context,
 	Stream<Pair<MasuState, MasuState>> moveSpread) {
 
 	var candidates = ban.search(s -> s.player() == PlayerType &&
@@ -72,23 +74,33 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    return Stream.empty();
 
 	var moveSpreadMap = moveSpread.collect(PairListGen.collect()).toMap();
-	var ineffectiveKeys = moveSpreadMap
-	    .keySet()
+	var relay = moveSpreadMap
+	    .entrySet()
 	    .stream()
-	    .filter(k -> !candidates.map(c -> getAkiObstruction(ban, c).orElse(null))
-		.filter(s -> s != null && s.equals(k))
-		.findFirst()
-		.isPresent())
-	    .toArray();
-	for(var k : ineffectiveKeys)
-    	    moveSpreadMap.remove(k);
-	
-	// 軌道上の移動は除外しないとだめ
-//	return moveSpreadMap.entrySet()
-//		.stream()
-//		.map(e -> null)
-	
-	return null;
+	    .map(e -> Pair.of(e,
+		candidates.map(c -> Pair.of(c, getAkiObstruction(ban, c).orElse(null)))
+		    .filter(p -> p.getRight() != null && p.getRight().equals(e.getKey()))
+		    .map(Pair::getLeft)
+		    .findFirst()))
+	    .filter(p -> p.getRight().isPresent());
+	if (relay.count() == 0)
+	    return Stream.empty();
+
+	var opponentOu = ban
+	    .search(s -> s.player() != PlayerType && s.koma() == Koma.Ou)
+	    .findFirst().get();
+	return relay.flatMap(t -> {
+	    var candidate = t.getRight().get();
+	    var decomposedOute = MatrixResolver.decompose(candidate.getVectorTo(opponentOu));
+	    return t.getLeft().getValue()
+		.stream()
+		.filter(s -> !ArrayUtils.contains(decomposedOute, candidate.getVectorTo(s)))
+		.map(s -> {
+		    var newBan = ban.clone();
+		    var k = newBan.advance(t.getLeft().getKey(), s, PlayerType);
+		    return context.branch(newBan, s, k, PlayerType, true);
+		});
+	});
     }
 
     private Predicate<MasuState> getOuteFilter(Ban ban) {
