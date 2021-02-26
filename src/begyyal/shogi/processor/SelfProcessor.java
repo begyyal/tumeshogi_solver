@@ -108,7 +108,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .anyMatch(s2 -> s2.koma() == Koma.Ou && s2.player() != PlayerType);
     }
 
-    // 引数のステートから移動可能なステート全てを移動後のステートにしてStreamで返却
+    // 引数のステートから移動可能な範囲全てを移動後のステートにしてStreamで返却
     private Stream<MasuState> spreadMasuState(MasuState state, Ban ban) {
 	return state.getTerritory()
 	    .stream()
