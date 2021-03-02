@@ -2,7 +2,6 @@ package begyyal.shogi.processor;
 
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -48,7 +47,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .stream()
 	    .flatMap(k -> ban
 		.search(s -> s.koma() == Koma.Empty)
-		.map(s -> Pair.of(s, new MasuState(PlayerType, k, s.x(), s.y(), false)))
+		.map(s -> Pair.of(s, new MasuState(PlayerType, k, s.x(), s.y(), false, s.rangedBy())))
 		.filter(sp -> isOute(ban, sp.getRight())))
 	    .map(sp -> {
 		var newBan = ban.clone();
@@ -96,6 +95,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    return t.getLeft().getValue()
 		.stream()
 		.filter(s -> !ArrayUtils.contains(decomposedOute, candidate.getVectorTo(s)))
+		.filter(s -> ban.validateState(s))
 		.map(s -> {
 		    var newBan = ban.clone();
 		    var k = newBan.advance(t.getLeft().getKey(), s, PlayerType);
@@ -187,11 +187,11 @@ public class SelfProcessor extends PlayerProcessorBase {
 	return null;
     }
 
-    private boolean canAdvanceTo(MasuState state) {
-	return state != MasuState.Invalid
-		&& (state.koma() == Koma.Empty || state.player() != PlayerType);
+    @Override
+    protected Player getPlayerType() {
+	return PlayerType;
     }
-
+    
     public static SelfProcessor newi() {
 	return new SelfProcessor();
     }

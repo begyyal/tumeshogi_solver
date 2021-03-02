@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import begyyal.commons.util.matrix.MatrixResolver;
 import begyyal.commons.util.matrix.Vector;
 import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
@@ -12,36 +13,46 @@ import begyyal.shogi.def.Player;
 
 public class Ban implements Cloneable {
 
-    // 空ステートは利用頻度が高いので取り置き
-    private static final MasuState[][] EmptyMatrix;
-    static {
-	var matrix = new MasuState[9][9];
-	for (int x = 0; x < 9; x++)
-	    for (int y = 0; y < 9; y++)
-		matrix[x][y] = MasuState.emptyOf(x, y);
-	EmptyMatrix = matrix;
-    }
-
     // インデックスの振り順は将棋盤の読み方に倣わない。x/y座標で見る。
     private MasuState[][] matrix;
 
     private Ban(String[] args) {
-	var matrix = new MasuState[9][9];
+
+	this.matrix = new MasuState[9][9];
 	for (String arg : args) {
 	    int x = Integer.valueOf(arg.substring(0, 1));
 	    int y = Integer.valueOf(arg.substring(1, 2));
-	    matrix[x - 1][y - 1] = MasuState.of(arg.substring(2), x, y);
+	    this.matrix[9 - x][9 - y] = MasuState.of(arg.substring(2), x, y);
 	}
+
 	for (int x = 0; x < 9; x++)
 	    for (int y = 0; y < 9; y++)
-		if (matrix[x][y] == null)
-		    matrix[x][y] = EmptyMatrix[x][y];
+		if (this.matrix[x][y] == null)
+		    emptyMasu(x, y, SuperListGen.newi());
 
-	this.matrix = matrix;
+	for (int x = 0; x < 9; x++)
+	    for (int y = 0; y < 9; y++)
+		markRangeBy(this.matrix[x][y]);
     }
 
     private Ban(MasuState[][] matrix) {
 	this.matrix = matrix;
+    }
+
+    public void markRangeBy(MasuState s) {
+	for (var v : s.getTerritory())
+	    for (var miniV : MatrixResolver.decompose(v)) {
+		int vx = s.x() + miniV.x();
+		int vy = s.y() + miniV.y();
+		if (validateCoordinate(vx, vy))
+		    this.matrix[vx][vy].rangedBy().add(s);
+	    }
+    }
+
+    public void unmarkRangeBy(MasuState s) {
+	for (int x = 0; x < 9; x++)
+	    for (int y = 0; y < 9; y++)
+		this.matrix[x][y].rangedBy().removeIf(state -> state.isEqualXY(s));
     }
 
     public Stream<MasuState> search(Predicate<MasuState> filter) {
@@ -49,8 +60,8 @@ public class Ban implements Cloneable {
 	int count = 0;
 	for (int x = 0; x < 9; x++)
 	    for (int y = 0; y < 9; y++)
-		if (filter.test(matrix[x][y]) && ++count != 0)
-		    result[x * 9 + y] = matrix[x][y];
+		if (filter.test(matrix[x][y]))
+		    result[count++] = matrix[x][y];
 	return count == 0 ? Stream.empty() : Arrays.stream(result, 0, count);
     }
 
@@ -82,12 +93,16 @@ public class Ban implements Cloneable {
      * @return 取得した駒。無ければnull
      */
     public Koma advance(MasuState from, MasuState to, Player player) {
-	emptyMasu(from.x(), from.y());
+
+	from.rangedBy().removeIf(s -> s.isEqualXY(to));
+	emptyMasu(from.x(), from.y(), from.rangedBy());
+	unmarkRangeBy(from);
+	
 	var occupied = this.matrix[to.x()][to.y()];
-	this.matrix[to.x()][to.y()] = to;
+	advance(to);
 	return occupied.koma() != Koma.Empty ? occupied.koma() : null;
     }
-    
+
     /**
      * 主体のマトリクスに対して駒の配置を行う。<br>
      * 配置先の検査無し。
@@ -96,6 +111,7 @@ public class Ban implements Cloneable {
      */
     public void advance(MasuState state) {
 	this.matrix[state.x()][state.y()] = state;
+	markRangeBy(state);
     }
 
     /**
@@ -126,9 +142,9 @@ public class Ban implements Cloneable {
 
 	return true;
     }
-    
-    private void emptyMasu(int x, int y) {
-	this.matrix[x][y] = EmptyMatrix[x][y];
+
+    private void emptyMasu(int x, int y, SuperList<MasuState> rangedBy) {
+	this.matrix[x][y] = MasuState.emptyOf(x, y, rangedBy);
     }
 
     private boolean validateCoordinate(int x, int y) {
