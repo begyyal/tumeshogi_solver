@@ -21,16 +21,23 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	
 	var ban = context.getLatestBan();
 
-//	var contextStream1 = ban.search(s -> s.player() == PlayerType)
-//	    .flatMap(s -> spreadMasuState(s, ban)
-//		.filter(isOute(ban))
-//		.map(range -> Pair.of(s, range)))
-//	    .map(s -> {
-//		var newBan = ban.clone();
-//		var k = newBan.advance(s.getLeft(), s.getRight(), PlayerType);
-//		return context.branch(newBan, k, PlayerType, true);
-//	    });
-//
+	// !!! ベクトル方向は反転させる必要アリ
+	
+	// 王手範囲から避ける
+	var opponentOu = ban
+		.search(s -> s.koma() == Koma.Ou && s.player() == PlayerType)
+		.findFirst().get();
+	var contextStream1 = spreadMasuState(opponentOu, ban)
+		.filter(s -> !s.rangedBy().anyMatch(s2 -> s2.player() != PlayerType))
+		.map(s -> {
+		    var newBan = ban.clone();
+		    var k = newBan.advance(opponentOu, s, PlayerType);
+		    return context.branch(newBan, s, opponentOu, k, PlayerType, true);
+		});
+	
+	// 王手駒を取得する
+//	var contextStream2 = opponentOu
+	
 //	return Stream.concat(contextStream1, contextStream2).toArray(BanContext[]::new);
 	return null;
     }

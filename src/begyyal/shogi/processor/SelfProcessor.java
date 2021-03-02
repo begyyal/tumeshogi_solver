@@ -112,12 +112,6 @@ public class SelfProcessor extends PlayerProcessorBase {
 	});
     }
 
-    private Stream<MasuState> spreadMasuState(MasuState from, Ban ban) {
-	return ban.search(s -> s.rangedBy().contains(from))
-	    .filter(s -> this.canAdvanceTo(s))
-	    .map(s -> this.occupy(from, s));
-    }
-
     // 1ステートからの空き王手は複数にならない
     private Optional<MasuState> getAkiObstruction(
 	Ban ban,
