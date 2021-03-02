@@ -35,6 +35,11 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	return null;
     }
     
+    @Override
+    protected Player getPlayerType() {
+	return PlayerType;
+    }
+    
     public static OpponentProcessor newi() {
 	return new OpponentProcessor();
     }

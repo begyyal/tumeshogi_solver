@@ -101,12 +101,14 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    return t.getLeft().getValue()
 		.stream()
 		.filter(s -> !ArrayUtils.contains(decomposedOute, candidate.getVectorTo(s)))
-		.filter(s -> ban.validateState(s))
 		.map(s -> {
 		    var newBan = ban.clone();
 		    var k = newBan.advance(t.getLeft().getKey(), s, PlayerType);
-		    return context.branch(newBan, s, t.getLeft().getKey(), k, PlayerType, true);
-		});
+		    return newBan.validateState(s)
+			    ? context.branch(newBan, s, t.getLeft().getKey(), k, PlayerType, true)
+			    : null;
+		})
+		.filter(c -> c != null);
 	});
     }
 
