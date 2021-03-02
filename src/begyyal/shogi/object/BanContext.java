@@ -75,7 +75,11 @@ public class BanContext {
     }
 
     public BanContext copy() {
-	return new BanContext(this.log, this.selfMotigoma, this.opponentMotigoma, this.id);
+	return new BanContext(
+	    SuperListGen.of(this.log), 
+	    SuperListGen.of(this.selfMotigoma), 
+	    SuperListGen.of(this.opponentMotigoma), 
+	    this.id);
     }
 
     public Ban[] getLog() {

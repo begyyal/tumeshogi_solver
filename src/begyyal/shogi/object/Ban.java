@@ -97,7 +97,7 @@ public class Ban implements Cloneable {
 	from.rangedBy().removeIf(s -> s.isEqualXY(to));
 	emptyMasu(from.x(), from.y(), from.rangedBy());
 	unmarkRangeBy(from);
-	
+
 	var occupied = this.matrix[to.x()][to.y()];
 	advance(to);
 	return occupied.koma() != Koma.Empty ? occupied.koma() : null;
@@ -149,6 +149,13 @@ public class Ban implements Cloneable {
 
     private boolean validateCoordinate(int x, int y) {
 	return 0 <= x && x < 9 && 0 <= y && y < 9;
+    }
+
+    public boolean isOuteBy(Player p, MasuState s) {
+	return search(s2 -> s2.koma() == Koma.Ou && s2.player() != p)
+	    .findFirst().get()
+	    .rangedBy()
+	    .anyMatch(s2 -> s.isEqualXY(s2));
     }
 
     @Override

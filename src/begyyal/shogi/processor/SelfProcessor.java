@@ -1,6 +1,5 @@
 package begyyal.shogi.processor;
 
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -29,15 +28,19 @@ public class SelfProcessor extends PlayerProcessorBase {
 	var ban = context.getLatestBan();
 
 	// 駒の移動による王手(開き王手は除く)
-	var moveSpread = ban.search(s -> s.player() == PlayerType)
+	var moveSpread = ban
+	    .search(s -> s.player() == PlayerType)
 	    .flatMap(s -> spreadMasuState(s, ban).map(dest -> Pair.of(s, dest)));
 	var cs1 = moveSpread
-	    .filter(sp -> isOute(ban, sp.getRight()))
 	    .map(sp -> {
+		var to = sp.getRight();
 		var newBan = ban.clone();
-		var k = newBan.advance(sp.getLeft(), sp.getRight(), PlayerType);
-		return context.branch(newBan, sp.getRight(), sp.getLeft(), k, PlayerType, true);
-	    });
+		var k = newBan.advance(sp.getLeft(), to, PlayerType);
+		return newBan.validateState(to) && newBan.isOuteBy(PlayerType, to)
+			? context.branch(newBan, to, sp.getLeft(), k, PlayerType, true)
+			: null;
+	    })
+	    .filter(c -> c != null);
 
 	// 開き王手
 	var cs2 = getAkiOuteContextStream(ban, context, moveSpread);
@@ -47,14 +50,17 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .stream()
 	    .flatMap(k -> ban
 		.search(s -> s.koma() == Koma.Empty)
-		.map(s -> Pair.of(s, new MasuState(PlayerType, k, s.x(), s.y(), false, s.rangedBy())))
-		.filter(sp -> isOute(ban, sp.getRight())))
+		.map(s -> Pair.of(s,
+		    new MasuState(PlayerType, k, s.x(), s.y(), false, s.rangedBy()))))
 	    .map(sp -> {
 		var newBan = ban.clone();
 		var s = sp.getRight();
 		newBan.advance(s);
-		return context.branch(newBan, s, sp.getLeft(), s.koma(), PlayerType, false);
-	    });
+		return newBan.validateState(s) && newBan.isOuteBy(PlayerType, s)
+			? context.branch(newBan, s, sp.getLeft(), s.koma(), PlayerType, false)
+			: null;
+	    })
+	    .filter(c -> c != null);
 
 	// 駒移動系は空き王手と他で重複し得るのでdistinctする
 	return Stream.concat(Stream.concat(cs1, cs2).distinct(), cs3)
@@ -104,41 +110,10 @@ public class SelfProcessor extends PlayerProcessorBase {
 	});
     }
 
-    private boolean isOute(Ban ban, MasuState s) {
-	return ban.validateState(s) && spreadMasuState(s, ban)
-	    .anyMatch(s2 -> s2.koma() == Koma.Ou && s2.player() != PlayerType);
-    }
-
-    // 引数のステートから移動可能な範囲全てを移動後のステートにしてStreamで返却
-    private Stream<MasuState> spreadMasuState(MasuState state, Ban ban) {
-	return state.getTerritory()
-	    .stream()
-	    .flatMap(v -> spreadVector(ban, v, state));
-    }
-
-    private Stream<MasuState> spreadVector(
-	Ban ban,
-	Vector v,
-	MasuState s) {
-
-	if (Math.abs(v.x()) == 1 || Math.abs(v.y()) == 1) {
-	    var result = ban.exploration(s, v);
-	    return canAdvanceTo(result) ? Stream.of(occupy(s, result)) : Stream.empty();
-	}
-
-	var stateBucket = new MasuState[8];
-	int i = 0;
-	for (var miniV : MatrixResolver.decompose(v)) {
-	    var result = ban.exploration(s, miniV);
-	    if (canAdvanceTo(result)) {
-		stateBucket[i] = occupy(s, result);
-		i++;
-	    }
-	    if (result == MasuState.Invalid || result.koma() != Koma.Empty)
-		break;
-	}
-
-	return i == 0 ? Stream.empty() : Arrays.stream(stateBucket, 0, i);
+    private Stream<MasuState> spreadMasuState(MasuState from, Ban ban) {
+	return ban.search(s -> s.rangedBy().contains(from))
+	    .filter(s -> this.canAdvanceTo(s))
+	    .map(s -> this.occupy(from, s));
     }
 
     // 1ステートからの空き王手は複数にならない
@@ -191,7 +166,7 @@ public class SelfProcessor extends PlayerProcessorBase {
     protected Player getPlayerType() {
 	return PlayerType;
     }
-    
+
     public static SelfProcessor newi() {
 	return new SelfProcessor();
     }
