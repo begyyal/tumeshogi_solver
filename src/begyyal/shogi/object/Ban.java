@@ -39,6 +39,10 @@ public class Ban implements Cloneable {
 	this.matrix = matrix;
     }
 
+    public MasuState getState(int x, int y) {
+	return this.matrix[x][y];
+    }
+
     public void markRangeBy(MasuState s) {
 	for (var v : s.getTerritory())
 	    for (var miniV : MatrixResolver.decompose(v)) {
@@ -89,29 +93,38 @@ public class Ban implements Cloneable {
      * 
      * @param from
      * @param to
-     * @param player
      * @return 取得した駒。無ければnull
      */
-    public Koma advance(MasuState from, MasuState to, Player player) {
+    public Koma advance(MasuState from, MasuState to) {
 
 	from.rangedBy().removeIf(s -> s.isEqualXY(to));
 	emptyMasu(from.x(), from.y(), from.rangedBy());
 	unmarkRangeBy(from);
 
 	var occupied = this.matrix[to.x()][to.y()];
-	advance(to);
+	deploy(to);
 	return occupied.koma() != Koma.Empty ? occupied.koma() : null;
     }
 
     /**
-     * 主体のマトリクスに対して駒の配置を行う。<br>
-     * 配置先の検査無し。
+     * 主体のマトリクスに対して駒の配置を行う。
      * 
      * @param state
      */
-    public void advance(MasuState state) {
+    public void deploy(MasuState state) {
 	this.matrix[state.x()][state.y()] = state;
 	markRangeBy(state);
+    }
+
+    public MasuState deploy(Koma k, int x, int y, Player p) {
+
+	var state = new MasuState(p, k, x, y, false, this.matrix[x][y].rangedBy());
+	if (!validateState(state))
+	    return null;
+
+	this.matrix[state.x()][state.y()] = state;
+	markRangeBy(state);
+	return state;
     }
 
     /**

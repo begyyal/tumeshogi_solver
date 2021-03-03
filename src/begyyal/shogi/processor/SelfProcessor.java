@@ -35,7 +35,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .map(sp -> {
 		var to = sp.getRight();
 		var newBan = ban.clone();
-		var k = newBan.advance(sp.getLeft(), to, PlayerType);
+		var k = newBan.advance(sp.getLeft(), to);
 		return newBan.validateState(to) && newBan.isOuteBy(PlayerType, to)
 			? context.branch(newBan, to, sp.getLeft(), k, PlayerType, true)
 			: null;
@@ -55,7 +55,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .map(sp -> {
 		var newBan = ban.clone();
 		var s = sp.getRight();
-		newBan.advance(s);
+		newBan.deploy(s);
 		return newBan.validateState(s) && newBan.isOuteBy(PlayerType, s)
 			? context.branch(newBan, s, sp.getLeft(), s.koma(), PlayerType, false)
 			: null;
@@ -103,7 +103,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 		.filter(s -> !ArrayUtils.contains(decomposedOute, candidate.getVectorTo(s)))
 		.map(s -> {
 		    var newBan = ban.clone();
-		    var k = newBan.advance(t.getLeft().getKey(), s, PlayerType);
+		    var k = newBan.advance(t.getLeft().getKey(), s);
 		    return newBan.validateState(s)
 			    ? context.branch(newBan, s, t.getLeft().getKey(), k, PlayerType, true)
 			    : null;
