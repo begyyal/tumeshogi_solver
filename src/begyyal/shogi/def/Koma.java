@@ -68,8 +68,8 @@ public enum Koma {
 	null),
     Empty(
 	"*",
-	null,
-	null);
+	SuperListGen.empty(),
+	SuperListGen.empty());
 
     private final String id;
     public final ImmutableSuperList<Vector> territory;
