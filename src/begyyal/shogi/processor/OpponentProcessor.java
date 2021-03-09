@@ -56,21 +56,24 @@ public class OpponentProcessor extends PlayerProcessorBase {
 			: null;
 	    })
 	    .filter(c -> c != null);
-	
+
 	// 持ち駒を貼る
 	var outeVector = opponentOu.getVectorTo(outeState);
 	var cs3 = context.opponentMotigoma.isEmpty() || outeVector.x() < 2 && outeVector.y() < 2
 		? Stream.empty()
 		: Arrays.stream(MatrixResolver.decompose(outeVector))
 		    .filter(miniV -> miniV != outeVector)
-		    .flatMap(v -> context.opponentMotigoma.stream().map(k -> {
-			var newBan = ban.clone();
-			int x = opponentOu.x() + v.x(), y = opponentOu.y() + v.y();
-			var s = newBan.deploy(k, x, y, PlayerType);
-			return s == null ? null
-				: context.branch(
-				    newBan, s, ban.getState(x, y), k, PlayerType, false);
-		    }))
+		    .flatMap(v -> context.opponentMotigoma
+			.stream()
+			.distinct()
+			.map(k -> {
+			    var newBan = ban.clone();
+			    int x = opponentOu.x() + v.x(), y = opponentOu.y() + v.y();
+			    var s = newBan.deploy(k, x, y, PlayerType);
+			    return s == null ? null
+				    : context.branch(
+					newBan, s, ban.getState(x, y), k, PlayerType, false);
+			}))
 		    .filter(c -> c != null);
 
 	// selfに同じく駒移動系は重複し得るのでdistinctする

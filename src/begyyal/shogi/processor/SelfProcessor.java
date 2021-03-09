@@ -48,6 +48,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	// 持ち駒配置による王手
 	var cs3 = context.selfMotigoma
 	    .stream()
+	    .distinct()
 	    .flatMap(k -> ban
 		.search(s -> s.koma() == Koma.Empty)
 		.map(s -> Pair.of(s,

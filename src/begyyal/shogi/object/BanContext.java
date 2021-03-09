@@ -4,6 +4,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+import javax.print.attribute.standard.NumberUpSupported;
+
+import org.apache.commons.lang3.StringUtils;
+
 import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.shogi.def.Koma;
@@ -76,9 +80,9 @@ public class BanContext {
 
     public BanContext copy() {
 	return new BanContext(
-	    SuperListGen.of(this.log), 
-	    SuperListGen.of(this.selfMotigoma), 
-	    SuperListGen.of(this.opponentMotigoma), 
+	    SuperListGen.of(this.log),
+	    SuperListGen.of(this.selfMotigoma),
+	    SuperListGen.of(this.opponentMotigoma),
 	    this.id);
     }
 
@@ -98,14 +102,22 @@ public class BanContext {
 		? (player == Player.Self ? lowerGetter.apply(xIndex) : higherGetter.apply(yIndex))
 		: (player == Player.Self ? higherGetter.apply(xIndex) : lowerGetter.apply(yIndex));
 
-	for (int i = 0; i < argv.length(); i += 2) {
+	int i = 0;
+	while (i < argv.length()) {
+
 	    var type = Koma.of(argv.substring(i, i + 1));
-	    IntStream.range(0, Integer.valueOf(argv.substring(i + 1, i + 2)))
-		.forEach(idx -> motigoma.add(type));
+	    var count = argv.substring(i + 1, i + 3);
+	    if (StringUtils.isNumeric(count) && ++i > 0)
+		count = argv.substring(i + 1, i + 2);
+
+	    IntStream.range(0, Integer.valueOf(count)).forEach(idx -> motigoma.add(type));
+
+	    i += 2;
 	}
+
 	return motigoma;
     }
-    
+
     @Override
     public boolean equals(Object o) {
 	if (!(o instanceof BanContext))
