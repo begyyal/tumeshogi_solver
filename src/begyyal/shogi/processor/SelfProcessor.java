@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import begyyal.commons.util.matrix.MatrixResolver;
 import begyyal.commons.util.matrix.Vector;
+import begyyal.commons.util.object.PairList;
 import begyyal.commons.util.object.PairList.PairListGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
@@ -30,8 +31,9 @@ public class SelfProcessor extends PlayerProcessorBase {
 	// 駒の移動による王手(開き王手は除く)
 	var moveSpread = ban
 	    .search(s -> s.player() == PlayerType)
-	    .flatMap(s -> spreadMasuState(s, ban).map(dest -> Pair.of(s, dest)));
-	var cs1 = moveSpread
+	    .flatMap(s -> spreadMasuState(s, ban).map(dest -> Pair.of(s, dest)))
+	    .collect(PairListGen.collect());
+	var cs1 = moveSpread.stream()
 	    .map(sp -> {
 		var to = sp.getRight();
 		var newBan = ban.clone();
@@ -71,7 +73,7 @@ public class SelfProcessor extends PlayerProcessorBase {
     private Stream<BanContext> getAkiOuteContextStream(
 	Ban ban,
 	BanContext context,
-	Stream<Pair<MasuState, MasuState>> moveSpread) {
+	PairList<MasuState, MasuState> moveSpread) {
 
 	var candidates = ban.search(s -> s.player() == PlayerType &&
 		(s.koma() == Koma.Kyousha && !s.nariFlag() ||
@@ -80,8 +82,11 @@ public class SelfProcessor extends PlayerProcessorBase {
 	if (candidates.count() == 0)
 	    return Stream.empty();
 
-	var moveSpreadMap = moveSpread.collect(PairListGen.collect()).toMap();
-	var relay = moveSpreadMap
+	var opponentOu = ban
+	    .search(s -> s.player() != PlayerType && s.koma() == Koma.Ou)
+	    .findFirst().get();
+
+	return moveSpread.toMap()
 	    .entrySet()
 	    .stream()
 	    .map(e -> Pair.of(e,
@@ -89,28 +94,23 @@ public class SelfProcessor extends PlayerProcessorBase {
 		    .filter(p -> p.getRight() != null && p.getRight().equals(e.getKey()))
 		    .map(Pair::getLeft)
 		    .findFirst()))
-	    .filter(p -> p.getRight().isPresent());
-	if (relay.count() == 0)
-	    return Stream.empty();
-
-	var opponentOu = ban
-	    .search(s -> s.player() != PlayerType && s.koma() == Koma.Ou)
-	    .findFirst().get();
-	return relay.flatMap(t -> {
-	    var candidate = t.getRight().get();
-	    var decomposedOute = MatrixResolver.decompose(candidate.getVectorTo(opponentOu));
-	    return t.getLeft().getValue()
-		.stream()
-		.filter(s -> !ArrayUtils.contains(decomposedOute, candidate.getVectorTo(s)))
-		.map(s -> {
-		    var newBan = ban.clone();
-		    var k = newBan.advance(t.getLeft().getKey(), s);
-		    return newBan.validateState(s)
-			    ? context.branch(newBan, s, t.getLeft().getKey(), k, PlayerType, true)
-			    : null;
-		})
-		.filter(c -> c != null);
-	});
+	    .filter(p -> p.getRight().isPresent())
+	    .flatMap(t -> {
+		var candidate = t.getRight().get();
+		var decomposedOute = MatrixResolver.decompose(candidate.getVectorTo(opponentOu));
+		return t.getLeft().getValue()
+		    .stream()
+		    .filter(s -> !ArrayUtils.contains(decomposedOute, candidate.getVectorTo(s)))
+		    .map(s -> {
+			var newBan = ban.clone();
+			var k = newBan.advance(t.getLeft().getKey(), s);
+			return newBan.validateState(s)
+				? context.branch(newBan, s, t.getLeft().getKey(), k, PlayerType,
+				    true)
+				: null;
+		    })
+		    .filter(c -> c != null);
+	    });
     }
 
     // 1ステートからの空き王手は複数にならない

@@ -9,6 +9,7 @@ import begyyal.commons.util.matrix.MatrixResolver;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.BanContext;
+import begyyal.shogi.object.MasuState;
 
 public class OpponentProcessor extends PlayerProcessorBase {
 
@@ -34,15 +35,16 @@ public class OpponentProcessor extends PlayerProcessorBase {
 		return context.branch(newBan, s, opponentOu, k, PlayerType, true);
 	    });
 
-	var outeStream = opponentOu
+	var outeArray = opponentOu
 	    .rangedBy()
 	    .stream()
-	    .filter(s -> s.player() != PlayerType);
-	if (outeStream.count() > 1)
+	    .filter(s -> s.player() != PlayerType)
+	    .toArray(MasuState[]::new);
+	if (outeArray.length > 1)
 	    return cs1.toArray(BanContext[]::new);
 
 	// 王手駒を取得する
-	var outeState = outeStream.findFirst().get();
+	var outeState = outeArray[0];
 	var cs2 = outeState.rangedBy()
 	    .stream()
 	    .filter(s -> s.player() == PlayerType)
