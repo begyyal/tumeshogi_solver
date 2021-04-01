@@ -97,8 +97,8 @@ public class BanContext {
 	Function<Integer, String> lowerGetter = idx -> arg.substring(1, idx);
 	Function<Integer, String> higherGetter = idx -> arg.substring(idx + 1, arg.length());
 	String argv = xIndex < yIndex
-		? (player == Player.Self ? lowerGetter.apply(xIndex) : higherGetter.apply(yIndex))
-		: (player == Player.Self ? higherGetter.apply(xIndex) : lowerGetter.apply(yIndex));
+		? (player == Player.Self ? lowerGetter.apply(yIndex) : higherGetter.apply(yIndex))
+		: (player == Player.Self ? higherGetter.apply(xIndex) : lowerGetter.apply(xIndex));
 
 	int i = 0;
 	while (i < argv.length()) {
@@ -107,7 +107,7 @@ public class BanContext {
 	    var count = argv.substring(i + 1, i + 2);
 	    if (i + 3 < argv.length()) { // 歩は保持数2桁があり得る
 		var count2dig = argv.substring(i + 1, i + 3);
-		if (StringUtils.isNumeric(count) && ++i > 0)
+		if (StringUtils.isNumeric(count2dig) && ++i > 0)
 		    count = count2dig;
 	    }
 
