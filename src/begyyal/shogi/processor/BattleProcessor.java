@@ -12,8 +12,8 @@ public class BattleProcessor {
 
     private final SuperList<BanContext> contexts;
 
-    private BattleProcessor(String motigomaStr, String[] banStrs) {
-	this.contexts = SuperListGen.of(BanContext.newi(banStrs, motigomaStr));
+    private BattleProcessor(String motigomaStr, String banStr) {
+	this.contexts = SuperListGen.of(BanContext.newi(banStr, motigomaStr));
     }
 
     /**
@@ -103,7 +103,7 @@ public class BattleProcessor {
 	return sb.toString();
     }
     
-    public static BattleProcessor of(String motigomaStr, String[] banStrs) {
-	return new BattleProcessor(motigomaStr, banStrs);
+    public static BattleProcessor of(String motigomaStr, String banStr) {
+	return new BattleProcessor(motigomaStr, banStr);
     }
 }

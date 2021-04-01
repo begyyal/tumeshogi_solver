@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import begyyal.commons.constant.Strs;
+import begyyal.commons.util.function.SuperStrings;
 import begyyal.commons.util.matrix.MatrixResolver;
 import begyyal.commons.util.matrix.Vector;
 import begyyal.commons.util.object.SuperList;
@@ -16,13 +18,22 @@ public class Ban implements Cloneable {
     // インデックスの振り順は将棋盤の読み方に倣わない。x/y座標で見る。
     private MasuState[][] matrix;
 
-    private Ban(String[] args) {
+    private Ban(String arg) {
 
 	this.matrix = new MasuState[9][9];
-	for (String arg : args) {
-	    int x = Integer.valueOf(arg.substring(0, 1));
-	    int y = Integer.valueOf(arg.substring(1, 2));
-	    this.matrix[9 - x][9 - y] = MasuState.of(arg.substring(2), x, y);
+	
+	String draft = arg;
+	while (!draft.isBlank()) {
+
+	    int skipIndex = SuperStrings.firstIndexOf(draft, "x", "y").getRight();
+	    var next = SuperStrings.firstIndexOf(draft.substring(skipIndex + 1), "x", "y");
+	    int kiritori = next == null ? draft.length() : next.getRight() + skipIndex - 1;
+	    var masu = draft.substring(0, kiritori);
+	    draft = kiritori == draft.length() ? Strs.empty : draft.substring(kiritori);
+
+	    int x = Integer.valueOf(masu.substring(0, 1));
+	    int y = Integer.valueOf(masu.substring(1, 2));
+	    this.matrix[9 - x][9 - y] = MasuState.of(masu.substring(2), x, y);
 	}
 
 	for (int x = 0; x < 9; x++)
@@ -180,7 +191,7 @@ public class Ban implements Cloneable {
 	return new Ban(newMatrix);
     }
 
-    public static Ban of(String[] args) {
-	return new Ban(args);
+    public static Ban of(String arg) {
+	return new Ban(arg);
     }
 }

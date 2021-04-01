@@ -4,8 +4,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
-import javax.print.attribute.standard.NumberUpSupported;
-
 import org.apache.commons.lang3.StringUtils;
 
 import begyyal.commons.util.object.SuperList;
@@ -28,8 +26,8 @@ public class BanContext {
     public MasuState beforeLatestState;
     public final int beforeId;
 
-    private BanContext(String[] banStrs, String motigomaStr) {
-	this.log = SuperListGen.of(Ban.of(banStrs));
+    private BanContext(String banStr, String motigomaStr) {
+	this.log = SuperListGen.of(Ban.of(banStr));
 	this.selfMotigoma = parseMotigoma(Player.Self, motigomaStr);
 	this.opponentMotigoma = parseMotigoma(Player.Opponent, motigomaStr);
 	this.beforeId = -1;
@@ -106,12 +104,14 @@ public class BanContext {
 	while (i < argv.length()) {
 
 	    var type = Koma.of(argv.substring(i, i + 1));
-	    var count = argv.substring(i + 1, i + 3);
-	    if (StringUtils.isNumeric(count) && ++i > 0)
-		count = argv.substring(i + 1, i + 2);
+	    var count = argv.substring(i + 1, i + 2);
+	    if (i + 3 < argv.length()) { // 歩は保持数2桁があり得る
+		var count2dig = argv.substring(i + 1, i + 3);
+		if (StringUtils.isNumeric(count) && ++i > 0)
+		    count = count2dig;
+	    }
 
 	    IntStream.range(0, Integer.valueOf(count)).forEach(idx -> motigoma.add(type));
-
 	    i += 2;
 	}
 
@@ -128,7 +128,7 @@ public class BanContext {
 		casted.beforeLatestState == this.beforeLatestState;
     }
 
-    public static BanContext newi(String[] banStrs, String motigomaStr) {
-	return new BanContext(banStrs, motigomaStr);
+    public static BanContext newi(String banStr, String motigomaStr) {
+	return new BanContext(banStr, motigomaStr);
     }
 }
