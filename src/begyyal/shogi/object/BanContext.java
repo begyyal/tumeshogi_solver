@@ -16,7 +16,7 @@ public class BanContext {
     private static final AtomicInteger idGen = new AtomicInteger();
     public final int id = idGen.getAndIncrement();
 
-    private final SuperList<Ban> log;
+    public final SuperList<Ban> log;
     // 持ち駒は最新断面のみ
     public final SuperList<Koma> selfMotigoma;
     public final SuperList<Koma> opponentMotigoma;
@@ -82,10 +82,6 @@ public class BanContext {
 	    SuperListGen.of(this.selfMotigoma),
 	    SuperListGen.of(this.opponentMotigoma),
 	    this.id);
-    }
-
-    public Ban[] getLog() {
-	return this.log.toArray();
     }
 
     private static SuperList<Koma> parseMotigoma(Player player, String arg) {

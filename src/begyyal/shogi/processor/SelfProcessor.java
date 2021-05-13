@@ -1,5 +1,6 @@
 package begyyal.shogi.processor;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -78,8 +79,9 @@ public class SelfProcessor extends PlayerProcessorBase {
 	var candidates = ban.search(s -> s.player() == PlayerType &&
 		(s.koma() == Koma.Kyousha && !s.nariFlag() ||
 			s.koma() == Koma.Hisha ||
-			s.koma() == Koma.Kaku));
-	if (candidates.count() == 0)
+			s.koma() == Koma.Kaku))
+	    .toArray(MasuState[]::new);
+	if (candidates.length == 0)
 	    return Stream.empty();
 
 	var opponentOu = ban
@@ -90,7 +92,8 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .entrySet()
 	    .stream()
 	    .map(e -> Pair.of(e,
-		candidates.map(c -> Pair.of(c, getAkiObstruction(ban, c).orElse(null)))
+		Arrays.stream(candidates)
+		    .map(c -> Pair.of(c, getAkiObstruction(ban, c).orElse(null)))
 		    .filter(p -> p.getRight() != null && p.getRight().equals(e.getKey()))
 		    .map(Pair::getLeft)
 		    .findFirst()))

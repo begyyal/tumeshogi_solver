@@ -12,6 +12,6 @@ repositories {
 }
 
 dependencies {
-	compile files('resource/jar/java_commons.jar')
-	compile 'org.apache.commons:commons-lang3:latest.release'
+	implementation files('jar/java_commons.jar')
+	implementation 'org.apache.commons:commons-lang3:latest.release'
 }

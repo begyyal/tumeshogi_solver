@@ -1,6 +1,7 @@
 package begyyal.shogi.processor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
@@ -36,7 +37,7 @@ public class BattleProcessor {
 
 	return result == null 
 		? new String[] { "詰めませんでした。" } 
-		: this.summarize(result.getLog());
+		: this.summarize(result.log);
     }
 
     @SuppressWarnings("unchecked")
@@ -65,7 +66,7 @@ public class BattleProcessor {
 	return null;
     }
 
-    private String[] summarize(Ban[] bans) {
+    private String[] summarize(List<Ban> bans) {
 
 	var tejun = SuperListGen.<MasuState>newi();
 

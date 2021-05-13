@@ -58,6 +58,13 @@ public record MasuState(
 	return s.x == this.x && s.y == this.y;
     }
 
+    public boolean isEqualWithoutRange(MasuState s) {
+	return this.isEqualXY(s)
+		&& this.koma == s.koma
+		&& this.player == s.player
+		&& this.nariFlag == s.nariFlag;
+    }
+
     public static MasuState emptyOf(int suzi, int dan, SuperList<MasuState> rangedBy) {
 	return new MasuState(
 	    Player.None,
@@ -88,5 +95,18 @@ public record MasuState(
 	boolean nari = value.length() > 2 && StringUtils.equals(value.substring(2, 3), "z");
 
 	return new MasuState(p, k, 9 - suzi, 9 - dan, nari, SuperListGen.newi());
+    }
+
+    // rangedByの循環比較を抑止するために上書きする。
+    // rangedByが含むMasuStateのrangedByは本質的には第三者的要素であるため、比較を無視しても差支えない。
+    @Override
+    public boolean equals(Object o) {
+	if (!(o instanceof MasuState))
+	    return false;
+	var casted = (MasuState) o;
+	return this.isEqualWithoutRange(casted)
+		&& this.rangedBy.size() == casted.rangedBy.size()
+		&& this.rangedBy.zip(casted.rangedBy)
+		    .allMatch(p -> p.getLeft().isEqualWithoutRange(p.getRight()));
     }
 }
