@@ -28,10 +28,10 @@ public class SelfProcessor extends PlayerProcessorBase {
     public BanContext[] spread(BanContext context) {
 
 	var ban = context.getLatestBan();
-
+	
 	// 駒の移動による王手(開き王手は除く)
 	var moveSpread = ban
-	    .search(s -> s.player() == PlayerType)
+	    .search(s -> s.player == PlayerType)
 	    .flatMap(s -> spreadMasuState(s, ban).map(dest -> Pair.of(s, dest)))
 	    .collect(PairListGen.collect());
 	var cs1 = moveSpread.stream()
@@ -53,15 +53,15 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .stream()
 	    .distinct()
 	    .flatMap(k -> ban
-		.search(s -> s.koma() == Koma.Empty)
+		.search(s -> s.koma == Koma.Empty)
 		.map(s -> Pair.of(s,
-		    new MasuState(PlayerType, k, s.x(), s.y(), false, s.rangedBy()))))
+		    new MasuState(PlayerType, k, s.x, s.y, false, s.rangedBy))))
 	    .map(sp -> {
 		var newBan = ban.clone();
 		var s = sp.getRight();
 		newBan.deploy(s);
 		return newBan.validateState(s) && newBan.isOuteBy(PlayerType, s)
-			? context.branch(newBan, s, sp.getLeft(), s.koma(), PlayerType, false)
+			? context.branch(newBan, s, sp.getLeft(), s.koma, PlayerType, false)
 			: null;
 	    })
 	    .filter(c -> c != null);
@@ -76,16 +76,16 @@ public class SelfProcessor extends PlayerProcessorBase {
 	BanContext context,
 	PairList<MasuState, MasuState> moveSpread) {
 
-	var candidates = ban.search(s -> s.player() == PlayerType &&
-		(s.koma() == Koma.Kyousha && !s.nariFlag() ||
-			s.koma() == Koma.Hisha ||
-			s.koma() == Koma.Kaku))
+	var candidates = ban.search(s -> s.player == PlayerType &&
+		(s.koma == Koma.Kyousha && !s.nariFlag ||
+			s.koma == Koma.Hisha ||
+			s.koma == Koma.Kaku))
 	    .toArray(MasuState[]::new);
 	if (candidates.length == 0)
 	    return Stream.empty();
 
 	var opponentOu = ban
-	    .search(s -> s.player() != PlayerType && s.koma() == Koma.Ou)
+	    .search(s -> s.player != PlayerType && s.koma == Koma.Ou)
 	    .findFirst().get();
 
 	return moveSpread.toMap()
@@ -144,16 +144,16 @@ public class SelfProcessor extends PlayerProcessorBase {
 
 	    if (result == MasuState.Invalid)
 		break;
-	    if (result.player() == Player.None)
+	    if (result.player == Player.None)
 		continue;
 	    if (i == 0) {
-		if (result.player() == PlayerType) {
+		if (result.player == PlayerType) {
 		    obstruction = result;
 		    i++;
 		} else
 		    break;
 	    } else if (i == 1)
-		if (result.player() != PlayerType && result.koma() == Koma.Ou) {
+		if (result.player != PlayerType && result.koma == Koma.Ou) {
 		    return obstruction;
 		} else
 		    break;

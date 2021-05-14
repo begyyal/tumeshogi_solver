@@ -59,7 +59,7 @@ public class BattleProcessor {
 	this.contexts.removeIf(c -> c.id == acon.id);
 
 	var branches = OpponentProcessor.newi().spread(acon);
-	if (branches == null)
+	if (branches == null || branches.length == 0)
 	    return acon;
 	
 	this.contexts.addAll(branches);
@@ -95,12 +95,12 @@ public class BattleProcessor {
 
     private String writeItte(MasuState state) {
 	var sb = new StringBuilder();
-	sb.append(state.player());
+	sb.append(state.player);
 	sb.append(" -> ");
 	sb.append(state.getSuzi());
 	sb.append(state.getDan());
-	sb.append(state.koma());
-	sb.append(state.nariFlag());
+	sb.append(state.koma);
+	sb.append(state.nariFlag);
 	return sb.toString();
     }
     

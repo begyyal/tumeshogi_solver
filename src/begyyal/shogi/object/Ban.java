@@ -21,7 +21,7 @@ public class Ban implements Cloneable {
     private Ban(String arg) {
 
 	this.matrix = new MasuState[9][9];
-	
+
 	String draft = arg;
 	while (!draft.isBlank()) {
 
@@ -57,17 +57,17 @@ public class Ban implements Cloneable {
     public void markRangeBy(MasuState s) {
 	for (var v : s.getTerritory())
 	    for (var miniV : MatrixResolver.decompose(v)) {
-		int vx = s.x() + miniV.x();
-		int vy = s.y() + miniV.y();
+		int vx = s.x + miniV.x();
+		int vy = s.y + miniV.y();
 		if (validateCoordinate(vx, vy))
-		    this.matrix[vx][vy].rangedBy().add(s);
+		    this.matrix[vx][vy].rangedBy.add(s);
 	    }
     }
 
     public void unmarkRangeBy(MasuState s) {
 	for (int x = 0; x < 9; x++)
 	    for (int y = 0; y < 9; y++)
-		this.matrix[x][y].rangedBy().removeIf(state -> state.isEqualXY(s));
+		this.matrix[x][y].rangedBy.removeIf(state -> state.isEqualXY(s));
     }
 
     public Stream<MasuState> search(Predicate<MasuState> filter) {
@@ -93,7 +93,7 @@ public class Ban implements Cloneable {
      * @return ステート
      */
     public MasuState exploration(MasuState state, Vector v) {
-	int x = state.x(), y = state.y();
+	int x = state.x, y = state.y;
 	int vx = x + v.x(), vy = y + v.y();
 	return validateCoordinate(vx, vy) ? this.matrix[vx][vy] : MasuState.Invalid;
     }
@@ -108,13 +108,13 @@ public class Ban implements Cloneable {
      */
     public Koma advance(MasuState from, MasuState to) {
 
-	from.rangedBy().removeIf(s -> s.isEqualXY(to));
-	emptyMasu(from.x(), from.y(), from.rangedBy());
+	from.rangedBy.removeIf(s -> s.isEqualXY(to));
+	emptyMasu(from.x, from.y, from.rangedBy);
 	unmarkRangeBy(from);
 
-	var occupied = this.matrix[to.x()][to.y()];
+	var occupied = this.matrix[to.x][to.y];
 	deploy(to);
-	return occupied.koma() != Koma.Empty ? occupied.koma() : null;
+	return occupied.koma != Koma.Empty ? occupied.koma : null;
     }
 
     /**
@@ -123,17 +123,17 @@ public class Ban implements Cloneable {
      * @param state
      */
     public void deploy(MasuState state) {
-	this.matrix[state.x()][state.y()] = state;
+	this.matrix[state.x][state.y] = state;
 	markRangeBy(state);
     }
 
     public MasuState deploy(Koma k, int x, int y, Player p) {
 
-	var state = new MasuState(p, k, x, y, false, this.matrix[x][y].rangedBy());
+	var state = new MasuState(p, k, x, y, false, this.matrix[x][y].rangedBy);
 	if (!validateState(state))
 	    return null;
 
-	this.matrix[state.x()][state.y()] = state;
+	this.matrix[state.x][state.y] = state;
 	markRangeBy(state);
 	return state;
     }
@@ -146,21 +146,21 @@ public class Ban implements Cloneable {
      */
     public boolean validateState(MasuState state) {
 
-	if (state.koma() == Koma.Hu) {
-	    if (state.y() == 1)
+	if (state.koma == Koma.Hu) {
+	    if (state.y == 1)
 		return false;
-	    if (search(s -> s.x() == state.x()
-		    && s.koma() == Koma.Hu
-		    && s.player() == state.player())
+	    if (search(s -> s.x == state.x
+		    && s.koma == Koma.Hu
+		    && s.player == state.player)
 			.findAny().isPresent())
 		return false;
 
-	} else if (state.koma() == Koma.Kyousha) {
-	    if (state.y() == 1)
+	} else if (state.koma == Koma.Kyousha) {
+	    if (state.y == 1)
 		return false;
 
-	} else if (state.koma() == Koma.Keima) {
-	    if (state.y() < 3)
+	} else if (state.koma == Koma.Keima) {
+	    if (state.y < 3)
 		return false;
 	}
 
@@ -176,10 +176,9 @@ public class Ban implements Cloneable {
     }
 
     public boolean isOuteBy(Player p, MasuState s) {
-	return search(s2 -> s2.koma() == Koma.Ou && s2.player() != p)
-	    .findFirst().get()
-	    .rangedBy()
-	    .anyMatch(s2 -> s.isEqualXY(s2));
+	return search(s2 -> s2.koma == Koma.Ou && s2.player != p)
+	    .findFirst().get().rangedBy
+		.anyMatch(s2 -> s.isEqualXY(s2));
     }
 
     @Override
@@ -187,7 +186,7 @@ public class Ban implements Cloneable {
 	var newMatrix = new MasuState[9][9];
 	for (int x = 0; x < 9; x++)
 	    for (int y = 0; y < 9; y++)
-		newMatrix[x][y] = this.matrix[x][y];
+		newMatrix[x][y] = new MasuState(this.matrix[x][y]);
 	return new Ban(newMatrix);
     }
 

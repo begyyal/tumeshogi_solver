@@ -13,14 +13,36 @@ import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 
 // nullは入れない方針
-@SuppressWarnings("preview")
-public record MasuState(
+public class MasuState {
+
+    public final Player player;
+    public final Koma koma;
+    public final int x;
+    public final int y;
+    public final boolean nariFlag;
+    // コストを嫌気して射程変更の都度MasuStateはnewせずrangedByを直接いじる。
+    // これがrecordにしなかった所以。
+    public final SuperList<MasuState> rangedBy;
+
+    public MasuState(MasuState s) {
+	this(s.player, s.koma, s.x, s.y, s.nariFlag, s.rangedBy);
+    }
+
+    public MasuState(
 	Player player,
 	Koma koma,
 	int x,
 	int y,
 	boolean nariFlag,
 	SuperList<MasuState> rangedBy) {
+
+	this.player = player;
+	this.koma = koma;
+	this.x = x;
+	this.y = y;
+	this.nariFlag = nariFlag;
+	this.rangedBy = SuperListGen.of(rangedBy);
+    }
 
     public static final MasuState Invalid = new MasuState(
 	Player.None,

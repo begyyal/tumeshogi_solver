@@ -13,26 +13,26 @@ public abstract class PlayerProcessorBase {
     }
 
     protected Stream<MasuState> spreadMasuState(MasuState from, Ban ban) {
-	return ban.search(s -> s.rangedBy().contains(from))
+	return ban.search(s -> s.rangedBy.contains(from))
 	    .filter(s -> this.canAdvanceTo(s))
 	    .map(s -> this.occupy(from, s))
 	    .filter(s -> s != null);
     }
     
     protected MasuState occupy(MasuState from, MasuState to) {
-	return from.player() == to.player() ? null 
+	return from.player == to.player ? null 
 		: new MasuState(
-		    from.player(), 
-		    from.koma(),
-		    to.x(), 
-		    to.y(), 
-		    from.nariFlag() || to.y() <= 3,
-		    to.rangedBy());
+		    from.player, 
+		    from.koma,
+		    to.x, 
+		    to.y, 
+		    from.nariFlag || to.y <= 3,
+		    to.rangedBy);
     }
     
     protected boolean canAdvanceTo(MasuState state) {
 	return state != MasuState.Invalid
-		&& (state.koma() == Koma.Empty || state.player() != getPlayerType());
+		&& (state.koma == Koma.Empty || state.player != getPlayerType());
     }
     
     protected abstract Player getPlayerType();
