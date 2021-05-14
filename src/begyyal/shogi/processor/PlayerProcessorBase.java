@@ -18,22 +18,26 @@ public abstract class PlayerProcessorBase {
 	    .map(s -> this.occupy(from, s))
 	    .filter(s -> s != null);
     }
-    
+
     protected MasuState occupy(MasuState from, MasuState to) {
-	return from.player == to.player ? null 
+	return from.player == to.player ? null
 		: new MasuState(
-		    from.player, 
+		    from.player,
 		    from.koma,
-		    to.x, 
-		    to.y, 
+		    to.x,
+		    to.y,
 		    from.nariFlag || to.y <= 3,
 		    to.rangedBy);
     }
-    
+
     protected boolean canAdvanceTo(MasuState state) {
 	return state != MasuState.Invalid
 		&& (state.koma == Koma.Empty || state.player != getPlayerType());
     }
-    
+
+    protected boolean isOpponentOu(MasuState s) {
+	return s.player == Player.Opponent && s.koma == Koma.Ou;
+    }
+
     protected abstract Player getPlayerType();
 }

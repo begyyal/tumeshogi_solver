@@ -153,7 +153,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 		} else
 		    break;
 	    } else if (i == 1)
-		if (result.player != PlayerType && result.koma == Koma.Ou) {
+		if (this.isOpponentOu(result)) {
 		    return obstruction;
 		} else
 		    break;

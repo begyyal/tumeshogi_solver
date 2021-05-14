@@ -23,10 +23,10 @@ public class OpponentProcessor extends PlayerProcessorBase {
 
 	var ban = context.getLatestBan();
 	var opponentOu = ban
-	    .search(s -> s.koma == Koma.Ou && s.player == PlayerType)
+	    .search(s -> this.isOpponentOu(s))
 	    .findFirst().get();
 
-	// 王手範囲から避ける
+	// 王手範囲から避ける(王による王手駒の取得含む)
 	var cs1 = spreadMasuState(opponentOu, ban)
 	    .filter(s -> !s.rangedBy.anyMatch(s2 -> s2.player != PlayerType))
 	    .map(s -> {
@@ -35,19 +35,18 @@ public class OpponentProcessor extends PlayerProcessorBase {
 		return context.branch(newBan, s, opponentOu, k, PlayerType, true);
 	    });
 
-	var outeArray = opponentOu
-	    .rangedBy
+	var outeArray = opponentOu.rangedBy
 	    .stream()
 	    .filter(s -> s.player != PlayerType)
 	    .toArray(MasuState[]::new);
 	if (outeArray.length > 1)
 	    return cs1.toArray(BanContext[]::new);
 
-	// 王手駒を取得する
+	// 王手駒を取得する(王による取得は含まず)
 	var outeState = outeArray[0];
 	var cs2 = outeState.rangedBy
 	    .stream()
-	    .filter(s -> s.player == PlayerType)
+	    .filter(s -> s.player == PlayerType && s.koma != Koma.Ou)
 	    .map(s -> Pair.of(s, this.occupy(s, outeState)))
 	    .map(sp -> {
 		var to = sp.getRight();
