@@ -39,9 +39,6 @@ public class SelfProcessor extends PlayerProcessorBase {
 		var dest = sp.getRight();
 		var newBan = ban.clone();
 		var k = newBan.advance(sp.getLeft().x, sp.getLeft().y, dest.x, dest.y);
-		if (dest.x == 7 && dest.y == 7) {
-		    System.out.println();
-		}
 		var newDest = newBan.getState(dest.x, dest.y);
 		return newBan.validateState(newDest) && newBan.isOuteBy(PlayerType, dest.x, dest.y)
 			? context.branch(newBan, newDest, k, PlayerType, true)

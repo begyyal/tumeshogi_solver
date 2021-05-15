@@ -101,7 +101,8 @@ public class BattleProcessor {
 	sb.append(state.getSuzi());
 	sb.append(state.getDan());
 	sb.append(state.koma);
-	sb.append(state.nariFlag);
+	if(state.nariFlag)
+	    sb.append("Nari");
 	return sb.toString();
     }
     
