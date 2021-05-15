@@ -8,6 +8,8 @@ import begyyal.commons.constant.Strs;
 import begyyal.commons.util.function.SuperStrings;
 import begyyal.commons.util.matrix.MatrixResolver;
 import begyyal.commons.util.matrix.Vector;
+import begyyal.commons.util.object.PairList;
+import begyyal.commons.util.object.PairList.PairListGen;
 import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.shogi.def.Koma;
@@ -39,7 +41,7 @@ public class Ban implements Cloneable {
 	for (int x = 0; x < 9; x++)
 	    for (int y = 0; y < 9; y++)
 		if (this.matrix[x][y] == null)
-		    emptyMasu(x, y, SuperListGen.newi());
+		    emptyMasu(x, y, PairListGen.newi());
 
 	for (int x = 0; x < 9; x++)
 	    for (int y = 0; y < 9; y++)
@@ -60,14 +62,15 @@ public class Ban implements Cloneable {
 		int vx = s.x + miniV.x();
 		int vy = s.y + miniV.y();
 		if (validateCoordinate(vx, vy))
-		    this.matrix[vx][vy].rangedBy.add(s);
+		    this.matrix[vx][vy].rangedBy.add(s.x, s.y);
 	    }
     }
 
-    public void unmarkRangeBy(MasuState s) {
+    public void unmarkRangeBy(int targetX, int targetY) {
 	for (int x = 0; x < 9; x++)
 	    for (int y = 0; y < 9; y++)
-		this.matrix[x][y].rangedBy.removeIf(state -> state.isEqualXY(s));
+		this.matrix[x][y].rangedBy
+		    .removeIf(p -> p.getLeft() == targetX && p.getRight() == targetY);
     }
 
     public Stream<MasuState> search(Predicate<MasuState> filter) {
@@ -99,32 +102,38 @@ public class Ban implements Cloneable {
     }
 
     /**
-     * 主体のマトリクスに対してfromからtoへの駒の移動を行う。<br>
+     * 主体のマトリクスに対してfromからtoへの指定座標への駒の移動を行う。<br>
      * 中間地点および移動先の検査無し。
      * 
-     * @param from
-     * @param to
+     * @param fromX
+     * @param fromY
+     * @param toX
+     * @param toY
      * @return 取得した駒。無ければnull
      */
-    public Koma advance(MasuState from, MasuState to) {
+    public Koma advance(int fromX, int fromY, int toX, int toY) {
 
-	from.rangedBy.removeIf(s -> s.isEqualXY(to));
-	emptyMasu(from.x, from.y, from.rangedBy);
-	unmarkRangeBy(from);
+	var from = this.matrix[fromX][fromY];
+	var to = this.matrix[toX][toY];
 
+	if (to.koma != Koma.Empty)
+	    unmarkRangeBy(toX, toY);
+	emptyMasu(fromX, fromY);
+	unmarkRangeBy(fromX, fromY);
+
+	var newState = new MasuState(
+	    from.player,
+	    from.koma,
+	    toX,
+	    toY,
+	    from.nariFlag || to.y <= 3,
+	    to.rangedBy);
 	var occupied = this.matrix[to.x][to.y];
-	deploy(to);
-	return occupied.koma != Koma.Empty ? occupied.koma : null;
-    }
 
-    /**
-     * 主体のマトリクスに対して駒の配置を行う。
-     * 
-     * @param state
-     */
-    public void deploy(MasuState state) {
-	this.matrix[state.x][state.y] = state;
-	markRangeBy(state);
+	this.matrix[toX][toY] = newState;
+	markRangeBy(newState);
+
+	return occupied.koma != Koma.Empty ? occupied.koma : null;
     }
 
     public MasuState deploy(Koma k, int x, int y, Player p) {
@@ -167,7 +176,11 @@ public class Ban implements Cloneable {
 	return true;
     }
 
-    private void emptyMasu(int x, int y, SuperList<MasuState> rangedBy) {
+    private void emptyMasu(int x, int y) {
+	emptyMasu(x, y, this.matrix[x][y].rangedBy);
+    }
+
+    private void emptyMasu(int x, int y, PairList<Integer, Integer> rangedBy) {
 	this.matrix[x][y] = MasuState.emptyOf(x, y, rangedBy);
     }
 
@@ -175,10 +188,9 @@ public class Ban implements Cloneable {
 	return 0 <= x && x < 9 && 0 <= y && y < 9;
     }
 
-    public boolean isOuteBy(Player p, MasuState s) {
-	return search(s2 -> s2.koma == Koma.Ou && s2.player != p)
-	    .findFirst().get().rangedBy
-		.anyMatch(s2 -> s.isEqualXY(s2));
+    public boolean isOuteBy(Player p, int x, int y) {
+	return search(s -> s.koma == Koma.Ou && s.player != p)
+	    .findFirst().get().rangedBy.anyMatch(s -> s.getLeft() == x && s.getRight() == y);
     }
 
     @Override

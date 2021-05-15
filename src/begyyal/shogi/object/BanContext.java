@@ -55,7 +55,6 @@ public class BanContext {
     public BanContext branch(
 	Ban latestBan,
 	MasuState latestState,
-	MasuState beforeLatestState,
 	Koma koma,
 	Player player,
 	boolean isAddition) {
@@ -72,7 +71,7 @@ public class BanContext {
 		motigoma.remove(koma);
 
 	newContext.latestState = latestState;
-	newContext.beforeLatestState = beforeLatestState;
+	newContext.beforeLatestState = this.latestState;
 	return newContext;
     }
 

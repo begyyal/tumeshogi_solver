@@ -28,7 +28,7 @@ public class SelfProcessor extends PlayerProcessorBase {
     public BanContext[] spread(BanContext context) {
 
 	var ban = context.getLatestBan();
-	
+
 	// 駒の移動による王手(開き王手は除く)
 	var moveSpread = ban
 	    .search(s -> s.player == PlayerType)
@@ -36,11 +36,15 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .collect(PairListGen.collect());
 	var cs1 = moveSpread.stream()
 	    .map(sp -> {
-		var to = sp.getRight();
+		var dest = sp.getRight();
 		var newBan = ban.clone();
-		var k = newBan.advance(sp.getLeft(), to);
-		return newBan.validateState(to) && newBan.isOuteBy(PlayerType, to)
-			? context.branch(newBan, to, sp.getLeft(), k, PlayerType, true)
+		var k = newBan.advance(sp.getLeft().x, sp.getLeft().y, dest.x, dest.y);
+		if (dest.x == 7 && dest.y == 7) {
+		    System.out.println();
+		}
+		var newDest = newBan.getState(dest.x, dest.y);
+		return newBan.validateState(newDest) && newBan.isOuteBy(PlayerType, dest.x, dest.y)
+			? context.branch(newBan, newDest, k, PlayerType, true)
 			: null;
 	    })
 	    .filter(c -> c != null);
@@ -54,14 +58,12 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .distinct()
 	    .flatMap(k -> ban
 		.search(s -> s.koma == Koma.Empty)
-		.map(s -> Pair.of(s,
-		    new MasuState(PlayerType, k, s.x, s.y, false, s.rangedBy))))
-	    .map(sp -> {
+		.map(s -> Pair.of(k, s)))
+	    .map(ks -> {
 		var newBan = ban.clone();
-		var s = sp.getRight();
-		newBan.deploy(s);
-		return newBan.validateState(s) && newBan.isOuteBy(PlayerType, s)
-			? context.branch(newBan, s, sp.getLeft(), s.koma, PlayerType, false)
+		var s = newBan.deploy(ks.getLeft(), ks.getRight().x, ks.getRight().y, PlayerType);
+		return s != null && newBan.isOuteBy(PlayerType, s.x, s.y)
+			? context.branch(newBan, s, s.koma, PlayerType, false)
 			: null;
 	    })
 	    .filter(c -> c != null);
@@ -106,10 +108,10 @@ public class SelfProcessor extends PlayerProcessorBase {
 		    .filter(s -> !ArrayUtils.contains(decomposedOute, candidate.getVectorTo(s)))
 		    .map(s -> {
 			var newBan = ban.clone();
-			var k = newBan.advance(t.getLeft().getKey(), s);
+			var from = t.getLeft().getKey();
+			var k = newBan.advance(from.x, from.y, s.x, s.y);
 			return newBan.validateState(s)
-				? context.branch(newBan, s, t.getLeft().getKey(), k, PlayerType,
-				    true)
+				? context.branch(newBan, s, k, PlayerType, true)
 				: null;
 		    })
 		    .filter(c -> c != null);

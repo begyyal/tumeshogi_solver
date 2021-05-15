@@ -1,12 +1,17 @@
 package begyyal.shogi.object;
 
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.google.common.collect.Lists;
+
 import begyyal.commons.util.matrix.Vector;
-import begyyal.commons.util.object.SuperList;
+import begyyal.commons.util.object.PairList;
+import begyyal.commons.util.object.PairList.PairListGen;
 import begyyal.commons.util.object.SuperList.ImmutableSuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.shogi.def.Koma;
@@ -20,12 +25,10 @@ public class MasuState {
     public final int x;
     public final int y;
     public final boolean nariFlag;
-    // コストを嫌気して射程変更の都度MasuStateはnewせずrangedByを直接いじる。
-    // これがrecordにしなかった所以。
-    public final SuperList<MasuState> rangedBy;
+    public final PairList<Integer, Integer> rangedBy; // left=X,right=Y
 
     public MasuState(MasuState s) {
-	this(s.player, s.koma, s.x, s.y, s.nariFlag, s.rangedBy);
+	this(s.player, s.koma, s.x, s.y, s.nariFlag, PairListGen.of(s.rangedBy));
     }
 
     public MasuState(
@@ -34,14 +37,14 @@ public class MasuState {
 	int x,
 	int y,
 	boolean nariFlag,
-	SuperList<MasuState> rangedBy) {
+	PairList<Integer, Integer> rangedBy) {
 
 	this.player = player;
 	this.koma = koma;
 	this.x = x;
 	this.y = y;
 	this.nariFlag = nariFlag;
-	this.rangedBy = SuperListGen.of(rangedBy);
+	this.rangedBy = rangedBy;
     }
 
     public static final MasuState Invalid = new MasuState(
@@ -50,7 +53,7 @@ public class MasuState {
 	-1,
 	-1,
 	false,
-	SuperListGen.empty());
+	PairListGen.empty());
 
     public static final ConcurrentHashMap<Pair<Koma, Boolean>, ImmutableSuperList<Vector>> ReverseTerritoryCache = //
 	    new ConcurrentHashMap<Pair<Koma, Boolean>, ImmutableSuperList<Vector>>();
@@ -80,14 +83,7 @@ public class MasuState {
 	return s.x == this.x && s.y == this.y;
     }
 
-    public boolean isEqualWithoutRange(MasuState s) {
-	return this.isEqualXY(s)
-		&& this.koma == s.koma
-		&& this.player == s.player
-		&& this.nariFlag == s.nariFlag;
-    }
-
-    public static MasuState emptyOf(int suzi, int dan, SuperList<MasuState> rangedBy) {
+    public static MasuState emptyOf(int suzi, int dan, PairList<Integer, Integer> rangedBy) {
 	return new MasuState(
 	    Player.None,
 	    Koma.Empty,
@@ -116,19 +112,25 @@ public class MasuState {
 
 	boolean nari = value.length() > 2 && StringUtils.equals(value.substring(2, 3), "z");
 
-	return new MasuState(p, k, 9 - suzi, 9 - dan, nari, SuperListGen.newi());
+	return new MasuState(p, k, 9 - suzi, 9 - dan, nari, PairListGen.newi());
     }
 
-    // rangedByの循環比較を抑止するために上書きする。
-    // rangedByが含むMasuStateのrangedByは本質的には第三者的要素であるため、比較を無視しても差支えない。
     @Override
     public boolean equals(Object o) {
 	if (!(o instanceof MasuState))
 	    return false;
 	var casted = (MasuState) o;
-	return this.isEqualWithoutRange(casted)
-		&& this.rangedBy.size() == casted.rangedBy.size()
-		&& this.rangedBy.zip(casted.rangedBy)
-		    .allMatch(p -> p.getLeft().isEqualWithoutRange(p.getRight()));
+	boolean r = this.isEqualXY(casted)
+		&& this.koma == casted.koma
+		&& this.player == casted.player
+		&& this.nariFlag == casted.nariFlag;
+	if (r && this.rangedBy.size() == casted.rangedBy.size()) {
+	    var a = Lists.newArrayList(this.rangedBy);
+	    var b = Lists.newArrayList(casted.rangedBy);
+	    Collections.sort(a);
+	    Collections.sort(b);
+	    return CollectionUtils.isEqualCollection(a, b);
+	} else
+	    return false;
     }
 }

@@ -3,8 +3,6 @@ package begyyal.shogi.processor;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import begyyal.commons.util.matrix.MatrixResolver;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
@@ -28,15 +26,18 @@ public class OpponentProcessor extends PlayerProcessorBase {
 
 	// 王手範囲から避ける(王による王手駒の取得含む)
 	var cs1 = spreadMasuState(opponentOu, ban)
-	    .filter(s -> !s.rangedBy.anyMatch(s2 -> s2.player != PlayerType))
+	    .filter(s -> !s.rangedBy
+		.anyMatch(r -> ban.getState(r.getLeft(), r.getRight()).player != PlayerType))
 	    .map(s -> {
 		var newBan = ban.clone();
-		var k = newBan.advance(opponentOu, s);
-		return context.branch(newBan, s, opponentOu, k, PlayerType, true);
+		var k = newBan.advance(opponentOu.x, opponentOu.y, s.x, s.y);
+		var dest = newBan.getState(s.x, s.y);
+		return context.branch(newBan, dest, k, PlayerType, true);
 	    });
 
 	var outeArray = opponentOu.rangedBy
 	    .stream()
+	    .map(r -> ban.getState(r.getLeft(), r.getRight()))
 	    .filter(s -> s.player != PlayerType)
 	    .toArray(MasuState[]::new);
 	if (outeArray.length > 1)
@@ -46,14 +47,16 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	var outeState = outeArray[0];
 	var cs2 = outeState.rangedBy
 	    .stream()
-	    .filter(s -> s.player == PlayerType && s.koma != Koma.Ou)
-	    .map(s -> Pair.of(s, this.occupy(s, outeState)))
-	    .map(sp -> {
-		var to = sp.getRight();
+	    .filter(r -> {
+		var s = ban.getState(r.getLeft(), r.getRight());
+		return s.player == PlayerType && s.koma != Koma.Ou;
+	    })
+	    .map(r -> {
 		var newBan = ban.clone();
-		var k = newBan.advance(sp.getLeft(), to);
-		return newBan.validateState(to)
-			? context.branch(newBan, to, sp.getLeft(), k, PlayerType, true)
+		var k = newBan.advance(r.getLeft(), r.getRight(), outeState.x, outeState.y);
+		var dest = newBan.getState(outeState.x, outeState.y);
+		return newBan.validateState(dest)
+			? context.branch(newBan, dest, k, PlayerType, true)
 			: null;
 	    })
 	    .filter(c -> c != null);
@@ -72,8 +75,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 			    int x = opponentOu.x + v.x(), y = opponentOu.y + v.y();
 			    var s = newBan.deploy(k, x, y, PlayerType);
 			    return s == null ? null
-				    : context.branch(
-					newBan, s, ban.getState(x, y), k, PlayerType, false);
+				    : context.branch(newBan, s, k, PlayerType, false);
 			}))
 		    .filter(c -> c != null);
 
