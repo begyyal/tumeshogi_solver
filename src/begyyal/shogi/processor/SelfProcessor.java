@@ -78,16 +78,13 @@ public class SelfProcessor extends PlayerProcessorBase {
 	BanContext context,
 	PairList<MasuState, MasuState> moveSpread) {
 
-	var candidates = ban.search(s -> s.player == PlayerType &&
-		(s.koma == Koma.Kyousha && !s.nariFlag ||
-			s.koma == Koma.Hisha ||
-			s.koma == Koma.Kaku))
+	var candidates = ban.search(s -> s.player == PlayerType && MasuState.isLinearRange(s))
 	    .toArray(MasuState[]::new);
 	if (candidates.length == 0)
 	    return Stream.empty();
 
 	var opponentOu = ban
-	    .search(s -> s.player != PlayerType && s.koma == Koma.Ou)
+	    .search(s -> this.isOpponentOu(s))
 	    .findFirst().get();
 
 	return moveSpread.toMap()

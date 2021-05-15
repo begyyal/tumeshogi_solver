@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 
 import begyyal.commons.constant.Strs;
 import begyyal.commons.util.function.SuperStrings;
+import begyyal.commons.util.math.SuperMath;
 import begyyal.commons.util.matrix.MatrixResolver;
 import begyyal.commons.util.matrix.Vector;
 import begyyal.commons.util.object.PairList;
@@ -132,6 +133,23 @@ public class Ban implements Cloneable {
 
 	this.matrix[toX][toY] = newState;
 	markRangeBy(newState);
+
+	// 配置により遮断される線形射程
+	newState.rangedBy
+	    .stream()
+	    .map(p -> this.matrix[p.getLeft()][p.getRight()])
+	    .filter(s -> MasuState.isLinearRange(s))
+	    .forEach(s -> {
+		var v = s.getVectorTo(newState);
+		int mltX = SuperMath.simplify(v.x()), mltY = SuperMath.simplify(v.y());
+		int x = newState.x, y = newState.y;
+		while (validateCoordinate(x += mltX, y += mltY)) {
+		    var s2 = this.matrix[x][y];
+		    s2.rangedBy.removeIf(p -> p.getLeft() == s.x && p.getRight() == s.y);
+		    if (s2.koma != Koma.Empty)
+			break;
+		}
+	    });
 
 	return occupied.koma != Koma.Empty ? occupied.koma : null;
     }

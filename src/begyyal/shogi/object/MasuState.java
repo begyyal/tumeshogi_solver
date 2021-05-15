@@ -122,9 +122,15 @@ public class MasuState {
 	return new MasuState(p, k, 9 - suzi, 9 - dan, nari, PairListGen.newi());
     }
 
+    public static boolean isLinearRange(MasuState s) {
+	return s.koma == Koma.Kyousha && !s.nariFlag ||
+		s.koma == Koma.Hisha ||
+		s.koma == Koma.Kaku;
+    }
+
     @Override
     public boolean equals(Object o) {
-	
+
 	if (!(o instanceof MasuState))
 	    return false;
 	var casted = (MasuState) o;
