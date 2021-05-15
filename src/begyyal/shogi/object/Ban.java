@@ -62,8 +62,11 @@ public class Ban implements Cloneable {
 	    for (var miniV : MatrixResolver.decompose(v)) {
 		int vx = s.x + miniV.x();
 		int vy = s.y + miniV.y();
-		if (validateCoordinate(vx, vy))
-		    this.matrix[vx][vy].rangedBy.add(s.x, s.y);
+		if (!validateCoordinate(vx, vy))
+		    break;
+		this.matrix[vx][vy].rangedBy.add(s.x, s.y);
+		if (this.matrix[vx][vy].koma != Koma.Empty)
+		    break;
 	    }
     }
 
@@ -133,23 +136,7 @@ public class Ban implements Cloneable {
 
 	this.matrix[toX][toY] = newState;
 	markRangeBy(newState);
-
-	// 配置により遮断される線形射程
-	newState.rangedBy
-	    .stream()
-	    .map(p -> this.matrix[p.getLeft()][p.getRight()])
-	    .filter(s -> MasuState.isLinearRange(s))
-	    .forEach(s -> {
-		var v = s.getVectorTo(newState);
-		int mltX = SuperMath.simplify(v.x()), mltY = SuperMath.simplify(v.y());
-		int x = newState.x, y = newState.y;
-		while (validateCoordinate(x += mltX, y += mltY)) {
-		    var s2 = this.matrix[x][y];
-		    s2.rangedBy.removeIf(p -> p.getLeft() == s.x && p.getRight() == s.y);
-		    if (s2.koma != Koma.Empty)
-			break;
-		}
-	    });
+	cutoffRangeBy(newState);
 
 	return occupied.koma != Koma.Empty ? occupied.koma : null;
     }
@@ -162,7 +149,30 @@ public class Ban implements Cloneable {
 
 	this.matrix[state.x][state.y] = state;
 	markRangeBy(state);
+	cutoffRangeBy(state);
+
 	return state;
+    }
+
+    private void cutoffRangeBy(MasuState newState) {
+
+	newState.rangedBy
+	    .stream()
+	    .map(p -> this.matrix[p.getLeft()][p.getRight()])
+	    .filter(s -> MasuState.isLinearRange(s))
+	    .forEach(s -> {
+
+		var v = s.getVectorTo(newState);
+		int mltX = SuperMath.simplify(v.x()), mltY = SuperMath.simplify(v.y());
+		int x = newState.x, y = newState.y;
+
+		while (validateCoordinate(x += mltX, y += mltY)) {
+		    var s2 = this.matrix[x][y];
+		    s2.rangedBy.removeIf(p -> p.getLeft() == s.x && p.getRight() == s.y);
+		    if (s2.koma != Koma.Empty)
+			break;
+		}
+	    });
     }
 
     /**
