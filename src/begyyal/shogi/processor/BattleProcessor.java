@@ -5,6 +5,7 @@ import java.util.List;
 
 import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
+import begyyal.shogi.def.Koma;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
 import begyyal.shogi.object.MasuState;
@@ -86,9 +87,9 @@ public class BattleProcessor {
 	return from.serializeMatrix()
 		.zip(to.serializeMatrix())
 		.stream()
-		.filter(p -> !p.getLeft().equals(p.getRight()))
+		.filter(p -> !p.getLeft().isEqualWithoutRange(p.getRight()))
 		.map(p -> p.getRight())
-		.filter(s -> s != null)
+		.filter(s -> s.koma != Koma.Empty)
 		.findFirst()
 		.get();
     }

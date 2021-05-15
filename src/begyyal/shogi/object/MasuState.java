@@ -83,6 +83,13 @@ public class MasuState {
 	return s.x == this.x && s.y == this.y;
     }
 
+    public boolean isEqualWithoutRange(MasuState s) {
+	return this.isEqualXY(s)
+		&& this.koma == s.koma
+		&& this.player == s.player
+		&& this.nariFlag == s.nariFlag;
+    }
+
     public static MasuState emptyOf(int suzi, int dan, PairList<Integer, Integer> rangedBy) {
 	return new MasuState(
 	    Player.None,
@@ -117,14 +124,12 @@ public class MasuState {
 
     @Override
     public boolean equals(Object o) {
+	
 	if (!(o instanceof MasuState))
 	    return false;
 	var casted = (MasuState) o;
-	boolean r = this.isEqualXY(casted)
-		&& this.koma == casted.koma
-		&& this.player == casted.player
-		&& this.nariFlag == casted.nariFlag;
-	if (r && this.rangedBy.size() == casted.rangedBy.size()) {
+
+	if (this.isEqualWithoutRange(casted) && this.rangedBy.size() == casted.rangedBy.size()) {
 	    var a = Lists.newArrayList(this.rangedBy);
 	    var b = Lists.newArrayList(casted.rangedBy);
 	    Collections.sort(a);
