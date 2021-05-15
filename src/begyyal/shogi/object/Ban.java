@@ -113,9 +113,10 @@ public class Ban implements Cloneable {
      * @param fromY
      * @param toX
      * @param toY
+     * @param tryNari
      * @return 取得した駒。無ければnull
      */
-    public Koma advance(int fromX, int fromY, int toX, int toY) {
+    public Koma advance(int fromX, int fromY, int toX, int toY, boolean tryNari) {
 
 	var from = this.matrix[fromX][fromY];
 	var to = this.matrix[toX][toY];
@@ -143,11 +144,11 @@ public class Ban implements Cloneable {
 
     public MasuState deploy(Koma k, int x, int y, Player p) {
 
+	if (!validateState(k, x, y, p) || k == Koma.Hu && !checkNihu(p, x))
+	    return MasuState.Invalid;
 	var state = new MasuState(p, k, x, y, false, this.matrix[x][y].rangedBy);
-	if (!validateState(state))
-	    return null;
 
-	this.matrix[state.x][state.y] = state;
+	this.matrix[x][y] = state;
 	markRangeBy(state);
 	cutoffRangeBy(state);
 
@@ -176,32 +177,25 @@ public class Ban implements Cloneable {
     }
 
     /**
-     * 主体のマトリクスに対して対象のステートを当てはめた際の特殊ルールの検査を行う。
+     * 対象の座標に対象の駒の配置が可能か検証を行う。(2歩を除く静的なもの)
      * 
-     * @param state
+     * @param koma
+     * @param x
+     * @param y
      * @return 違反しなければtrue
      */
-    public boolean validateState(MasuState state) {
+    public static boolean validateState(Koma koma, int x, int y, Player p) {
+	int end = p == Player.Self ? 8 : 0;
+	return (koma != Koma.Hu && koma != Koma.Kyousha || y != end)
+		&& (koma != Koma.Keima || p == Player.Self ? y < 7 : y > 1);
+    }
 
-	if (state.koma == Koma.Hu) {
-	    if (state.y == 1)
-		return false;
-	    if (search(s -> s.x == state.x
-		    && s.koma == Koma.Hu
-		    && s.player == state.player)
-			.findAny().isPresent())
-		return false;
-
-	} else if (state.koma == Koma.Kyousha) {
-	    if (state.y == 1)
-		return false;
-
-	} else if (state.koma == Koma.Keima) {
-	    if (state.y < 3)
-		return false;
-	}
-
-	return true;
+    public boolean checkNihu(Player player, int x) {
+	return search(s -> s.x == x
+		&& s.koma == Koma.Hu
+		&& !s.nariFlag
+		&& s.player == player)
+		    .findAny().isEmpty();
     }
 
     private void emptyMasu(int x, int y) {

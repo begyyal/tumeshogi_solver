@@ -4,8 +4,10 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 import begyyal.commons.util.matrix.MatrixResolver;
+import begyyal.commons.util.object.SuperBool;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
+import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
 import begyyal.shogi.object.MasuState;
 
@@ -23,14 +25,14 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	var opponentOu = ban
 	    .search(s -> this.isOpponentOu(s))
 	    .findFirst().get();
-	
+
 	// 王手範囲から避ける(王による王手駒の取得含む)
 	var cs1 = spreadMasuState(opponentOu, ban)
 	    .filter(s -> !s.rangedBy
 		.anyMatch(r -> ban.getState(r.getLeft(), r.getRight()).player != PlayerType))
 	    .map(s -> {
 		var newBan = ban.clone();
-		var k = newBan.advance(opponentOu.x, opponentOu.y, s.x, s.y);
+		var k = newBan.advance(opponentOu.x, opponentOu.y, s.x, s.y, false);
 		var dest = newBan.getState(s.x, s.y);
 		return context.branch(newBan, dest, k, PlayerType, true);
 	    });
@@ -51,15 +53,20 @@ public class OpponentProcessor extends PlayerProcessorBase {
 		var s = ban.getState(r.getLeft(), r.getRight());
 		return s.player == PlayerType && s.koma != Koma.Ou;
 	    })
-	    .map(r -> {
-		var newBan = ban.clone();
-		var k = newBan.advance(r.getLeft(), r.getRight(), outeState.x, outeState.y);
-		var dest = newBan.getState(outeState.x, outeState.y);
-		return newBan.validateState(dest)
-			? context.branch(newBan, dest, k, PlayerType, true)
-			: null;
-	    })
-	    .filter(c -> c != null);
+	    .map(r -> ban.getState(r.getLeft(), r.getRight()))
+	    .flatMap(from -> {
+		var tryNari = SuperBool.newi();
+		return createBranchStream(outeState.y, from.koma)
+		    .filter(i -> tryNari.get()
+			    || Ban.validateState(from.koma, outeState.x, outeState.y, PlayerType))
+		    .mapToObj(i -> {
+			var newBan = ban.clone();
+			var k = newBan.advance(
+			    from.x, from.y, outeState.x, outeState.y, tryNari.getAndReverse());
+			var dest = newBan.getState(outeState.x, outeState.y);
+			return context.branch(newBan, dest, k, PlayerType, true);
+		    });
+	    });
 
 	// 持ち駒を貼る
 	var outeVector = opponentOu.getVectorTo(outeState);
@@ -74,7 +81,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 			    var newBan = ban.clone();
 			    int x = opponentOu.x + v.x(), y = opponentOu.y + v.y();
 			    var s = newBan.deploy(k, x, y, PlayerType);
-			    return s == null ? null
+			    return s == MasuState.Invalid ? null
 				    : context.branch(newBan, s, k, PlayerType, false);
 			}))
 		    .filter(c -> c != null);

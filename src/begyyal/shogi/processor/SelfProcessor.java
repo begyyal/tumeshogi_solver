@@ -11,6 +11,7 @@ import begyyal.commons.util.matrix.MatrixResolver;
 import begyyal.commons.util.matrix.Vector;
 import begyyal.commons.util.object.PairList;
 import begyyal.commons.util.object.PairList.PairListGen;
+import begyyal.commons.util.object.SuperBool;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
@@ -35,14 +36,21 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .flatMap(s -> spreadMasuState(s, ban).map(dest -> Pair.of(s, dest)))
 	    .collect(PairListGen.collect());
 	var cs1 = moveSpread.stream()
-	    .map(sp -> {
+	    .flatMap(sp -> {
+		var tryNari = SuperBool.newi();
 		var dest = sp.getRight();
-		var newBan = ban.clone();
-		var k = newBan.advance(sp.getLeft().x, sp.getLeft().y, dest.x, dest.y);
-		var newDest = newBan.getState(dest.x, dest.y);
-		return newBan.validateState(newDest) && newBan.isOuteBy(PlayerType, dest.x, dest.y)
-			? context.branch(newBan, newDest, k, PlayerType, true)
-			: null;
+		return createBranchStream(dest.y, sp.getLeft().koma)
+		    .filter(i -> tryNari.get() ||
+			    Ban.validateState(sp.getLeft().koma, dest.x, dest.y, PlayerType))
+		    .mapToObj(i -> {
+			var newBan = ban.clone();
+			var k = newBan.advance(sp.getLeft().x, sp.getLeft().y, dest.x, dest.y,
+			    tryNari.getAndReverse());
+			var newDest = newBan.getState(dest.x, dest.y);
+			return newBan.isOuteBy(PlayerType, dest.x, dest.y)
+				? context.branch(newBan, newDest, k, PlayerType, true)
+				: null;
+		    });
 	    })
 	    .filter(c -> c != null);
 
@@ -59,7 +67,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .map(ks -> {
 		var newBan = ban.clone();
 		var s = newBan.deploy(ks.getLeft(), ks.getRight().x, ks.getRight().y, PlayerType);
-		return s != null && newBan.isOuteBy(PlayerType, s.x, s.y)
+		return s != MasuState.Invalid && newBan.isOuteBy(PlayerType, s.x, s.y)
 			? context.branch(newBan, s, s.koma, PlayerType, false)
 			: null;
 	    })
@@ -84,6 +92,8 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .search(s -> this.isOpponentOu(s))
 	    .findFirst().get();
 
+	// TODO candidateに対する王手筋のフィルタリングが無い。
+	// TODO rangedByの利用を考慮する。
 	return moveSpread.toMap()
 	    .entrySet()
 	    .stream()
@@ -100,15 +110,18 @@ public class SelfProcessor extends PlayerProcessorBase {
 		return t.getLeft().getValue()
 		    .stream()
 		    .filter(s -> !ArrayUtils.contains(decomposedOute, candidate.getVectorTo(s)))
-		    .map(s -> {
-			var newBan = ban.clone();
+		    .flatMap(to -> {
+			var tryNari = SuperBool.newi();
 			var from = t.getLeft().getKey();
-			var k = newBan.advance(from.x, from.y, s.x, s.y);
-			return newBan.validateState(s)
-				? context.branch(newBan, s, k, PlayerType, true)
-				: null;
-		    })
-		    .filter(c -> c != null);
+			return createBranchStream(to.y, from.koma)
+			    .mapToObj(i -> {
+				var newBan = ban.clone();
+				var k = newBan.advance(
+				    from.x, from.y, to.x, to.y, tryNari.getAndReverse());
+				return context.branch(
+				    newBan, newBan.getState(to.x, to.y), k, PlayerType, true);
+			    });
+		    });
 	    });
     }
 
@@ -134,7 +147,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 
 	int i = 0;
 	MasuState obstruction = null;
-	for (var miniV : MatrixResolver.decompose(v)) {
+	for (var miniV : decomposed) {
 
 	    var result = ban.exploration(state, miniV);
 
