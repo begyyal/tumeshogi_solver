@@ -4,17 +4,15 @@ import begyyal.shogi.processor.BattleProcessor;
 
 public class Entrypoint {
 
-    /**
-     * 第1引数/持ち駒 -> x + 駒種別 + 枚数 ... + y + 駒種別 + 枚数 <br>
-     * 第2引数/盤面 -> 座標 + 自/相 + 駒種別 ( +成りフラグ )
-     * 
-     * @param args 引数
-     */
     public static void main(String args[]) {
 
 	try {
+
+	    if (args.length < 1)
+		throw new IllegalArgumentException("Arguments lack.");
+
 	    for (String str : BattleProcessor
-		.of(args[0], args[1])
+		.of(args[0], args.length > 1 ? args[1] : null)
 		.calculate())
 		System.out.println(str);
 

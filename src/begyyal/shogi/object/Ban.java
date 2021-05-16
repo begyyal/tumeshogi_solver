@@ -15,13 +15,19 @@ import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
+import begyyal.shogi.exception.BanIllegalArgException;
 
 public class Ban implements Cloneable {
+
+    private static final String banArgRegex = "([1-9][1-9][xy][a-h][z]?)+";
 
     // インデックスの振り順は将棋盤の読み方に倣わない。x/y座標で見る。
     private MasuState[][] matrix;
 
     private Ban(String arg) {
+
+	if (!arg.matches(banArgRegex))
+	    throw new BanIllegalArgException();
 
 	this.matrix = new MasuState[9][9];
 

@@ -14,7 +14,7 @@ public class BattleProcessor {
 
     private final SuperList<BanContext> contexts;
 
-    private BattleProcessor(String motigomaStr, String banStr) {
+    private BattleProcessor(String banStr, String motigomaStr) {
 	this.contexts = SuperListGen.of(BanContext.newi(banStr, motigomaStr));
     }
 
@@ -36,8 +36,8 @@ public class BattleProcessor {
 		    break;
 	} while (result == null);
 
-	return result == null 
-		? new String[] { "詰めませんでした。" } 
+	return result == null
+		? new String[] { "詰めませんでした。" }
 		: this.summarize(result.log);
     }
 
@@ -62,7 +62,7 @@ public class BattleProcessor {
 	var branches = OpponentProcessor.newi().spread(acon);
 	if (branches == null || branches.length == 0)
 	    return acon;
-	
+
 	this.contexts.addAll(branches);
 	return null;
     }
@@ -79,19 +79,19 @@ public class BattleProcessor {
 	}
 
 	return tejun.stream()
-		.map(s -> writeItte(s))
-		.toArray(String[]::new);
+	    .map(s -> writeItte(s))
+	    .toArray(String[]::new);
     }
 
     private MasuState parseBanDiff(Ban from, Ban to) {
 	return from.serializeMatrix()
-		.zip(to.serializeMatrix())
-		.stream()
-		.filter(p -> !p.getLeft().isEqualWithoutRange(p.getRight()))
-		.map(p -> p.getRight())
-		.filter(s -> s.koma != Koma.Empty)
-		.findFirst()
-		.get();
+	    .zip(to.serializeMatrix())
+	    .stream()
+	    .filter(p -> !p.getLeft().isEqualWithoutRange(p.getRight()))
+	    .map(p -> p.getRight())
+	    .filter(s -> s.koma != Koma.Empty)
+	    .findFirst()
+	    .get();
     }
 
     private String writeItte(MasuState state) {
@@ -101,12 +101,12 @@ public class BattleProcessor {
 	sb.append(state.getSuzi());
 	sb.append(state.getDan());
 	sb.append(state.koma);
-	if(state.nariFlag)
+	if (state.nariFlag)
 	    sb.append("Nari");
 	return sb.toString();
     }
-    
-    public static BattleProcessor of(String motigomaStr, String banStr) {
-	return new BattleProcessor(motigomaStr, banStr);
+
+    public static BattleProcessor of(String banStr, String motigomaStr) {
+	return new BattleProcessor(banStr, motigomaStr);
     }
 }
