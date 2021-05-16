@@ -4,14 +4,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
 import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
+import begyyal.commons.util.object.SuperMap.SuperMapGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
-import begyyal.shogi.exception.MotigomaIllegalArgException;
 
 public class BanContext {
 
@@ -31,10 +32,12 @@ public class BanContext {
     public final int beforeId;
 
     private BanContext(String banStr, String motigomaStr) {
+	var ban = Ban.of(banStr);
 	this.log = SuperListGen.of(Ban.of(banStr));
 	this.selfMotigoma = parseMotigoma(Player.Self, motigomaStr);
 	this.opponentMotigoma = parseMotigoma(Player.Opponent, motigomaStr);
 	this.beforeId = -1;
+	validateCondition(ban);
     }
 
     private BanContext(
@@ -46,6 +49,17 @@ public class BanContext {
 	this.selfMotigoma = selfMotigoma;
 	this.opponentMotigoma = opponentMotigoma;
 	this.beforeId = beforeId;
+    }
+
+    private void validateCondition(Ban ban) {
+	if (Stream.concat(ban.serializeMatrix().stream().map(s -> s.koma),
+	    Stream.concat(this.selfMotigoma.stream(), this.opponentMotigoma.stream()))
+	    .filter(k -> k != Koma.Empty)
+	    .collect(SuperMapGen.collect(k -> k, k -> 1, (v1, v2) -> v1 + v2))
+	    .entrySet()
+	    .stream()
+	    .anyMatch(e -> e.getKey().numLimit < e.getValue()))
+	    throw new IllegalArgumentException("There are koma that exceeeds number limit.");
     }
 
     public Ban getLatestBan() {
@@ -94,7 +108,7 @@ public class BanContext {
 	    return motigoma;
 
 	if (!arg.matches(motigomaArgRegex))
-	    throw new MotigomaIllegalArgException();
+	    throw new IllegalArgumentException("Motigoma argument format is invalid.");
 
 	int xIndex = arg.indexOf(Player.Self.id);
 	int yIndex = arg.indexOf(Player.Opponent.id);

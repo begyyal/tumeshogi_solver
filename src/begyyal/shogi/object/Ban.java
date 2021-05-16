@@ -15,11 +15,10 @@ import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
-import begyyal.shogi.exception.BanIllegalArgException;
 
 public class Ban implements Cloneable {
 
-    private static final String banArgRegex = "([1-9][1-9][xy][a-h][z]?)+";
+    private static final String banArgRegex = "([1-9][1-9][xy][a-dfg][z]?|[1-9][1-9][xy][eh])+";
 
     // インデックスの振り順は将棋盤の読み方に倣わない。x/y座標で見る。
     private MasuState[][] matrix;
@@ -27,7 +26,7 @@ public class Ban implements Cloneable {
     private Ban(String arg) {
 
 	if (!arg.matches(banArgRegex))
-	    throw new BanIllegalArgException();
+	    throw new IllegalArgumentException("Ban argument format is invalid.");
 
 	this.matrix = new MasuState[9][9];
 
@@ -53,10 +52,34 @@ public class Ban implements Cloneable {
 	for (int x = 0; x < 9; x++)
 	    for (int y = 0; y < 9; y++)
 		markRangeBy(this.matrix[x][y]);
+
+	validateCondition();
     }
 
     private Ban(MasuState[][] matrix) {
 	this.matrix = matrix;
+    }
+
+    private void validateCondition() {
+
+	boolean existOu = false;
+	for (int x = 0; x < 9; x++) {
+	    int huCountX = 0, huCountY = 0;
+	    for (int y = 0; y < 9; y++) {
+		var state = this.matrix[x][y];
+		if (state.koma == Koma.Empty)
+		    continue;
+		existOu = existOu || state.koma == Koma.Ou && state.player == Player.Opponent;
+		if (state.koma == Koma.Hu && !state.nariFlag
+			&& (state.player == Player.Self ? ++huCountX == 2 : ++huCountY == 2))
+		    throw new IllegalArgumentException("It's 2hu.");
+		if (!state.nariFlag && !validateState(state.koma, x, y, state.player))
+		    throw new IllegalArgumentException("There is invalid arrangement.");
+	    }
+	}
+
+	if (!existOu)
+	    throw new IllegalArgumentException("There must be the koma [Ou] in y's arguments.");
     }
 
     public MasuState getState(int x, int y) {
@@ -193,7 +216,7 @@ public class Ban implements Cloneable {
     public static boolean validateState(Koma koma, int x, int y, Player p) {
 	int end = p == Player.Self ? 8 : 0;
 	return (koma != Koma.Hu && koma != Koma.Kyousha || y != end)
-		&& (koma != Koma.Keima || p == Player.Self ? y < 7 : y > 1);
+		&& (koma != Koma.Keima || (p == Player.Self ? y < 7 : y > 1));
     }
 
     public boolean checkNihu(Player player, int x) {
