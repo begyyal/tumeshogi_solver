@@ -49,11 +49,8 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	var outeState = outeArray[0];
 	var cs2 = outeState.rangedBy
 	    .stream()
-	    .filter(r -> {
-		var s = ban.getState(r.getLeft(), r.getRight());
-		return s.player == PlayerType && s.koma != Koma.Ou;
-	    })
 	    .map(r -> ban.getState(r.getLeft(), r.getRight()))
+	    .filter(s -> s.player == PlayerType && s.koma != Koma.Ou)
 	    .flatMap(from -> {
 		var tryNari = SuperBool.newi();
 		return createBranchStream(outeState.y, from.koma)

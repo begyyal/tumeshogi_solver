@@ -90,16 +90,25 @@ public class Ban implements Cloneable {
     }
 
     public void markRangeBy(MasuState s) {
+	boolean haveLinearRange = MasuState.isLinearRange(s);
 	for (var v : s.getTerritory())
-	    for (var miniV : MatrixResolver.decompose(v)) {
-		int vx = s.x + miniV.x();
-		int vy = s.y + miniV.y();
-		if (!validateCoordinate(vx, vy))
-		    break;
-		this.matrix[vx][vy].rangedBy.add(s.x, s.y);
-		if (this.matrix[vx][vy].koma != Koma.Empty)
-		    break;
-	    }
+	    if (haveLinearRange) {
+		for (var miniV : MatrixResolver.decompose(v))
+		    if (!markRange(miniV, s.x, s.y))
+			break;
+	    } else
+		markRange(v, s.x, s.y);
+    }
+
+    private boolean markRange(Vector v, int x, int y) {
+	int vx = x + v.x();
+	int vy = y + v.y();
+	if (!validateCoordinate(vx, vy))
+	    return false;
+	this.matrix[vx][vy].rangedBy.add(x, y);
+	if (this.matrix[vx][vy].koma != Koma.Empty)
+	    return false;
+	return true;
     }
 
     public void unmarkRangeBy(int targetX, int targetY) {
