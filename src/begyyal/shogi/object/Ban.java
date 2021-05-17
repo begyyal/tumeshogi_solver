@@ -41,6 +41,9 @@ public class Ban implements Cloneable {
 
 	    int x = Integer.valueOf(masu.substring(0, 1));
 	    int y = Integer.valueOf(masu.substring(1, 2));
+	    if (this.matrix[9 - x][9 - y] != null)
+		throw new IllegalArgumentException(
+		    "The masu states of [" + x + "-" + y + "] are duplicated.");
 	    this.matrix[9 - x][9 - y] = MasuState.of(masu.substring(2), x, y);
 	}
 
