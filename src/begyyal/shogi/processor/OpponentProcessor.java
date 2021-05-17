@@ -9,6 +9,7 @@ import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
+import begyyal.shogi.object.BanContext.BranchParam;
 import begyyal.shogi.object.MasuState;
 
 public class OpponentProcessor extends PlayerProcessorBase {
@@ -34,8 +35,15 @@ public class OpponentProcessor extends PlayerProcessorBase {
 		var newBan = ban.clone();
 		var k = newBan.advance(opponentOu.x, opponentOu.y, s.x, s.y, false);
 		var dest = newBan.getState(s.x, s.y);
-		return context.branch(newBan, dest, k, PlayerType, true);
-	    });
+		return new BranchParam(newBan, dest, k, PlayerType, true);
+	    })
+	    .filter(bp -> bp.latestState().rangedBy
+		.stream()
+		.map(r -> bp.latestBan().getState(r.getLeft(), r.getRight()))
+		.filter(s -> s.player != PlayerType)
+		.findFirst()
+		.isEmpty())
+	    .map(bp -> context.branch(bp));
 
 	var outeArray = opponentOu.rangedBy
 	    .stream()
@@ -61,9 +69,18 @@ public class OpponentProcessor extends PlayerProcessorBase {
 			var k = newBan.advance(
 			    from.x, from.y, outeState.x, outeState.y, tryNari.getAndReverse());
 			var dest = newBan.getState(outeState.x, outeState.y);
-			return context.branch(newBan, dest, k, PlayerType, true);
+			return new BranchParam(newBan, dest, k, PlayerType, true);
 		    });
-	    });
+	    })
+	    .filter(bp -> bp.latestBan().search(s -> this.isOpponentOu(s))
+		.findFirst()
+		.get().rangedBy
+		    .stream()
+		    .map(r -> bp.latestBan().getState(r.getLeft(), r.getRight()))
+		    .filter(s -> s.player != PlayerType)
+		    .findFirst()
+		    .isEmpty())
+	    .map(bp -> context.branch(bp));
 
 	// 持ち駒を貼る
 	var outeVector = opponentOu.getVectorTo(outeState);
@@ -79,13 +96,12 @@ public class OpponentProcessor extends PlayerProcessorBase {
 			    int x = opponentOu.x + v.x(), y = opponentOu.y + v.y();
 			    var s = newBan.deploy(k, x, y, PlayerType);
 			    return s == MasuState.Invalid ? null
-				    : context.branch(newBan, s, k, PlayerType, false);
+				    : new BranchParam(newBan, s, k, PlayerType, false);
 			}))
-		    .filter(c -> c != null);
+		    .filter(bp -> bp != null)
+		    .map(bp -> context.branch(bp));
 
-	// selfに同じく駒移動系は重複し得るのでdistinctする
-	return Stream.concat(Stream.concat(cs1, cs2).distinct(), cs3)
-	    .toArray(BanContext[]::new);
+	return Stream.concat(Stream.concat(cs1, cs2), cs3).toArray(BanContext[]::new);
     }
 
     @Override

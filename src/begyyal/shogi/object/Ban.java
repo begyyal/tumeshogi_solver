@@ -6,7 +6,6 @@ import java.util.stream.Stream;
 
 import begyyal.commons.constant.Strs;
 import begyyal.commons.util.function.SuperStrings;
-import begyyal.commons.util.math.SuperMath;
 import begyyal.commons.util.matrix.MatrixResolver;
 import begyyal.commons.util.matrix.Vector;
 import begyyal.commons.util.object.PairList;
@@ -52,10 +51,7 @@ public class Ban implements Cloneable {
 		if (this.matrix[x][y] == null)
 		    emptyMasu(x, y, PairListGen.newi());
 
-	for (int x = 0; x < 9; x++)
-	    for (int y = 0; y < 9; y++)
-		markRangeBy(this.matrix[x][y]);
-
+	markRangeAll();
 	validateCondition();
     }
 
@@ -87,6 +83,19 @@ public class Ban implements Cloneable {
 
     public MasuState getState(int x, int y) {
 	return this.matrix[x][y];
+    }
+
+    private void refreshRange() {
+	for (int x = 0; x < 9; x++)
+	    for (int y = 0; y < 9; y++)
+		this.matrix[x][y].rangedBy.clear();
+	markRangeAll();
+    }
+
+    private void markRangeAll() {
+	for (int x = 0; x < 9; x++)
+	    for (int y = 0; y < 9; y++)
+		markRangeBy(this.matrix[x][y]);
     }
 
     public void markRangeBy(MasuState s) {
@@ -162,10 +171,7 @@ public class Ban implements Cloneable {
 	var from = this.matrix[fromX][fromY];
 	var to = this.matrix[toX][toY];
 
-	if (to.koma != Koma.Empty)
-	    unmarkRangeBy(toX, toY);
 	emptyMasu(fromX, fromY);
-	unmarkRangeBy(fromX, fromY);
 
 	var newState = new MasuState(
 	    from.player,
@@ -175,11 +181,9 @@ public class Ban implements Cloneable {
 	    from.nariFlag || to.y <= 3,
 	    to.rangedBy);
 	var occupied = this.matrix[to.x][to.y];
-
 	this.matrix[toX][toY] = newState;
-	markRangeBy(newState);
-	cutoffRangeBy(newState);
 
+	refreshRange();
 	return occupied.koma != Koma.Empty ? occupied.koma : null;
     }
 
@@ -187,34 +191,12 @@ public class Ban implements Cloneable {
 
 	if (!validateState(k, x, y, p) || k == Koma.Hu && !checkNihu(p, x))
 	    return MasuState.Invalid;
+
 	var state = new MasuState(p, k, x, y, false, this.matrix[x][y].rangedBy);
-
 	this.matrix[x][y] = state;
-	markRangeBy(state);
-	cutoffRangeBy(state);
 
+	refreshRange();
 	return state;
-    }
-
-    private void cutoffRangeBy(MasuState newState) {
-
-	newState.rangedBy
-	    .stream()
-	    .map(p -> this.matrix[p.getLeft()][p.getRight()])
-	    .filter(s -> MasuState.isLinearRange(s))
-	    .forEach(s -> {
-
-		var v = s.getVectorTo(newState);
-		int mltX = SuperMath.simplify(v.x()), mltY = SuperMath.simplify(v.y());
-		int x = newState.x, y = newState.y;
-
-		while (validateCoordinate(x += mltX, y += mltY)) {
-		    var s2 = this.matrix[x][y];
-		    s2.rangedBy.removeIf(p -> p.getLeft() == s.x && p.getRight() == s.y);
-		    if (s2.koma != Koma.Empty)
-			break;
-		}
-	    });
     }
 
     /**
