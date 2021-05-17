@@ -52,14 +52,17 @@ public class BanContext {
     }
 
     private void validateCondition(Ban ban) {
-	if (Stream.concat(ban.serializeMatrix().stream().map(s -> s.koma),
+	var tooMany = Stream.concat(ban.serializeMatrix().stream().map(s -> s.koma),
 	    Stream.concat(this.selfMotigoma.stream(), this.opponentMotigoma.stream()))
 	    .filter(k -> k != Koma.Empty)
 	    .collect(SuperMapGen.collect(k -> k, k -> 1, (v1, v2) -> v1 + v2))
 	    .entrySet()
 	    .stream()
-	    .anyMatch(e -> e.getKey().numLimit < e.getValue()))
-	    throw new IllegalArgumentException("There are koma that exceeeds number limit.");
+	    .filter(e -> e.getKey().numLimit < e.getValue())
+	    .findFirst()
+	    .orElse(null);
+	if (tooMany != null)
+	    throw new IllegalArgumentException("The koma [" + tooMany + "] exceeeds number limit.");
     }
 
     public Ban getLatestBan() {
