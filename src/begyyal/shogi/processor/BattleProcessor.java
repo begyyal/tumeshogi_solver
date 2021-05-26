@@ -1,11 +1,16 @@
 package begyyal.shogi.processor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import org.apache.commons.lang3.math.NumberUtils;
 
 import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
+import begyyal.commons.util.object.SuperMap.SuperMapGen;
 import begyyal.shogi.def.Koma;
+import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
 import begyyal.shogi.object.MasuState;
@@ -13,8 +18,13 @@ import begyyal.shogi.object.MasuState;
 public class BattleProcessor {
 
     private final SuperList<BanContext> contexts;
+    private final int numOfMoves;
 
-    private BattleProcessor(String banStr, String motigomaStr) {
+    private BattleProcessor(String numStr, String banStr, String motigomaStr) {
+	if (!NumberUtils.isParsable(numStr))
+	    throw new IllegalArgumentException(
+		"The argument of number of moves must be number format.");
+	this.numOfMoves = Integer.parseInt(numStr);
 	this.contexts = SuperListGen.of(BanContext.newi(banStr, motigomaStr));
     }
 
@@ -25,20 +35,30 @@ public class BattleProcessor {
      */
     public String[] calculate() {
 
-	BanContext result = null;
+	var results = SuperListGen.<BanContext>newi();
 	do {
 	    for (BanContext acon : this.shallowCopyContexts())
 		processSelf(acon);
 	    if (this.contexts.isEmpty())
 		break;
 	    for (BanContext acon : this.shallowCopyContexts())
-		if ((result = processOpponent(acon)) != null)
-		    break;
-	} while (result == null);
+		processOpponent(acon, results);
+	} while (!this.contexts.isEmpty() && this.contexts.getTip().log.size() - 1 < numOfMoves);
 
-	return result == null
-		? new String[] { "詰めませんでした。" }
-		: this.summarize(result.log);
+	if (results.isEmpty())
+	    return new String[] { "詰めませんでした。" };
+
+	var result = results.stream().collect(SuperMapGen.collect(
+	    c -> c.log.size(),
+	    c -> c,
+	    (c1, c2) -> c1.grading() < c2.grading() ? c2 : c1))
+	    .entrySet()
+	    .stream()
+	    .sorted((e1, e2) -> e1.getKey() - e2.getKey())
+	    .findFirst().get()
+	    .getValue();
+
+	return this.summarize(result.log);
     }
 
     @SuppressWarnings("unchecked")
@@ -48,9 +68,6 @@ public class BattleProcessor {
 
     private void processSelf(BanContext acon) {
 
-	if(acon.id == 20)
-	    System.out.println();
-	
 	this.contexts.removeIf(c -> c.id == acon.id);
 
 	var branches = SelfProcessor.newi().spread(acon);
@@ -58,16 +75,20 @@ public class BattleProcessor {
 	    this.contexts.addAll(branches);
     }
 
-    private BanContext processOpponent(BanContext acon) {
+    private void processOpponent(BanContext acon, SuperList<BanContext> results) {
 
 	this.contexts.removeIf(c -> c.id == acon.id);
 
 	var branches = OpponentProcessor.newi().spread(acon);
 	if (branches == null || branches.length == 0)
-	    return acon;
+	    results.add(acon);
 
-	this.contexts.addAll(branches);
-	return null;
+	Arrays.stream(branches)
+	    .filter(c -> {
+		long selfBanCount = c.getLatestBan().search(s -> s.player == Player.Self).count();
+		return selfBanCount > 0 && selfBanCount + c.selfMotigoma.size() > 1;
+	    })
+	    .forEach(this.contexts::add);
     }
 
     private String[] summarize(List<Ban> bans) {
@@ -109,7 +130,7 @@ public class BattleProcessor {
 	return sb.toString();
     }
 
-    public static BattleProcessor of(String banStr, String motigomaStr) {
-	return new BattleProcessor(banStr, motigomaStr);
+    public static BattleProcessor of(String numStr, String banStr, String motigomaStr) {
+	return new BattleProcessor(numStr, banStr, motigomaStr);
     }
 }

@@ -169,6 +169,12 @@ public class BanContext {
 	return new BanContext(banStr, motigomaStr);
     }
 
+    public int grading() {
+
+	// TODO
+	return 0;
+    }
+
     // TODO
     @SuppressWarnings("preview")
     public record BranchParam(
