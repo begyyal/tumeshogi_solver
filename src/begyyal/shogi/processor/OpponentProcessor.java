@@ -84,7 +84,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 
 	// 持ち駒を貼る
 	var outeVector = opponentOu.getVectorTo(outeState);
-	boolean outeIsNotLinear = Math.abs(outeVector.x()) < 2 && Math.abs(outeVector.y()) < 2;
+	boolean outeIsNotLinear = Math.abs(outeVector.x()) == 1 || Math.abs(outeVector.y()) == 1;
 	var cs3 = context.opponentMotigoma.isEmpty() || outeIsNotLinear
 		? Stream.empty()
 		: Arrays.stream(MatrixResolver.decompose(outeVector))
