@@ -51,7 +51,7 @@ public class BattleProcessor {
 	var result = results.stream().collect(SuperMapGen.collect(
 	    c -> c.log.size(),
 	    c -> c,
-	    (c1, c2) -> c1.grading() < c2.grading() ? c2 : c1))
+	    (c1, c2) -> c1.getLatestBan().grading() < c2.getLatestBan().grading() ? c2 : c1))
 	    .entrySet()
 	    .stream()
 	    .sorted((e1, e2) -> e1.getKey() - e2.getKey())

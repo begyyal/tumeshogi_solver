@@ -238,6 +238,27 @@ public class Ban implements Cloneable {
 	    .findFirst().get().rangedBy.anyMatch(s -> s.getLeft() == x && s.getRight() == y);
     }
 
+    public int grading() {
+
+	int result = 0;
+	for (int x = 0; x < 9; x++)
+	    for (int y = 0; y < 9; y++) {
+		var s = this.matrix[x][y];
+		var score = getScore(s.player);
+		if (score != 0) {
+		    result += score;
+		} else
+		    for (var rs : s.rangedBy)
+			result += getScore(this.matrix[rs.getLeft()][rs.getRight()].player);
+	    }
+
+	return result;
+    }
+
+    private int getScore(Player p) {
+	return p == Player.None ? 0 : p == Player.Self ? 1 : -1;
+    }
+
     @Override
     public Ban clone() {
 	var newMatrix = new MasuState[9][9];
