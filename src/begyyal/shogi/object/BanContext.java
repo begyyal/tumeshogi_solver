@@ -31,6 +31,8 @@ public class BanContext {
     public MasuState beforeLatestState;
     public final int beforeId;
 
+    public boolean isFailure = false;
+
     private BanContext(String banStr, String motigomaStr) {
 	var ban = Ban.of(banStr);
 	this.log = SuperListGen.of(Ban.of(banStr));
@@ -63,6 +65,10 @@ public class BanContext {
 	    .orElse(null);
 	if (tooMany != null)
 	    throw new IllegalArgumentException("The koma [" + tooMany + "] exceeeds number limit.");
+    }
+
+    public Ban getBan(int index) {
+	return this.log.get(index);
     }
 
     public Ban getLatestBan() {

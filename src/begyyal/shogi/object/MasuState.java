@@ -68,6 +68,8 @@ public class MasuState {
 
     public ImmutableSuperList<Vector> getTerritory() {
 	var base = nariFlag ? koma.nariTerri : koma.territory;
+	if (base == null)
+	    return SuperListGen.empty();
 	return player == Player.Opponent
 		? ReverseTerritoryCache.computeIfAbsent(Pair.of(koma, nariFlag),
 		    k -> SuperListGen.immutableOf(

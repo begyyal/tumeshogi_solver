@@ -1,6 +1,7 @@
 package begyyal.shogi.object;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -16,6 +17,9 @@ import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 
 public class Ban implements Cloneable {
+
+    private static final AtomicInteger idGen = new AtomicInteger();
+    public final int id = idGen.getAndIncrement();
 
     private static final String banArgRegex = "([1-9][1-9][xy][a-dfg][z]?|[1-9][1-9][xy][eh])+";
 
@@ -238,27 +242,6 @@ public class Ban implements Cloneable {
 	    .findFirst().get().rangedBy.anyMatch(s -> s.getLeft() == x && s.getRight() == y);
     }
 
-    public int grading() {
-
-	int result = 0;
-	for (int x = 0; x < 9; x++)
-	    for (int y = 0; y < 9; y++) {
-		var s = this.matrix[x][y];
-		var score = getScore(s.player);
-		if (score != 0) {
-		    result += score;
-		} else
-		    for (var rs : s.rangedBy)
-			result += getScore(this.matrix[rs.getLeft()][rs.getRight()].player);
-	    }
-
-	return result;
-    }
-
-    private int getScore(Player p) {
-	return p == Player.None ? 0 : p == Player.Self ? 1 : -1;
-    }
-
     @Override
     public Ban clone() {
 	var newMatrix = new MasuState[9][9];
@@ -268,7 +251,19 @@ public class Ban implements Cloneable {
 	return new Ban(newMatrix);
     }
 
+    @Override
+    public boolean equals(Object o) {
+	if (!(o instanceof Ban))
+	    return false;
+	var casted = (Ban) o;
+	return this.id == casted.id;
+    }
+
     public static Ban of(String arg) {
 	return new Ban(arg);
+    }
+
+    public static int generateId() {
+	return idGen.getAndIncrement();
     }
 }
