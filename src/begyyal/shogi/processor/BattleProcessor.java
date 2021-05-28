@@ -2,10 +2,12 @@ package begyyal.shogi.processor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import begyyal.commons.util.object.SuperList;
@@ -27,6 +29,9 @@ public class BattleProcessor {
 	    throw new IllegalArgumentException(
 		"The argument of number of moves must be number format.");
 	this.numOfMoves = Integer.parseInt(numStr);
+	if (this.numOfMoves % 2 != 1)
+	    throw new IllegalArgumentException(
+		"The argument of number of moves must be odd number.");
 	this.contexts = SuperListGen.of(BanContext.newi(banStr, motigomaStr));
     }
 
@@ -52,14 +57,22 @@ public class BattleProcessor {
 	} while (!this.contexts.isEmpty() && count < numOfMoves);
 
 	if (results.isEmpty())
-	    return new String[] { "詰めませんでした。" };
+	    return createFailureLabel();
 
-	return this.summarize(this.selectContext(results).log);
+	var result = this.selectContext(results);
+	if (result == null)
+	    return createFailureLabel();
+
+	return this.summarize(result.log);
     }
 
     @SuppressWarnings("unchecked")
     private ArrayList<BanContext> shallowCopyContexts() {
 	return (ArrayList<BanContext>) this.contexts.clone();
+    }
+
+    private String[] createFailureLabel() {
+	return new String[] { "詰めませんでした。" };
     }
 
     private void processSelf(BanContext acon) {
@@ -133,30 +146,67 @@ public class BattleProcessor {
     }
 
     private BanContext selectContext(SuperList<BanContext> results) {
-	
-	var tree = this.context2tree(results);
-	
-	this.recursive4selectContext(tree.getChildren(), true, 1);
-	
-	
-	return null;
+	// TODO 指定手数未満の手数での詰み筋もフォローしたい
+	var resultTree = recursive4selectContext(context2tree(results).getChildren(), true, 1);
+	return resultTree == null
+		? null
+		: results
+		    .stream()
+		    .filter(c -> c.getLatestBan().id == resultTree.getValue())
+		    .findFirst().get();
     }
-    
-    private Tree<Integer> recursive4selectContext(Set<Tree<Integer>> branches, boolean isSelf, int depth){
+
+    private Tree<Integer> recursive4selectContext(
+	Set<Tree<Integer>> branches,
+	boolean isSelf,
+	int nomCount) {
 	// self -> 詰み筋が多い方
 	// opponent -> 深度が深い方。深度が同一の場合はその深度の分岐数が多い方
-	
-	if(isSelf) {
-	    
-	    for(var b : branches) {
-		
-	    }
-	    
+
+	Tree<Integer> result = null;
+	long criterion = 0, criterion2 = 0, temp;
+
+	for (var b : branches) {
+
+	    var tips = b.collectTips();
+
+	    if (!isSelf) {
+
+		final long maxDepth = tips
+		    .stream()
+		    .map(t -> t.getDepth())
+		    .sorted(Comparator.reverseOrder())
+		    .findFirst().get();
+
+		if (criterion == maxDepth
+			&& criterion2 < (temp = tips
+			    .stream()
+			    .filter(t -> t.getDepth() == maxDepth)
+			    .count())
+			&& (criterion2 = temp) > 0
+			|| criterion < maxDepth && (criterion = maxDepth) > 0)
+		    result = b;
+
+	    } else if (this.numOfMoves == nomCount) {
+		if (CollectionUtils.isEmpty(b.getChildren())) {
+		    result = b;
+		    break;
+		}
+
+	    } else if (criterion < (temp = tips
+		.stream()
+		.map(t -> t.getDepth())
+		.filter(d -> d % 2 == 1)
+		.count())
+		    && (criterion = temp) > 0)
+		result = b;
 	}
-	
-	return null;
+
+	return this.numOfMoves == nomCount
+		? result
+		: this.recursive4selectContext(result.getChildren(), !isSelf, nomCount + 1);
     }
-    
+
     // 引数のコンテキストのログを集積して初期配置からの盤面の分岐をツリー化
     private Tree<Integer> context2tree(SuperList<BanContext> results) {
 
@@ -173,8 +223,7 @@ public class BattleProcessor {
 		    .map(b -> b.id)
 		    .collect(Collectors.toList());
 		if (c.isFailure)
-		    // 手数内での詰み損じを識別できるように負数化
-		    idList.add(-Ban.generateId());
+		    idList.add(Ban.generateId());
 		return idList;
 	    })
 	    .forEach(idList -> origin.compound(idList));
