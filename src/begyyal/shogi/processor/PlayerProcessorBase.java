@@ -27,6 +27,7 @@ public abstract class PlayerProcessorBase {
 	return s.player == Player.Opponent && s.koma == Koma.Ou;
     }
 
+    // 成ってもいいし成らなくてもいい
     protected IntStream createBranchStream(int y, Koma koma) {
 	return IntStream.range(0,
 	    (getPlayerType() == Player.Self ? y > 5 : y < 3) && koma.canNari() ? 2 : 1);

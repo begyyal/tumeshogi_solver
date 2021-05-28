@@ -200,13 +200,14 @@ public class BattleProcessor {
     // 引数のコンテキストのログを集積して初期配置からの盤面の分岐をツリー化
     private Tree<Integer> context2tree(SuperList<BanContext> results) {
 
-	var origin = Tree.newi(
+	var origin = Tree.convert(
 	    results.get(0).log
 		.stream()
 		.map(b -> b.id)
 		.collect(Collectors.toList()));
 
-	results.stream()
+	results.subList(1, results.size())
+	    .stream()
 	    .map(c -> {
 		var idList = c.log.subList(1, c.log.size())
 		    .stream()
