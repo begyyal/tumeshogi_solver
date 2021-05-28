@@ -146,8 +146,7 @@ public class BattleProcessor {
     }
 
     private BanContext selectContext(SuperList<BanContext> results) {
-	// TODO 指定手数未満の手数での詰み筋もフォローしたい
-	var resultTree = recursive4selectContext(context2tree(results).getChildren(), true, 1);
+	var resultTree = recursive4selectContext(context2tree(results).getChildren(), true);
 	return resultTree == null
 		? null
 		: results
@@ -156,10 +155,7 @@ public class BattleProcessor {
 		    .findFirst().get();
     }
 
-    private Tree<Integer> recursive4selectContext(
-	Set<Tree<Integer>> branches,
-	boolean isSelf,
-	int nomCount) {
+    private Tree<Integer> recursive4selectContext(Set<Tree<Integer>> branches, boolean isSelf) {
 	// self -> 詰み筋が多い方
 	// opponent -> 深度が深い方。深度が同一の場合はその深度の分岐数が多い方
 
@@ -168,8 +164,10 @@ public class BattleProcessor {
 
 	for (var b : branches) {
 
-	    var tips = b.collectTips();
+	    if (CollectionUtils.isEmpty(b.getChildren()))
+		return b;
 
+	    var tips = b.collectTips();
 	    if (!isSelf) {
 
 		final long maxDepth = tips
@@ -187,12 +185,6 @@ public class BattleProcessor {
 			|| criterion < maxDepth && (criterion = maxDepth) > 0)
 		    result = b;
 
-	    } else if (this.numOfMoves == nomCount) {
-		if (CollectionUtils.isEmpty(b.getChildren())) {
-		    result = b;
-		    break;
-		}
-
 	    } else if (criterion < (temp = tips
 		.stream()
 		.map(t -> t.getDepth())
@@ -202,9 +194,7 @@ public class BattleProcessor {
 		result = b;
 	}
 
-	return this.numOfMoves == nomCount
-		? result
-		: this.recursive4selectContext(result.getChildren(), !isSelf, nomCount + 1);
+	return this.recursive4selectContext(result.getChildren(), !isSelf);
     }
 
     // 引数のコンテキストのログを集積して初期配置からの盤面の分岐をツリー化
