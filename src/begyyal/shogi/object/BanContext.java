@@ -19,7 +19,7 @@ public class BanContext {
     private static final AtomicInteger idGen = new AtomicInteger();
     public final int id = idGen.getAndIncrement();
 
-    private static final String motigomaArgRegex = "([xy]([a][1-9][1-8]?|[b-e][1-4]|[fg][12])+){2}";
+    private static final String motigomaArgRegex = "([xy]([a][1-9][1-8]?|[b-e][1-4]|[fg][12])+){1,2}";
 
     public final SuperList<Ban> log;
     // 持ち駒は最新断面のみ
@@ -128,7 +128,7 @@ public class BanContext {
 	int xIndex = arg.indexOf(Player.Self.id);
 	int yIndex = arg.indexOf(Player.Opponent.id);
 	if (player == Player.Self ? yIndex < 0 : xIndex < 0)
-	    getMotigomaParser(motigoma).accept(arg);
+	    getMotigomaParser(motigoma).accept(arg.substring(1));
 	if (xIndex < 0 || yIndex < 0)
 	    return motigoma;
 
