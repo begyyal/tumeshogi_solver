@@ -77,7 +77,7 @@ public class BattleProcessor {
     private void processSelf(BanContext acon) {
 
 	this.contexts.removeIf(c -> c.id == acon.id);
-
+	
 	var branches = SelfProcessor.newi().spread(acon);
 	if (branches != null)
 	    this.contexts.addAll(branches);
