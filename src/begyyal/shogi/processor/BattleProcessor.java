@@ -12,7 +12,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.commons.util.object.Tree;
-import begyyal.shogi.Entrypoint.TRLogger;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
@@ -155,22 +154,26 @@ public class BattleProcessor {
 		    .findFirst().get();
     }
 
+    // return -> 選択結果の末端ツリーノード。無ければnull。
     private Tree<Integer> recursive4selectContext(Tree<Integer> tree, boolean isSelf) {
+	// 自分は選択の余地があり、相手の選択は全てカバーしている必要がある
+	// つまり、自分はorかつ相手はandで詰みを再帰的に判断する
 
+	if (CollectionUtils.isEmpty(tree.getChildren()))
+	    return tree.getDepth() % 2 == 1 ? tree : null;
+	
 	Tree<Integer> result = null;
 	long criterion = 0, criterion2 = 0, temp;
 
 	for (var child : tree.getChildren()) {
-	    TRLogger.print(
-		"select context // branch --- id:" + child.getValue() + " isSelf:" + isSelf);
+	    var selected = recursive4selectContext(child, !isSelf); 
 	    if (isSelf) {
-		if (recursive4treeCheck(child, isSelf)) {
-		    result = child;
-		    break;
-		}
+		if (selected != null)
+		    return selected;
 	    } else {
+		if(selected == null)
+		    return null;
 		// 相手方は最短詰み筋の深度がより長い選択をする
-		// self側のtreeCheckで全選択に対する詰みは担保されている
 		var tips = child.collectTips();
 		final long minDepth = tips
 		    .stream()
@@ -185,33 +188,11 @@ public class BattleProcessor {
 			    .count())
 			&& (criterion2 = temp) > 0
 			|| criterion < minDepth && (criterion = minDepth) > 0)
-		    result = child;
+		    result = selected;
 	    }
 	}
 
-	if (result == null || CollectionUtils.isEmpty(result.getChildren()))
-	    return result;
-
-	TRLogger.print(
-	    "select context // do rec --- id:" + result.getValue() + " depth:" + result.getDepth());
-	return recursive4selectContext(result, !isSelf);
-    }
-
-    private boolean recursive4treeCheck(Tree<Integer> tree, boolean isSelf) {
-	// 自分は選択の余地があり、相手の選択は全てカバーしている必要がある
-	// つまり、自分はorかつ相手はandで詰みを再帰的に判断する
-
-	if (CollectionUtils.isEmpty(tree.getChildren()))
-	    return tree.getDepth() % 2 == 1;
-
-	for (var child : tree.getChildren())
-	    if (!isSelf) { // 子の選択なので反転
-		if (recursive4treeCheck(child, !isSelf))
-		    return true;
-	    } else if (!recursive4treeCheck(child, !isSelf))
-		return false;
-
-	return isSelf;
+	return result;
     }
 
     // 引数のコンテキストのログを集積して初期配置からの盤面の分岐をツリー化
