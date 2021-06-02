@@ -88,7 +88,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	var cs3 = context.opponentMotigoma.isEmpty() || outeIsNotLinear
 		? Stream.empty()
 		: Arrays.stream(MatrixResolver.decompose(outeVector))
-		    .filter(miniV -> miniV != outeVector)
+		    .filter(miniV -> !outeVector.equals(miniV))
 		    .flatMap(v -> context.opponentMotigoma
 			.stream()
 			.distinct()
