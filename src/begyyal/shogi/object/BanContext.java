@@ -2,7 +2,6 @@ package begyyal.shogi.object;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -36,8 +35,9 @@ public class BanContext {
     private BanContext(String banStr, String motigomaStr) {
 	var ban = Ban.of(banStr);
 	this.log = SuperListGen.of(Ban.of(banStr));
-	this.selfMotigoma = parseMotigoma(Player.Self, motigomaStr);
-	this.opponentMotigoma = parseMotigoma(Player.Opponent, motigomaStr);
+	this.selfMotigoma = SuperListGen.newi();
+	this.opponentMotigoma = SuperListGen.newi();
+	fillMotigoma(motigomaStr);
 	this.beforeId = -1;
 	validateCondition(ban);
     }
@@ -116,30 +116,27 @@ public class BanContext {
 	    this.id);
     }
 
-    private static SuperList<Koma> parseMotigoma(Player player, String arg) {
+    private void fillMotigoma(String arg) {
 
-	var motigoma = SuperListGen.<Koma>newi();
 	if (arg == null)
-	    return motigoma;
+	    return;
 
 	if (!arg.matches(motigomaArgRegex))
 	    throw new IllegalArgumentException("Motigoma argument format is invalid.");
 
 	int xIndex = arg.indexOf(Player.Self.id);
 	int yIndex = arg.indexOf(Player.Opponent.id);
-	if (player == Player.Self ? yIndex < 0 : xIndex < 0)
-	    getMotigomaParser(motigoma).accept(arg.substring(1));
-	if (xIndex < 0 || yIndex < 0)
-	    return motigoma;
+	var single = xIndex < 0 ? this.opponentMotigoma : yIndex < 0 ? this.selfMotigoma : null;
+	if (single != null) {
+	    getMotigomaParser(single).accept(arg.substring(1));
+	    return;
+	}
 
-	Function<Integer, String> lowerGetter = idx -> arg.substring(1, idx);
-	Function<Integer, String> higherGetter = idx -> arg.substring(idx + 1, arg.length());
-	String argv = xIndex < yIndex
-		? (player == Player.Self ? lowerGetter.apply(yIndex) : higherGetter.apply(yIndex))
-		: (player == Player.Self ? higherGetter.apply(xIndex) : lowerGetter.apply(xIndex));
-	getMotigomaParser(motigoma).accept(argv);
-
-	return motigoma;
+	boolean xy = xIndex < yIndex;
+	var low = xy ? this.selfMotigoma : this.opponentMotigoma;
+	var high = xy ? this.opponentMotigoma : this.selfMotigoma;
+	getMotigomaParser(low).accept(arg.substring(1, xy ? yIndex : xIndex));
+	getMotigomaParser(high).accept(arg.substring((xy ? yIndex : xIndex) + 1, arg.length()));
     }
 
     private static Consumer<String> getMotigomaParser(SuperList<Koma> motigoma) {
