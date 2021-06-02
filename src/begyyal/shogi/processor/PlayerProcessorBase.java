@@ -1,11 +1,13 @@
 package begyyal.shogi.processor;
 
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
+import begyyal.shogi.object.BanContext;
 import begyyal.shogi.object.MasuState;
 
 public abstract class PlayerProcessorBase {
@@ -34,6 +36,12 @@ public abstract class PlayerProcessorBase {
 		    && (getPlayerType() == Player.Self ? y > 5 : y < 3)
 		    && from.koma.canNari()
 			    ? 2 : 1);
+    }
+
+    protected Stream<BanContext> distinctContext(Stream<BanContext> cs) {
+	return cs.collect(Collectors.toMap(c -> c.latestState, c -> c, (c1, c2) -> c1))
+	    .values()
+	    .stream();
     }
 
     protected abstract Player getPlayerType();

@@ -22,7 +22,9 @@ public class BattleProcessor {
 
     private final SuperList<BanContext> contexts;
     private final int numOfMoves;
-
+    private final SelfProcessor selfProcessor;
+    private final OpponentProcessor opponentProcessor;
+    
     private BattleProcessor(String numStr, String banStr, String motigomaStr) {
 	if (!NumberUtils.isParsable(numStr))
 	    throw new IllegalArgumentException(
@@ -32,6 +34,8 @@ public class BattleProcessor {
 	    throw new IllegalArgumentException(
 		"The argument of number of moves must be odd number.");
 	this.contexts = SuperListGen.of(BanContext.newi(banStr, motigomaStr));
+	this.selfProcessor = SelfProcessor.newi();
+	this.opponentProcessor = OpponentProcessor.newi();
     }
 
     /**
@@ -78,7 +82,7 @@ public class BattleProcessor {
 
 	this.contexts.removeIf(c -> c.id == acon.id);
 	
-	var branches = SelfProcessor.newi().spread(acon);
+	var branches = this.selfProcessor.spread(acon);
 	if (branches != null)
 	    this.contexts.addAll(branches);
     }
@@ -87,7 +91,7 @@ public class BattleProcessor {
 
 	this.contexts.removeIf(c -> c.id == acon.id);
 
-	var branches = OpponentProcessor.newi().spread(acon);
+	var branches = this.opponentProcessor.spread(acon);
 	if (branches == null || branches.length == 0) {
 	    results.add(acon);
 	    return;

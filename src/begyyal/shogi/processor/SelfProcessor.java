@@ -74,7 +74,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .filter(c -> c != null);
 
 	// 駒移動系は空き王手と他で重複し得るのでdistinctする
-	return Stream.concat(Stream.concat(cs1, cs2).distinct(), cs3)
+	return Stream.concat(this.distinctContext(Stream.concat(cs1, cs2)), cs3)
 	    .toArray(BanContext[]::new);
     }
 
