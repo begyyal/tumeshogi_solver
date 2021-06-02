@@ -86,7 +86,7 @@ public class BattleProcessor {
     private void processOpponent(BanContext acon, SuperList<BanContext> results, int count) {
 
 	this.contexts.removeIf(c -> c.id == acon.id);
-	
+
 	var branches = OpponentProcessor.newi().spread(acon);
 	if (branches == null || branches.length == 0) {
 	    results.add(acon);
@@ -97,12 +97,16 @@ public class BattleProcessor {
 	    return;
 	}
 
-	Arrays.stream(branches)
-	    .filter(c -> {
-		long selfBanCount = c.getLatestBan().search(s -> s.player == Player.Self).count();
-		return selfBanCount > 0 && selfBanCount + c.selfMotigoma.size() > 1;
-	    })
-	    .forEach(this.contexts::add);
+	if (Arrays.stream(branches).anyMatch(b -> {
+	    long selfBanCount = b.getLatestBan().search(s -> s.player == Player.Self).count();
+	    return selfBanCount == 0 || selfBanCount + b.selfMotigoma.size() <= 1;
+	})) {
+	    acon.isFailure = true;
+	    results.add(acon);
+	    return;
+	}
+
+	this.contexts.addAll(branches);
     }
 
     private String[] summarize(List<Ban> bans) {
@@ -161,17 +165,17 @@ public class BattleProcessor {
 
 	if (CollectionUtils.isEmpty(tree.getChildren()))
 	    return tree.getDepth() % 2 == 1 ? tree : null;
-	
+
 	Tree<Integer> result = null;
 	long criterion = 0, criterion2 = 0, temp;
 
 	for (var child : tree.getChildren()) {
-	    var selected = recursive4selectContext(child, !isSelf); 
+	    var selected = recursive4selectContext(child, !isSelf);
 	    if (isSelf) {
 		if (selected != null)
 		    return selected;
 	    } else {
-		if(selected == null)
+		if (selected == null)
 		    return null;
 		// 相手方は最短詰み筋の深度がより長い選択をする
 		var tips = child.collectTips();
@@ -198,14 +202,8 @@ public class BattleProcessor {
     // 引数のコンテキストのログを集積して初期配置からの盤面の分岐をツリー化
     private Tree<Integer> context2tree(SuperList<BanContext> results) {
 
-	var origin = Tree.convert(
-	    results.get(0).log
-		.stream()
-		.map(b -> b.id)
-		.collect(Collectors.toList()));
-
-	results.subList(1, results.size())
-	    .stream()
+	var origin = Tree.newi(results.get(0).log.get(0).id, null);
+	results.stream()
 	    .map(c -> {
 		var idList = c.log.subList(1, c.log.size())
 		    .stream()
