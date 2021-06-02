@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -13,6 +12,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.commons.util.object.Tree;
+import begyyal.shogi.Entrypoint.TRLogger;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
@@ -87,7 +87,7 @@ public class BattleProcessor {
     private void processOpponent(BanContext acon, SuperList<BanContext> results, int count) {
 
 	this.contexts.removeIf(c -> c.id == acon.id);
-
+	
 	var branches = OpponentProcessor.newi().spread(acon);
 	if (branches == null || branches.length == 0) {
 	    results.add(acon);
@@ -146,7 +146,7 @@ public class BattleProcessor {
     }
 
     private BanContext selectContext(SuperList<BanContext> results) {
-	var resultTree = recursive4selectContext(context2tree(results).getChildren(), true);
+	var resultTree = recursive4selectContext(context2tree(results), true);
 	return resultTree == null
 		? null
 		: results
@@ -155,46 +155,63 @@ public class BattleProcessor {
 		    .findFirst().get();
     }
 
-    private Tree<Integer> recursive4selectContext(Set<Tree<Integer>> branches, boolean isSelf) {
-	// self -> 詰み筋が多い方
-	// opponent -> 深度が深い方。深度が同一の場合はその深度の分岐数が多い方
+    private Tree<Integer> recursive4selectContext(Tree<Integer> tree, boolean isSelf) {
 
 	Tree<Integer> result = null;
 	long criterion = 0, criterion2 = 0, temp;
 
-	for (var b : branches) {
-
-	    if (CollectionUtils.isEmpty(b.getChildren()))
-		return b;
-
-	    var tips = b.collectTips();
-	    if (!isSelf) {
-
-		final long maxDepth = tips
+	for (var child : tree.getChildren()) {
+	    TRLogger.print(
+		"select context // branch --- id:" + child.getValue() + " isSelf:" + isSelf);
+	    if (isSelf) {
+		if (recursive4treeCheck(child, isSelf)) {
+		    result = child;
+		    break;
+		}
+	    } else {
+		// 相手方は最短詰み筋の深度がより長い選択をする
+		// self側のtreeCheckで全選択に対する詰みは担保されている
+		var tips = child.collectTips();
+		final long minDepth = tips
 		    .stream()
 		    .map(t -> t.getDepth())
-		    .sorted(Comparator.reverseOrder())
+		    .filter(d -> d % 2 == 1)
+		    .sorted(Comparator.naturalOrder())
 		    .findFirst().get();
-
-		if (criterion == maxDepth
-			&& criterion2 < (temp = tips
+		if (criterion == minDepth
+			&& criterion2 > (temp = tips
 			    .stream()
-			    .filter(t -> t.getDepth() == maxDepth)
+			    .filter(t -> t.getDepth() == minDepth)
 			    .count())
 			&& (criterion2 = temp) > 0
-			|| criterion < maxDepth && (criterion = maxDepth) > 0)
-		    result = b;
-
-	    } else if (criterion < (temp = tips
-		.stream()
-		.map(t -> t.getDepth())
-		.filter(d -> d % 2 == 1)
-		.count())
-		    && (criterion = temp) > 0)
-		result = b;
+			|| criterion < minDepth && (criterion = minDepth) > 0)
+		    result = child;
+	    }
 	}
 
-	return this.recursive4selectContext(result.getChildren(), !isSelf);
+	if (result == null || CollectionUtils.isEmpty(result.getChildren()))
+	    return result;
+
+	TRLogger.print(
+	    "select context // do rec --- id:" + result.getValue() + " depth:" + result.getDepth());
+	return recursive4selectContext(result, !isSelf);
+    }
+
+    private boolean recursive4treeCheck(Tree<Integer> tree, boolean isSelf) {
+	// 自分は選択の余地があり、相手の選択は全てカバーしている必要がある
+	// つまり、自分はorかつ相手はandで詰みを再帰的に判断する
+
+	if (CollectionUtils.isEmpty(tree.getChildren()))
+	    return tree.getDepth() % 2 == 1;
+
+	for (var child : tree.getChildren())
+	    if (!isSelf) { // 子の選択なので反転
+		if (recursive4treeCheck(child, !isSelf))
+		    return true;
+	    } else if (!recursive4treeCheck(child, !isSelf))
+		return false;
+
+	return isSelf;
     }
 
     // 引数のコンテキストのログを集積して初期配置からの盤面の分岐をツリー化

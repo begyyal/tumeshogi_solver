@@ -61,7 +61,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	    .filter(s -> s.player == PlayerType && s.koma != Koma.Ou)
 	    .flatMap(from -> {
 		var tryNari = SuperBool.newi();
-		return createBranchStream(outeState.y, from.koma)
+		return createBranchStream(outeState.y, from)
 		    .filter(i -> tryNari.get()
 			    || Ban.validateState(from.koma, outeState.x, outeState.y, PlayerType))
 		    .mapToObj(i -> {

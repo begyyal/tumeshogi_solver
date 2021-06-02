@@ -12,7 +12,7 @@ public class Entrypoint {
 		throw new IllegalArgumentException("Arguments lack.");
 
 	    for (String str : BattleProcessor
-		.of(args[0], args[1], args.length > 2 ? args[2] : null)
+		.of(args[0], args[1], parseTailArguments(args, 2))
 		.calculate())
 		System.out.println(str);
 
@@ -20,6 +20,37 @@ public class Entrypoint {
 	    System.out.println(e.getMessage());
 	    for (var st : e.getStackTrace())
 		System.out.println(st);
+	}
+    }
+
+    private static String parseTailArguments(String[] args, int offset) {
+	if (args.length == offset)
+	    return null;
+	int idx = -1;
+	for (int count = offset; count < args.length; count++)
+	    if ("debug".equals(args[count]))
+		idx = count;
+	if (idx < 0)
+	    return args[offset];
+	TRLogger.isAvailable = true;
+	return idx == offset ? null : args[offset];
+    }
+
+    public static class TRLogger {
+
+	private static boolean isAvailable = false;
+	private static final String const1 = "[DEBUG][FROM]";
+	private static final String const2 = "[DEBUG][PRINT]";
+
+	public static void print(String str) {
+	    if (!isAvailable)
+		return;
+	    System.out.println(const1 + Thread.currentThread().getStackTrace()[2]);
+	    System.out.println(const2 + str);
+	}
+
+	public static boolean isDebug() {
+	    return isAvailable;
 	}
     }
 }

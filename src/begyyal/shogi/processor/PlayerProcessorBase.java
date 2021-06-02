@@ -28,9 +28,12 @@ public abstract class PlayerProcessorBase {
     }
 
     // 成ってもいいし成らなくてもいい
-    protected IntStream createBranchStream(int y, Koma koma) {
+    protected IntStream createBranchStream(int y, MasuState from) {
 	return IntStream.range(0,
-	    (getPlayerType() == Player.Self ? y > 5 : y < 3) && koma.canNari() ? 2 : 1);
+	    !from.nariFlag
+		    && (getPlayerType() == Player.Self ? y > 5 : y < 3)
+		    && from.koma.canNari()
+			    ? 2 : 1);
     }
 
     protected abstract Player getPlayerType();

@@ -39,7 +39,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .flatMap(sp -> {
 		var tryNari = SuperBool.newi();
 		var dest = sp.getRight();
-		return createBranchStream(dest.y, sp.getLeft().koma)
+		return createBranchStream(dest.y, sp.getLeft())
 		    .filter(i -> tryNari.get() ||
 			    Ban.validateState(sp.getLeft().koma, dest.x, dest.y, PlayerType))
 		    .mapToObj(i -> {
@@ -113,7 +113,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 		    .flatMap(to -> {
 			var tryNari = SuperBool.newi();
 			var from = t.getLeft().getKey();
-			return createBranchStream(to.y, from.koma)
+			return createBranchStream(to.y, from)
 			    .mapToObj(i -> {
 				var newBan = ban.clone();
 				var k = newBan.advance(
