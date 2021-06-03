@@ -83,23 +83,25 @@ public class SelfProcessor extends PlayerProcessorBase {
 	BanContext context,
 	PairList<MasuState, MasuState> moveSpread) {
 
-	var candidates = ban.search(s -> s.player == PlayerType && MasuState.isLinearRange(s))
-	    .toArray(MasuState[]::new);
-	if (candidates.length == 0)
-	    return Stream.empty();
-
 	var opponentOu = ban
 	    .search(s -> this.isOpponentOu(s))
 	    .findFirst().get();
 
-	// TODO candidateに対する王手筋のフィルタリングが無い。
-	// TODO rangedByの利用を考慮する。
+	var candidates = ban.search(s -> {
+	    var v = s.getVectorTo(opponentOu);
+	    return s.player == PlayerType
+		    && MasuState.isLinearRange(s)
+		    && (v.x() == 0 || v.y() == 0 || Math.abs(v.x() / v.y()) == 1);
+	}).toArray(MasuState[]::new);
+	if (candidates.length == 0)
+	    return Stream.empty();
+
 	return moveSpread.toMap()
 	    .entrySet()
 	    .stream()
 	    .map(e -> Pair.of(e,
 		Arrays.stream(candidates)
-		    .map(c -> Pair.of(c, getAkiObstruction(ban, c).orElse(null)))
+		    .map(c -> Pair.of(c, getAkiObstruction(ban, c, opponentOu).orElse(null)))
 		    .filter(p -> p.getRight() != null && p.getRight().equals(e.getKey()))
 		    .map(Pair::getLeft)
 		    .findFirst()))
@@ -109,7 +111,8 @@ public class SelfProcessor extends PlayerProcessorBase {
 		var decomposedOute = MatrixResolver.decompose(candidate.getVectorTo(opponentOu));
 		return t.getLeft().getValue()
 		    .stream()
-		    .filter(s -> !ArrayUtils.contains(decomposedOute, candidate.getVectorTo(s)))
+		    .filter(s -> !ArrayUtils.contains(decomposedOute, candidate.getVectorTo(s))
+			    && !ArrayUtils.contains(decomposedOute, s.getVectorTo(candidate)))
 		    .flatMap(to -> {
 			var tryNari = SuperBool.newi();
 			var from = t.getLeft().getKey();
@@ -128,20 +131,22 @@ public class SelfProcessor extends PlayerProcessorBase {
     // 1ステートからの空き王手は複数にならない
     private Optional<MasuState> getAkiObstruction(
 	Ban ban,
-	MasuState state) {
+	MasuState state,
+	MasuState opponentOu) {
 	return state.getTerritory()
 	    .stream()
-	    .map(v -> getAkiObstructionOnVector(ban, v, state))
+	    .map(v -> MatrixResolver.decompose(v))
+	    .filter(d -> d.length != 1 && ArrayUtils.contains(d, state.getVectorTo(opponentOu)))
+	    .map(d -> getAkiObstructionOnVector(ban, d, state))
 	    .filter(s -> s != null)
 	    .findFirst();
     }
 
     private MasuState getAkiObstructionOnVector(
 	Ban ban,
-	Vector v,
+	Vector[] decomposed,
 	MasuState state) {
 
-	var decomposed = MatrixResolver.decompose(v);
 	if (decomposed.length == 1)
 	    return null;
 
