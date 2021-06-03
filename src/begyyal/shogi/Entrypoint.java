@@ -7,14 +7,12 @@ public class Entrypoint {
     public static void main(String args[]) {
 
 	long start = System.currentTimeMillis();
-	try {
+	try (var processor = BattleProcessor.newi()) {
 
 	    if (args.length < 2)
 		throw new IllegalArgumentException("Arguments lack.");
 
-	    for (String str : BattleProcessor
-		.of(args[0], args[1], parseTailArguments(args, 2))
-		.calculate())
+	    for (String str : processor.calculate(args[0], args[1], parseTailArguments(args, 2)))
 		System.out.println(str);
 
 	} catch (Exception e) {

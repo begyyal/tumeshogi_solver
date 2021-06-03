@@ -1,117 +1,64 @@
 package begyyal.shogi.processor;
 
-import java.util.ArrayList;
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
-import begyyal.commons.util.object.SuperList;
+import com.google.common.collect.Sets;
+
 import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.commons.util.object.Tree;
-import begyyal.shogi.Entrypoint.TRLogger;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
 import begyyal.shogi.object.MasuState;
 
-public class BattleProcessor {
+public class BattleProcessor implements Closeable {
 
-    private final SuperList<BanContext> contexts;
-    private final int numOfMoves;
-    private final SelfProcessor selfProcessor;
-    private final OpponentProcessor opponentProcessor;
-    
-    private BattleProcessor(String numStr, String banStr, String motigomaStr) {
-	if (!NumberUtils.isParsable(numStr))
-	    throw new IllegalArgumentException(
-		"The argument of number of moves must be number format.");
-	this.numOfMoves = Integer.parseInt(numStr);
-	if (this.numOfMoves % 2 != 1)
-	    throw new IllegalArgumentException(
-		"The argument of number of moves must be odd number.");
-	this.contexts = SuperListGen.of(BanContext.newi(banStr, motigomaStr));
-	this.selfProcessor = SelfProcessor.newi();
-	this.opponentProcessor = OpponentProcessor.newi();
+    private final CalculationTools tools;
+
+    private BattleProcessor() {
+	this.tools = new CalculationTools();
     }
 
     /**
      * 詰将棋専用。
      * 
      * @return 回答
+     * @throws ExecutionException
+     * @throws InterruptedException
      */
-    public String[] calculate() {
+    public String[] calculate(String numStr, String banStr, String motigomaStr)
+	throws InterruptedException, ExecutionException {
 
-	var results = SuperListGen.<BanContext>newi();
-	int count = 0;
-
-	do {
-	    for (BanContext acon : this.shallowCopyContexts())
-		processSelf(acon);
-	    count++;
-	    if (this.contexts.isEmpty())
-		break;
-	    for (BanContext acon : this.shallowCopyContexts())
-		processOpponent(acon, results, count);
-	    count++;
-	} while (!this.contexts.isEmpty() && count < numOfMoves);
+	var results = Sets.<BanContext>newConcurrentHashSet();
+	var calculator = new OneshotCalculator(numStr, banStr, motigomaStr, this.tools);
+	calculator.ignite(results, 0).get();
 
 	if (results.isEmpty())
 	    return createFailureLabel();
 
-	var result = this.selectContext(results);
+	var result = this.selectContext(calculator.origin, results);
 	if (result == null)
 	    return createFailureLabel();
 
 	return this.summarize(result.log);
     }
 
-    @SuppressWarnings("unchecked")
-    private ArrayList<BanContext> shallowCopyContexts() {
-	return (ArrayList<BanContext>) this.contexts.clone();
-    }
-
     private String[] createFailureLabel() {
 	return new String[] { "詰めませんでした。" };
-    }
-
-    private void processSelf(BanContext acon) {
-
-	this.contexts.removeIf(c -> c.id == acon.id);
-	
-	var branches = this.selfProcessor.spread(acon);
-	if (branches != null)
-	    this.contexts.addAll(branches);
-    }
-
-    private void processOpponent(BanContext acon, SuperList<BanContext> results, int count) {
-
-	this.contexts.removeIf(c -> c.id == acon.id);
-	
-	var branches = this.opponentProcessor.spread(acon);
-	if (branches == null || branches.length == 0) {
-	    results.add(acon);
-	    return;
-	} else if (count == numOfMoves) {
-	    acon.isFailure = true;
-	    results.add(acon);
-	    return;
-	}
-
-	if (Arrays.stream(branches).anyMatch(b -> {
-	    long selfBanCount = b.getLatestBan().search(s -> s.player == Player.Self).count();
-	    return selfBanCount == 0 || selfBanCount + b.selfMotigoma.size() <= 1;
-	})) {
-	    acon.isFailure = true;
-	    results.add(acon);
-	    return;
-	}
-
-	this.contexts.addAll(branches);
     }
 
     private String[] summarize(List<Ban> bans) {
@@ -153,8 +100,8 @@ public class BattleProcessor {
 	return sb.toString();
     }
 
-    private BanContext selectContext(SuperList<BanContext> results) {
-	var resultTree = recursive4selectContext(context2tree(results), true);
+    private BanContext selectContext(BanContext origin, Set<BanContext> results) {
+	var resultTree = recursive4selectContext(context2tree(origin, results), true);
 	return resultTree == null
 		? null
 		: results
@@ -205,9 +152,9 @@ public class BattleProcessor {
     }
 
     // 引数のコンテキストのログを集積して初期配置からの盤面の分岐をツリー化
-    private Tree<Integer> context2tree(SuperList<BanContext> results) {
+    private Tree<Integer> context2tree(BanContext originC, Set<BanContext> results) {
 
-	var origin = Tree.newi(results.get(0).log.get(0).id, null);
+	var origin = Tree.newi(originC.log.get(0).id, null);
 	results.stream()
 	    .map(c -> {
 		var idList = c.log.subList(1, c.log.size())
@@ -223,7 +170,113 @@ public class BattleProcessor {
 	return origin;
     }
 
-    public static BattleProcessor of(String numStr, String banStr, String motigomaStr) {
-	return new BattleProcessor(numStr, banStr, motigomaStr);
+    public static BattleProcessor newi() {
+	return new BattleProcessor();
+    }
+
+    @Override
+    public void close() throws IOException {
+	this.tools.exe.shutdown();
+    }
+
+    private class CalculationTools {
+	private final SelfProcessor selfProcessor;
+	private final OpponentProcessor opponentProcessor;
+	private final ExecutorService exe;
+
+	CalculationTools() {
+	    this.selfProcessor = SelfProcessor.newi();
+	    this.opponentProcessor = OpponentProcessor.newi();
+	    this.exe = Executors.newCachedThreadPool();
+	}
+    }
+
+    private class OneshotCalculator {
+	private final int numOfMoves;
+	private final BanContext origin;
+	private final CalculationTools tools;
+
+	private OneshotCalculator(
+	    String numStr,
+	    String banStr,
+	    String motigomaStr,
+	    CalculationTools tools) {
+
+	    if (!NumberUtils.isParsable(numStr))
+		throw new IllegalArgumentException(
+		    "The argument of number of moves must be number format.");
+	    this.numOfMoves = Integer.parseInt(numStr);
+	    if (numOfMoves % 2 != 1)
+		throw new IllegalArgumentException(
+		    "The argument of number of moves must be odd number.");
+	    this.origin = BanContext.newi(banStr, motigomaStr);
+	    this.tools = tools;
+	}
+
+	private Future<?> ignite(Set<BanContext> results, int count) {
+	    return this.next(origin, results, count);
+	}
+
+	private Future<?> next(BanContext acon, Set<BanContext> results, int count) {
+	    return count > numOfMoves
+		    ? null
+		    : this.tools.exe.submit(
+			count % 2 == 0
+				? () -> this.processSelf(acon, results, count + 1)
+				: () -> this.processOpponent(acon, results, count + 1));
+	}
+
+	private void processSelf(BanContext acon, Set<BanContext> results, int count) {
+
+	    var branches = this.tools.selfProcessor.spread(acon);
+	    if (branches.length == 0)
+		results.add(acon);
+	    else {
+		Arrays.stream(branches)
+		    .map(b -> this.next(b, results, count))
+		    .forEach(f -> {
+			try {
+			    f.get();
+			} catch (InterruptedException | ExecutionException e) {
+			    // TODO Auto-generated catch block
+			    e.printStackTrace();
+			}
+		    });
+	    }
+	}
+
+	private void processOpponent(BanContext acon, Set<BanContext> results, int count) {
+
+	    var branches = this.tools.opponentProcessor.spread(acon);
+	    if (branches.length == 0) {
+		results.add(acon);
+		return;
+	    } else if (count == numOfMoves + 1) {
+		acon.isFailure = true;
+		results.add(acon);
+		return;
+	    }
+
+	    if (Arrays.stream(branches).anyMatch(b -> {
+		long selfBanCount = b.getLatestBan().search(s -> s.player == Player.Self).count();
+		return selfBanCount == 0 || selfBanCount + b.selfMotigoma.size() <= 1;
+	    })) {
+		acon.isFailure = true;
+		results.add(acon);
+		return;
+	    }
+
+	    Arrays.stream(branches)
+		.map(b -> this.next(b, results, count))
+		.forEach(f -> {
+		    try {
+			f.get();
+		    } catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		    }
+		});
+	}
+
     }
 }

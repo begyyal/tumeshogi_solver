@@ -35,7 +35,8 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .search(s -> s.player == PlayerType)
 	    .flatMap(s -> spreadMasuState(s, ban).map(dest -> Pair.of(s, dest)))
 	    .collect(PairListGen.collect());
-	var cs1 = moveSpread.stream()
+	var cs1 = moveSpread
+	    .stream()
 	    .flatMap(sp -> {
 		var tryNari = SuperBool.newi();
 		var dest = sp.getRight();
