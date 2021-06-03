@@ -23,9 +23,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
     public BanContext[] spread(BanContext context) {
 
 	var ban = context.getLatestBan();
-	var opponentOu = ban
-	    .search(s -> this.isOpponentOu(s))
-	    .findFirst().get();
+	var opponentOu = this.getOpponentOu(ban);
 
 	// 王手範囲から避ける(王による王手駒の取得含む)
 	var cs1 = spreadMasuState(opponentOu, ban)

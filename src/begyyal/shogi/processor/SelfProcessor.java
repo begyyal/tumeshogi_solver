@@ -83,10 +83,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	BanContext context,
 	PairList<MasuState, MasuState> moveSpread) {
 
-	var opponentOu = ban
-	    .search(s -> this.isOpponentOu(s))
-	    .findFirst().get();
-
+	var opponentOu = this.getOpponentOu(ban);
 	var candidates = ban.search(s -> {
 	    var v = s.getVectorTo(opponentOu);
 	    return s.player == PlayerType
