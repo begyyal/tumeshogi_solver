@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -45,9 +44,8 @@ public class BattleProcessor implements Closeable {
 
 	var results = Sets.<BanContext>newConcurrentHashSet();
 	var calculator = new OneshotCalculator(numStr, banStr, motigomaStr, this.tools);
-	calculator.ignite(results, 0).get();
 
-	if (results.isEmpty())
+	if (!calculator.ignite(results) || results.isEmpty())
 	    return createFailureLabel();
 
 	var result = this.selectContext(calculator.origin, results);
@@ -213,48 +211,42 @@ public class BattleProcessor implements Closeable {
 	    this.tools = tools;
 	}
 
-	private Future<?> ignite(Set<BanContext> results, int count) {
-	    return this.next(origin, results, count);
+	private boolean ignite(Set<BanContext> results)
+	    throws InterruptedException, ExecutionException {
+	    return this.next(origin, results, 0);
 	}
 
-	private Future<?> next(BanContext acon, Set<BanContext> results, int count) {
+	private boolean next(BanContext acon, Set<BanContext> results, int count)
+	    throws InterruptedException, ExecutionException {
 	    return count > numOfMoves
-		    ? null
+		    ? true
 		    : this.tools.exe.submit(
 			count % 2 == 0
 				? () -> this.processSelf(acon, results, count + 1)
-				: () -> this.processOpponent(acon, results, count + 1));
+				: () -> this.processOpponent(acon, results, count + 1))
+			.get();
 	}
 
-	private void processSelf(BanContext acon, Set<BanContext> results, int count) {
+	private boolean processSelf(BanContext acon, Set<BanContext> results, int count) {
 
 	    var branches = this.tools.selfProcessor.spread(acon);
-	    if (branches.length == 0)
+	    if (branches.length == 0) {
 		results.add(acon);
-	    else {
-		Arrays.stream(branches)
-		    .map(b -> this.next(b, results, count))
-		    .forEach(f -> {
-			try {
-			    f.get();
-			} catch (InterruptedException | ExecutionException e) {
-			    // TODO Auto-generated catch block
-			    e.printStackTrace();
-			}
-		    });
-	    }
+		return true;
+	    } else
+		return this.spread(branches, results, count);
 	}
 
-	private void processOpponent(BanContext acon, Set<BanContext> results, int count) {
+	private boolean processOpponent(BanContext acon, Set<BanContext> results, int count) {
 
 	    var branches = this.tools.opponentProcessor.spread(acon);
 	    if (branches.length == 0) {
 		results.add(acon);
-		return;
+		return true;
 	    } else if (count == numOfMoves + 1) {
 		acon.isFailure = true;
 		results.add(acon);
-		return;
+		return true;
 	    }
 
 	    if (Arrays.stream(branches).anyMatch(b -> {
@@ -263,20 +255,22 @@ public class BattleProcessor implements Closeable {
 	    })) {
 		acon.isFailure = true;
 		results.add(acon);
-		return;
+		return true;
 	    }
 
-	    Arrays.stream(branches)
-		.map(b -> this.next(b, results, count))
-		.forEach(f -> {
-		    try {
-			f.get();
-		    } catch (InterruptedException | ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		    }
-		});
+	    return this.spread(branches, results, count);
 	}
 
+	private boolean spread(BanContext[] branches, Set<BanContext> results, int count) {
+	    return Arrays.stream(branches)
+		.map(b -> {
+		    try {
+			return this.next(b, results, count);
+		    } catch (InterruptedException | ExecutionException e) {
+			return false;
+		    }
+		})
+		.allMatch(b -> b);
+	}
     }
 }
