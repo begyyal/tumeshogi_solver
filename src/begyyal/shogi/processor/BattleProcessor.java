@@ -12,6 +12,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.commons.util.object.Tree;
+import begyyal.shogi.Entrypoint.TRLogger;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
@@ -90,7 +91,7 @@ public class BattleProcessor {
     private void processOpponent(BanContext acon, SuperList<BanContext> results, int count) {
 
 	this.contexts.removeIf(c -> c.id == acon.id);
-
+	
 	var branches = this.opponentProcessor.spread(acon);
 	if (branches == null || branches.length == 0) {
 	    results.add(acon);

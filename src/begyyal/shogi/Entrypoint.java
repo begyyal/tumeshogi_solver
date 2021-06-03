@@ -6,6 +6,7 @@ public class Entrypoint {
 
     public static void main(String args[]) {
 
+	long start = System.currentTimeMillis();
 	try {
 
 	    if (args.length < 2)
@@ -21,6 +22,7 @@ public class Entrypoint {
 	    for (var st : e.getStackTrace())
 		System.out.println(st);
 	}
+	TRLogger.print("processing time -> " + (System.currentTimeMillis() - start) / 1000 + "sec");
     }
 
     private static String parseTailArguments(String[] args, int offset) {
@@ -42,11 +44,11 @@ public class Entrypoint {
 	private static final String const1 = "[DEBUG][FROM]";
 	private static final String const2 = "[DEBUG][PRINT]";
 
-	public static void print(String str) {
+	public static void print(Object target) {
 	    if (!isAvailable)
 		return;
 	    System.out.println(const1 + Thread.currentThread().getStackTrace()[2]);
-	    System.out.println(const2 + str);
+	    System.out.println(const2 + target);
 	}
 
 	public static boolean isDebug() {
