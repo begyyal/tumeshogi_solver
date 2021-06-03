@@ -30,6 +30,9 @@ public class BanContext {
     public MasuState beforeLatestState;
     public final int beforeId;
 
+    // 詰みの失敗は最終的に相手方の手で終わっていることとして判断される
+    // 失敗が確定的なselfの打ち筋に対しては、次の相手方の手で無駄なコンテキスト派生をせずに当該フラグを立てる形となる
+    // これにより終端のコンテキスト選定の段でフラグを元にダミーの相手方の手をlogに１手だけ加え、失敗を判断する
     public boolean isFailure = false;
 
     private BanContext(String banStr, String motigomaStr) {
