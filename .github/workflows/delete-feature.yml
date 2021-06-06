@@ -8,7 +8,7 @@ on:
     types: [ closed, deleted ]
 
 jobs:
-  create-feature:
+  delete-feature:
 
     runs-on: ubuntu-latest
 
@@ -24,4 +24,4 @@ jobs:
     - name: Delete branch
       if: test -n "$(git branch -a --format="%(refname:short)" | grep -e ^feature/${{ github.event.issue.number }})"
       run: |
-        git push --delete feature/${{ github.event.issue.number }}
+        git push --delete origin feature/${{ github.event.issue.number }}
