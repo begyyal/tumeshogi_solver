@@ -1,0 +1,24 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Create feature branch
+
+on:
+  issues:
+    types: [opend]
+
+jobs:
+  create-feature:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    
+    - name: Set git configs
+      run: |
+        git config --global user.email "llll@example.com"
+        git config --global user.name "Github Actions CI"
+    
+    - name: debug
+      run: echo ${{github}}
+        
