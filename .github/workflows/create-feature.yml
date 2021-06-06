@@ -20,5 +20,5 @@ jobs:
         git config --global user.name "Github Actions CI"
     
     - name: debug
-      run: echo ${{github}}
+      run: echo ${{ toJSON(github) }}
         
