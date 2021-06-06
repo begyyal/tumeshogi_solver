@@ -14,11 +14,14 @@ jobs:
 
     steps:
     
+    - uses: actions/checkout@v2
+
     - name: Set git configs
       run: |
         git config --global user.email "llll@example.com"
         git config --global user.name "Github Actions CI"
     
-    - name: debug
-      run: echo ${{ toJSON(github) }}
-        
+    - name: Create branch
+      run: |
+        git checkout -b feature/${{ github.event.issue.number }}
+        git push origin feature/${{ github.event.issue.number }}
