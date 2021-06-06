@@ -22,6 +22,6 @@ jobs:
         git config --global user.name "Github Actions CI"
     
     - name: Delete branch
-      if: contains($(git branch -a --format="%(refname:short)"), "feature/${{ github.event.issue.number }}")
+      shell: bash
       run: |
-        git push --delete origin feature/${{ github.event.issue.number }}
+        git push --delete origin feature/${{ github.event.issue.number }} || :
