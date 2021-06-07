@@ -43,6 +43,6 @@ jobs:
       if: success()
       run: |
         git fetch
-        git pull develop
+        git pull origin develop
         git push origin master
         
