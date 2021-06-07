@@ -2,6 +2,7 @@ name: Post processing of the PR
 
 on:
   pull_request:
+    branches: [ develop ]
     types: [ closed ]
 
 jobs:
