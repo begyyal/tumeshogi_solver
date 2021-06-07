@@ -22,9 +22,9 @@ jobs:
       id: ready
       shell: bash
       run: |
-        issue-url=${{github.event.pull_request.issue_url}}
+        issue_url_base=${{github.event.pull_request.issue_url}}
         branch=${{github.head_ref}}
-        echo "::set-output name=issue-url::${issue-url%/*}/${branch#feature/}"
+        echo "::set-output name=issue-url::${issue_url_base%/*}/${branch#feature/}"
 
     - name: Close issue
       uses: ./.github/actions/act_access_ghra
