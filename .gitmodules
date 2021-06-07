@@ -1,0 +1,3 @@
+[submodule ".github/actions/act_access_ghra"]
+	path = .github/actions/act_access_ghra
+	url = https://github.com/begyyal/act_access_ghra.git
