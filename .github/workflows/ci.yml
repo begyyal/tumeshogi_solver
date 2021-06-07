@@ -39,10 +39,15 @@ jobs:
       with:
         ref: master
 
+    - name: debug
+      shell: bash
+      run: echo "${GITHUB_REF}"
+
     - name: Push to master
       if: success()
       run: |
         git fetch
-        git pull origin develop --allow-unrelated-histories
+        git checkout "${GITHUB_REF:11}"
+        git pull origin develop
         git push origin master
         
