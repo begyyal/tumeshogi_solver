@@ -32,4 +32,4 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         url: ${{ steps.ready.outputs.issue-url }}
         method: 'PATCH'
-        arg: '{"state"="closed"}'
+        arg: '{"state":"closed"}'
