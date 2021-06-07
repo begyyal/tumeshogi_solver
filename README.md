@@ -1,3 +1,5 @@
+[![Java CI with Gradle](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/ci.yml/badge.svg)](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/ci.yml)
+
 # 概要
 
 詰将棋を解くプログラムです。  
