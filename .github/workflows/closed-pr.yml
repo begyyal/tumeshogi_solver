@@ -15,6 +15,9 @@ jobs:
       with:
         submodules: true
 
+    - name: Update submodules
+      run: git submodule update --remote
+
     - name: Close issue
       uses: ./.github/actions/act_access_ghra
       with:
