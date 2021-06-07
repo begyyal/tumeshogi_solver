@@ -16,7 +16,7 @@ jobs:
         submodules: true
 
     - name: Close issue
-      uses: actions/act_access_ghra
+      uses: actions/act_access_ghra@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         url: ${{ github.event.issue.url }}
