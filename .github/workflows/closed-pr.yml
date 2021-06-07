@@ -26,6 +26,6 @@ jobs:
       uses: ./.github/actions/act_access_ghra
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        url: "hoge"
+        url: "${{github.event.pull_request.issue_url%/*}}/${{github.head_ref#feature/}}"
         method: 'PATCH'
         arg: '{"state"="close"}'
