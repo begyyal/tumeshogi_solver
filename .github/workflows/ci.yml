@@ -39,6 +39,10 @@ jobs:
       with:
         ref: master
 
+    - name: debug
+      shell: bash
+      run: echo "${GITHUB_REF}"
+
     - name: Push to master
       if: success()
       run: |
