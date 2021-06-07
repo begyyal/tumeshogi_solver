@@ -18,10 +18,14 @@ jobs:
     - name: Update submodules
       run: git submodule update --remote
 
+    - name: debug
+      shell: bash
+      run: echo ${{github}}
+
     - name: Close issue
       uses: ./.github/actions/act_access_ghra
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        url: ${{ github.event.issue.url }}
+        url: "hoge"
         method: 'PATCH'
         arg: '{"state"="close"}'
