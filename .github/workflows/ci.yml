@@ -58,7 +58,6 @@ jobs:
     - name: Push to master
       if: success()
       run: |
-        git fetch
-        git pull origin develop
+        git merge develop
         git push origin master
         
