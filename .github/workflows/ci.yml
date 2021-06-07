@@ -14,40 +14,49 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: true
+ 
+    - name: Set git configs
+      run: |
+        git config --global user.email "llll@example.com"
+        git config --global user.name "Github Actions CI"
+
+    - name: Attach HEAD
+      run: git checkout "${GITHUB_REF:11}"
+
+    - name: Update submodules
+      run: git submodule update --remote
+
     - name: Set up JDK 15
       uses: actions/setup-java@v2
       with:
         java-version: '15'
         distribution: 'adopt'
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+
     - name: Build with Gradle
       run: ./gradlew build
 
 #     - name: Test
 #       run: test.sh
       
-    - name: Set git configs
+    - name: Push develop if needed
       run: |
-        git config --global user.email "llll@example.com"
-        git config --global user.name "Github Actions CI"
-
-    - name: Revert this branch
-      run: git reset --hard HEAD
+        git diff --exit-code || \
+        git add . && git commit -m "BY-CI" && git push origin HEAD
 
     - uses: actions/checkout@v2
+      if: success()
       with:
         ref: master
-
-    - name: debug
-      shell: bash
-      run: echo "${GITHUB_REF}"
 
     - name: Push to master
       if: success()
       run: |
         git fetch
-        git checkout "${GITHUB_REF:11}"
         git pull origin develop
         git push origin master
         
