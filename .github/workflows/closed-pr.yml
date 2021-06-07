@@ -20,7 +20,7 @@ jobs:
 
     - name: debug
       shell: bash
-      run: echo ${{github}}
+      run: echo ${{toJson(github)}}
 
     - name: Close issue
       uses: ./.github/actions/act_access_ghra
