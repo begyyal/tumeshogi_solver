@@ -53,6 +53,9 @@ jobs:
       with:
         ref: master
 
+    - name: Attach HEAD
+      run: git checkout "${GITHUB_REF:11}"
+
     - name: Push to master
       if: success()
       run: |
