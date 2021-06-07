@@ -43,6 +43,7 @@ jobs:
       if: success()
       run: |
         git fetch
-        git pull origin develop --allow-unrelated-histories
+        git checkout "${GITHUB_REF:11}"
+        git pull origin develop
         git push origin master
         
