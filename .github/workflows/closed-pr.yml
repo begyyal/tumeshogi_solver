@@ -18,14 +18,18 @@ jobs:
     - name: Update submodules
       run: git submodule update --remote
 
-    - name: debug
+    - name: Construct the issue's url 
+      id: ready
       shell: bash
-      run: echo ${{toJson(github)}}
+      run: |
+        issue-url=${{github.event.pull_request.issue_url}}
+        branch=${{github.head_ref}}
+        echo "::set-output name=issue-url::${issue-url%/*}/${branch#feature/}"
 
     - name: Close issue
       uses: ./.github/actions/act_access_ghra
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        url: "${{github.event.pull_request.issue_url%/*}}/${{github.head_ref#feature/}}"
+        url: ${{ steps.ready.issue-url }}
         method: 'PATCH'
         arg: '{"state"="close"}'
