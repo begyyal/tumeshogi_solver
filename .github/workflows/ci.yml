@@ -47,11 +47,6 @@ jobs:
       run: |
         git diff --exit-code || (git add . && git commit -m "BY-CI" && git push origin HEAD)
 
-    - uses: actions/checkout@v2
-      if: success()
-      with:
-        ref: master
-
     - name: Attach HEAD
       run: git checkout master
 
