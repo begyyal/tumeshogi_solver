@@ -43,6 +43,6 @@ jobs:
       if: success()
       run: |
         git fetch
-        git pull origin develop
+        git pull origin develop --allow-unrelated-histories
         git push origin master
         
