@@ -47,8 +47,10 @@ jobs:
       run: |
         git diff --exit-code || (git add . && git commit -m "BY-CI" && git push origin HEAD)
 
-    - name: Attach HEAD
-      run: git checkout master
+    - name: Checkout master
+      run: |
+        git fetch
+        git checkout master
 
     - name: Push to master
       if: success()
