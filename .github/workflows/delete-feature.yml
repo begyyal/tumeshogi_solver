@@ -1,6 +1,7 @@
 name: Delete feature branch
 
 on:
+  workflow_dispatch: 
   issues:
     types: [ closed, deleted ]
 
