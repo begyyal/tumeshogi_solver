@@ -15,6 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
+        fetch-depth: 0
         submodules: true
  
     - name: Set git configs
@@ -47,14 +48,11 @@ jobs:
       run: |
         git diff --exit-code || (git add . && git commit -m "BY-CI" && git push origin HEAD)
 
-    - name: Checkout master
-      run: |
-        git fetch
-        git checkout master
-
     - name: Push to master
       if: success()
       run: |
+        git fetch
+        git checkout master
         git merge develop
         git push origin master
         
