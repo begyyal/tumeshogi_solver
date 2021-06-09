@@ -1,4 +1,9 @@
+- **品質担保**  
 [![Java CI with Gradle](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/ci.yml/badge.svg)](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/ci.yml)
+- **開発補助**  
+[![Create feature branch](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/create-feature.yml/badge.svg)](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/create-feature.yml)  
+[![Delete feature branch](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/delete-feature.yml/badge.svg)](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/delete-feature.yml)  
+[![Post processing of the PR](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/closed-pr.yml/badge.svg)](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/closed-pr.yml)
 
 # 概要
 
