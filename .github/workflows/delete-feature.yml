@@ -20,5 +20,5 @@ jobs:
     - name: Delete feature branches
       uses: ./.github/actions/act_delete_feature
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.PAT_REPO }}
         repos: ${{ github.repository }}
