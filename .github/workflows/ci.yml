@@ -18,8 +18,8 @@ jobs:
         fetch-depth: 0
         submodules: true
  
-  - name: debug
-    run: echo ${{github}}
+    - name: debug
+      run: echo ${{github}}
 
     - name: Set git configs
       run: |
