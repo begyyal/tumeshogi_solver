@@ -17,9 +17,6 @@ jobs:
       with:
         fetch-depth: 0
         submodules: true
- 
-    - name: debug
-      run: echo ${{toJSON(github)}}
 
     - name: Set git configs
       run: |
