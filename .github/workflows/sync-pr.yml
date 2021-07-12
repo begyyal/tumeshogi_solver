@@ -9,7 +9,7 @@ jobs:
   sync-pr:
 
     runs-on: ubuntu-latest
-    if: ${{ startsWith(github.base_ref, 'feature/') }}
+    if: ${{ startsWith(github.head_ref, 'feature/') }}
 
     steps:
     
@@ -21,7 +21,7 @@ jobs:
       id: ready
       shell: bash
       run: |
-        branch=${{github.base_ref}}
+        branch=${{github.head_ref}}
         echo "::set-output name=issue-no::${branch#feature/}"
 
     - name: Revise target feature's comments
