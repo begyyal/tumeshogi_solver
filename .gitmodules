@@ -1,6 +1,3 @@
 [submodule ".github/actions/act_access_ghra"]
 	path = .github/actions/act_access_ghra
 	url = https://github.com/begyyal/act_access_ghra.git
-[submodule ".github/actions/act_delete_feature"]
-	path = .github/actions/act_delete_feature
-	url = https://github.com/begyyal/act_delete_feature.git
