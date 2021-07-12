@@ -14,11 +14,10 @@ jobs:
 
     - uses: actions/checkout@v2
       with:
-        fetch-depth: 0
-        submodules: true
+        repository: 'begyyal/act_delete_feature'
 
     - name: Delete feature branches
-      uses: ./.github/actions/act_delete_feature
+      uses: ./
       with:
         token: ${{ secrets.PAT_REPO }}
         repos: ${{ github.repository }}
