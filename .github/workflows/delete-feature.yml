@@ -12,12 +12,9 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v2
-      with:
-        repository: 'begyyal/act_delete_feature'
+    - name: Clone repo
+      shell: bash
+      run: git clone https://github.com/begyyal/act_delete_feature.git
 
     - name: Delete feature branches
-      uses: ./
-      with:
-        token: ${{ secrets.PAT_REPO }}
-        repos: ${{ github.repository }}
+      uses: ./act_delete_feature
