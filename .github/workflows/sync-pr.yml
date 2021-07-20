@@ -20,11 +20,11 @@ jobs:
         branch=${{github.head_ref}}
         echo "::set-output name=issue-no::${branch#feature/}"
 
-    - name: Revise target feature's comments
+    - name: Clone repo
       shell: bash
-      run: |
-        git clone https://github.com/begyyal/sh_revise_comments.git
-        ./sh_revise_comments/main.sh \
-        ${{ secrets.GITHUB_TOKEN }} \
-        ${{ github.repository }} \
-        ${{ steps.ready.outputs.issue-no }}
+      run: git clone https://github.com/begyyal/act_revise_comments.git
+
+    - name: Revise target feature's comments
+      uses: ./act_revise_comments
+      with:
+        issueNo: ${{ steps.ready.outputs.issue-no }}
