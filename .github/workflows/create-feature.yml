@@ -17,8 +17,8 @@ jobs:
 
     - name: Set git configs
       run: |
-        git config --global user.email "llll@example.com"
-        git config --global user.name "Github Actions CI"
+        git config --global user.email "begyyal@gmail.com"
+        git config --global user.name "begyyal-ghost"
     
     - name: Create branch
       run: |
