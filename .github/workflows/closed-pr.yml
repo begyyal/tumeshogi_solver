@@ -31,7 +31,6 @@ jobs:
     - name: Close issue
       uses: ./act_access_ghra
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
         url: ${{ steps.ready.outputs.issue-url }}
         method: 'PATCH'
         arg: '{"state":"closed"}'
