@@ -4,10 +4,8 @@
 name: Java CI with Gradle
 
 on:
-  workflow_run:
-    workflows: [ "Post processing of the PR" ]
+  push:
     branches: [ develop ]
-    types: [ completed ] 
 
 jobs:
   main:
@@ -26,7 +24,7 @@ jobs:
         git config --global user.name "begyyal-ghost"
 
     - name: Attach HEAD
-      run: git checkout "${GITHUB_REF:11}"
+      run: git checkout develop
 
     # - name: Update submodules
     #   run: git submodule update --remote

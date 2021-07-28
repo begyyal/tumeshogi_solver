@@ -14,11 +14,9 @@ jobs:
     steps:
     
     - name: Clone repo
-      shell: bash
-      run: |
-        git clone https://github.com/begyyal/act_access_ghra.git
+      run: git clone https://github.com/begyyal/act_access_ghra.git
 
-    - name: Prepare vars.
+    - name: Prepare vars
       id: ready
       shell: bash
       run: |
@@ -36,25 +34,27 @@ jobs:
   revise-comments:
 
     runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.merged }}
+    if: ${{ startsWith(github.head_ref, 'feature/') && github.event.pull_request.merged }}
 
     steps:
     
     - name: Clone repo
-      shell: bash
-      run: |
-        git clone https://github.com/begyyal/act_revise_comments.git
+      run: git clone https://github.com/begyyal/act_revise_comments.git
 
-    - name: Prepare vars.
+    - name: Prepare vars
       id: ready
       shell: bash
       run: |
         branch=${{ github.head_ref }}
         echo "::set-output name=issue-no::${branch#feature/}"
 
-    - name: Revise target feature's comments
+    - name: Prepend issue no to comments
       uses: ./act_revise_comments
       with:
-        issueNo: ${{ steps.ready.outputs.issue-no }}
+        prefix: '#'${{ steps.ready.outputs.issue-no }}
         branch: ${{ github.base_ref }}
-        baseBranch: 'master'
+        from: 'master'
+        to: 'snapshot/'${{ steps.ready.outputs.issue-no }}
+
+    - name: Delete snapshot
+      run: git push origin 'snapshot/'${{ steps.ready.outputs.issue-no }} --delete
