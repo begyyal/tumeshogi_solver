@@ -6,7 +6,7 @@ on:
     types: [ closed ]
 
 jobs:
-  closed-pr:
+  close-issue:
 
     runs-on: ubuntu-latest
     if: ${{ startsWith(github.head_ref, 'feature/') }}
@@ -16,16 +16,14 @@ jobs:
     - name: Clone repo
       shell: bash
       run: |
-        git clone https://github.com/begyyal/act_revise_comments.git
         git clone https://github.com/begyyal/act_access_ghra.git
 
     - name: Prepare vars.
       id: ready
       shell: bash
       run: |
-        issue_url_base=${{github.event.pull_request.issue_url}}
-        branch=${{github.head_ref}}
-        echo "::set-output name=issue-no::${branch#feature/}"
+        issue_url_base=${{ github.event.pull_request.issue_url }}
+        branch=${{ github.head_ref }}
         echo "::set-output name=issue-url::${issue_url_base%/*}/${branch#feature/}"
 
     - name: Close issue
@@ -34,6 +32,25 @@ jobs:
         url: ${{ steps.ready.outputs.issue-url }}
         method: 'PATCH'
         arg: '{"state":"closed"}'
+
+  revise-comments:
+
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.merged }}
+
+    steps:
+    
+    - name: Clone repo
+      shell: bash
+      run: |
+        git clone https://github.com/begyyal/act_revise_comments.git
+
+    - name: Prepare vars.
+      id: ready
+      shell: bash
+      run: |
+        branch=${{ github.head_ref }}
+        echo "::set-output name=issue-no::${branch#feature/}"
 
     - name: Revise target feature's comments
       uses: ./act_revise_comments
