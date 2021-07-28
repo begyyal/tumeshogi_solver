@@ -51,10 +51,10 @@ jobs:
     - name: Prepend issue no to comments
       uses: ./act_revise_comments
       with:
-        prefix: '#'${{ steps.ready.outputs.issue-no }}
+        prefix: "'#'${{ steps.ready.outputs.issue-no }}"
         branch: ${{ github.base_ref }}
         from: 'master'
-        to: 'snapshot/'${{ steps.ready.outputs.issue-no }}
+        to: "'snapshot/'${{ steps.ready.outputs.issue-no }}"
 
     - name: Delete snapshot
       run: git push origin 'snapshot/'${{ steps.ready.outputs.issue-no }} --delete
