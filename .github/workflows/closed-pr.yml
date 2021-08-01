@@ -6,6 +6,7 @@ on:
     types: [ closed ]
 
 jobs:
+
   close-issue:
 
     runs-on: ubuntu-latest
@@ -13,7 +14,7 @@ jobs:
 
     steps:
     
-    - name: Clone repo
+    - name: Clone a repo
       run: git clone https://github.com/begyyal/act_access_ghra.git
 
     - name: Prepare vars
@@ -38,8 +39,10 @@ jobs:
 
     steps:
     
-    - name: Clone repo
-      run: git clone https://github.com/begyyal/act_revise_comments.git
+    - name: Clone repos
+      run: |
+        git clone https://github.com/begyyal/act_await_wf_completion.git
+        git clone https://github.com/begyyal/act_revise_comments.git
 
     - name: Prepare vars
       id: ready
@@ -47,6 +50,11 @@ jobs:
       run: |
         branch=${{ github.head_ref }}
         echo "::set-output name=issue-no::${branch#feature/}"
+
+    - name: Wait
+      uses: ./act_await_wf_completion
+      with:
+        workflowName: 'Update process of the PR'
 
     - name: Prepend issue no to comments
       uses: ./act_revise_comments
