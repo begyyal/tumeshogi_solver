@@ -72,6 +72,10 @@ jobs:
 
     steps:
   
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    
     - name: Delete snapshot
       run: git push origin 'snapshot/'${{ steps.ready.outputs.issue-no }} --delete
   
