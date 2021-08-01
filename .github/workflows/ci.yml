@@ -12,13 +12,18 @@ jobs:
     steps:
     
     - name: Clone a repo
-      run: git clone https://github.com/begyyal/act_await_wf_completion.git
+      run: git clone https://github.com/begyyal/act_await_wf_execution.git
 
-    - name: Wait
-      uses: ./act_await_wf_completion
+    - name: Wait for a start
+      uses: ./act_await_wf_execution
       with:
         workflowName: 'Post processing of the PR'
-        timeoutSec: 180
+        awaitStartFlag: true
+
+    - name: Wait for a completion
+      uses: ./act_await_wf_execution
+      with:
+        workflowName: 'Post processing of the PR'
 
     - uses: actions/checkout@v2
       with:
