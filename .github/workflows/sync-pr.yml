@@ -3,28 +3,28 @@ name: Update process of the PR
 on:
   pull_request:
     branches: [ develop ]
-    types: [ opened, synchronize ]
+    types: [ open, synchronize ]
 
 jobs:
-  sync-pr:
+  save-snapshot:
 
     runs-on: ubuntu-latest
     if: ${{ startsWith(github.head_ref, 'feature/') }}
 
     steps:
 
-    - name: Extract the issue no
-      id: ready
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Attach HEAD
+      run: git checkout ${{ github.head_ref }}
+
+    - name: Create snapshot
       shell: bash
       run: |
-        branch=${{github.head_ref}}
-        echo "::set-output name=issue-no::${branch#feature/}"
-
-    - name: Clone repo
-      shell: bash
-      run: git clone https://github.com/begyyal/act_revise_comments.git
-
-    - name: Revise target feature's comments
-      uses: ./act_revise_comments
-      with:
-        issueNo: ${{ steps.ready.outputs.issue-no }}
+        branch=${{ github.head_ref }}
+        snapshot=snapshot${branch#feature}
+        [ -n "$(git branch -r | sed 's/ //g' | grep -e ^origin/$snapshot)" ] && git push origin $snapshot --delete
+        git checkout -b $snapshot
+        git push origin $snapshot

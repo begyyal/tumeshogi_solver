@@ -6,32 +6,72 @@ on:
     types: [ closed ]
 
 jobs:
-  closed-pr:
+
+  close-issue:
 
     runs-on: ubuntu-latest
     if: ${{ startsWith(github.head_ref, 'feature/') }}
 
     steps:
     
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
+    - name: Clone a repo
+      run: git clone https://github.com/begyyal/act_access_ghra.git
 
-    - name: Update submodules
-      run: git submodule update --remote
-
-    - name: Construct the issue's url 
+    - name: Prepare vars
       id: ready
       shell: bash
       run: |
-        issue_url_base=${{github.event.pull_request.issue_url}}
-        branch=${{github.head_ref}}
+        issue_url_base=${{ github.event.pull_request.issue_url }}
+        branch=${{ github.head_ref }}
         echo "::set-output name=issue-url::${issue_url_base%/*}/${branch#feature/}"
 
     - name: Close issue
-      uses: ./.github/actions/act_access_ghra
+      uses: ./act_access_ghra
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
         url: ${{ steps.ready.outputs.issue-url }}
         method: 'PATCH'
         arg: '{"state":"closed"}'
+
+  revise-comments:
+
+    runs-on: ubuntu-latest
+    if: ${{ startsWith(github.head_ref, 'feature/') && github.event.pull_request.merged }}
+
+    steps:
+    
+    - name: Clone repos
+      run: |
+        git clone https://github.com/begyyal/act_await_wf_completion.git
+        git clone https://github.com/begyyal/act_revise_comments.git
+
+    - name: Prepare vars
+      id: ready
+      shell: bash
+      run: |
+        branch=${{ github.head_ref }}
+        echo "::set-output name=issue-no::${branch#feature/}"
+
+    - name: Wait
+      uses: ./act_await_wf_completion
+      with:
+        workflowName: 'Update process of the PR'
+
+    - name: Prepend issue no to comments
+      uses: ./act_revise_comments
+      with:
+        prefix: "'#'${{ steps.ready.outputs.issue-no }}"
+        branch: ${{ github.base_ref }}
+        from: 'master'
+        to: "'snapshot/'${{ steps.ready.outputs.issue-no }}"
+
+  termination:
+
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [ revise-comments ]
+
+    steps:
+  
+    - name: Delete snapshot
+      run: git push origin 'snapshot/'${{ steps.ready.outputs.issue-no }} --delete
+  
