@@ -64,5 +64,14 @@ jobs:
         from: 'master'
         to: "'snapshot/'${{ steps.ready.outputs.issue-no }}"
 
+  termination:
+
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [ revise-comments ]
+
+    steps:
+  
     - name: Delete snapshot
       run: git push origin 'snapshot/'${{ steps.ready.outputs.issue-no }} --delete
+  
