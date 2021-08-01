@@ -59,10 +59,10 @@ jobs:
     - name: Prepend issue no to comments
       uses: ./act_revise_comments
       with:
-        prefix: "'#'${{ steps.ready.outputs.issue-no }}"
+        prefix: "#${{ steps.ready.outputs.issue-no }}"
         branch: ${{ github.base_ref }}
         from: 'master'
-        to: "'snapshot/'${{ steps.ready.outputs.issue-no }}"
+        to: "snapshot/${{ steps.ready.outputs.issue-no }}"
 
   termination:
 
@@ -72,6 +72,17 @@ jobs:
 
     steps:
   
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Prepare vars
+      id: ready
+      shell: bash
+      run: |
+        branch=${{ github.head_ref }}
+        echo "::set-output name=issue-no::${branch#feature/}"
+
     - name: Delete snapshot
       run: git push origin 'snapshot/'${{ steps.ready.outputs.issue-no }} --delete
   
