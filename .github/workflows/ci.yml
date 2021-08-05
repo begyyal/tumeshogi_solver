@@ -5,6 +5,7 @@ on:
     branches: [ develop ]
 
 jobs:
+
   main:
 
     runs-on: ubuntu-latest
@@ -12,13 +13,12 @@ jobs:
     steps:
     
     - name: Clone a repo
-      run: git clone https://github.com/begyyal/act_await_wf_completion.git
+      run: git clone https://github.com/begyyal/act_await_wf_execution.git
 
-    - name: Wait
-      uses: ./act_await_wf_completion
+    - name: Wait for a completion
+      uses: ./act_await_wf_execution
       with:
         workflowName: 'Post processing of the PR'
-        timeoutSec: 180
 
     - uses: actions/checkout@v2
       with:

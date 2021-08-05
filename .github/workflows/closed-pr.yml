@@ -41,7 +41,7 @@ jobs:
     
     - name: Clone repos
       run: |
-        git clone https://github.com/begyyal/act_await_wf_completion.git
+        git clone https://github.com/begyyal/act_await_wf_execution.git
         git clone https://github.com/begyyal/act_revise_comments.git
 
     - name: Prepare vars
@@ -52,7 +52,7 @@ jobs:
         echo "::set-output name=issue-no::${branch#feature/}"
 
     - name: Wait
-      uses: ./act_await_wf_completion
+      uses: ./act_await_wf_execution
       with:
         workflowName: 'Update process of the PR'
 
