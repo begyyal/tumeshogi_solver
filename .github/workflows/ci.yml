@@ -20,6 +20,10 @@ jobs:
       with:
         workflowName: 'Post processing of the PR'
 
+    - name: wait
+      shell: bash
+      run: sleep 10
+
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
