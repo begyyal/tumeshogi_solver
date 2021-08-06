@@ -12,6 +12,11 @@ jobs:
 
     steps:
     
+    - name: Set git configs
+      run: |
+        git config --global user.email "begyyal@gmail.com"
+        git config --global user.name "begyyal-ghost"
+    
     - name: Clone a repo
       run: git clone https://github.com/begyyal/act_await_wf_execution.git
 
@@ -25,13 +30,11 @@ jobs:
         fetch-depth: 0
 #        submodules: true
 
-    - name: Set git configs
-      run: |
-        git config --global user.email "begyyal@gmail.com"
-        git config --global user.name "begyyal-ghost"
-
     - name: Attach HEAD
-      run: git checkout develop
+      run: |
+        git checkout master
+        git branch -D develop
+        git checkout develop
 
     # - name: Update submodules
     #   run: git submodule update --remote
