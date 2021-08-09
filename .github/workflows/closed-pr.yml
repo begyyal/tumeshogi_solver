@@ -30,7 +30,7 @@ jobs:
       with:
         url: ${{ steps.ready.outputs.issue-url }}
         method: 'PATCH'
-        arg: '{"state":"closed"}'
+        args: '{"state":"closed"}'
 
   revise-comments:
 
