@@ -82,12 +82,6 @@ public class BanContext {
 	this.log.add(ban);
     }
 
-    // TODO
-    public BanContext branch(BranchParam param) {
-	return branch(
-	    param.latestBan, param.latestState, param.koma, param.player, param.isAddition);
-    }
-
     public BanContext branch(
 	Ban latestBan,
 	MasuState latestState,
@@ -173,15 +167,5 @@ public class BanContext {
 
     public static BanContext newi(String banStr, String motigomaStr) {
 	return new BanContext(banStr, motigomaStr);
-    }
-
-    // TODO
-    @SuppressWarnings("preview")
-    public record BranchParam(
-	    Ban latestBan,
-	    MasuState latestState,
-	    Koma koma,
-	    Player player,
-	    boolean isAddition) {
     }
 }

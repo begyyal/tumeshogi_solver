@@ -9,7 +9,6 @@ import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
-import begyyal.shogi.object.BanContext.BranchParam;
 import begyyal.shogi.object.MasuState;
 
 public class OpponentProcessor extends PlayerProcessorBase {
@@ -33,15 +32,10 @@ public class OpponentProcessor extends PlayerProcessorBase {
 		var newBan = ban.clone();
 		var k = newBan.advance(opponentOu.x, opponentOu.y, s.x, s.y, false);
 		var dest = newBan.getState(s.x, s.y);
-		return new BranchParam(newBan, dest, k, PlayerType, true);
-	    })
-	    .filter(bp -> bp.latestState().rangedBy
-		.stream()
-		.map(r -> bp.latestBan().getState(r.getLeft(), r.getRight()))
-		.filter(s -> s.player != PlayerType)
-		.findFirst()
-		.isEmpty())
-	    .map(bp -> context.branch(bp));
+		return checkingSafe(newBan, dest)
+			? context.branch(newBan, dest, k, PlayerType, true)
+			: null;
+	    });
 
 	var outeArray = opponentOu.rangedBy
 	    .stream()
@@ -49,7 +43,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	    .filter(s -> s.player != PlayerType)
 	    .toArray(MasuState[]::new);
 	if (outeArray.length > 1)
-	    return cs1.toArray(BanContext[]::new);
+	    return cs1.filter(c -> c != null).toArray(BanContext[]::new);
 
 	// 王手駒を取得する(王による取得は含まず)
 	var outeState = outeArray[0];
@@ -67,18 +61,11 @@ public class OpponentProcessor extends PlayerProcessorBase {
 			var k = newBan.advance(
 			    from.x, from.y, outeState.x, outeState.y, tryNari.getAndReverse());
 			var dest = newBan.getState(outeState.x, outeState.y);
-			return new BranchParam(newBan, dest, k, PlayerType, true);
+			return checkingSafe(newBan)
+				? context.branch(newBan, dest, k, PlayerType, true)
+				: null;
 		    });
-	    })
-	    .filter(bp -> bp.latestBan().search(s -> this.isOpponentOu(s))
-		.findFirst()
-		.get().rangedBy
-		    .stream()
-		    .map(r -> bp.latestBan().getState(r.getLeft(), r.getRight()))
-		    .filter(s -> s.player != PlayerType)
-		    .findFirst()
-		    .isEmpty())
-	    .map(bp -> context.branch(bp));
+	    });
 
 	// 持ち駒を貼る
 	var outeVector = opponentOu.getVectorTo(outeState);
@@ -94,13 +81,32 @@ public class OpponentProcessor extends PlayerProcessorBase {
 			    var newBan = ban.clone();
 			    int x = opponentOu.x + v.x(), y = opponentOu.y + v.y();
 			    var s = newBan.deploy(k, x, y, PlayerType);
-			    return s == MasuState.Invalid ? null
-				    : new BranchParam(newBan, s, k, PlayerType, false);
-			}))
-		    .filter(bp -> bp != null)
-		    .map(bp -> context.branch(bp));
+			    return s == MasuState.Invalid
+				    ? null
+				    : context.branch(newBan, s, k, PlayerType, false);
+			}));
 
-	return Stream.concat(Stream.concat(cs1, cs2), cs3).toArray(BanContext[]::new);
+	return Stream.concat(Stream.concat(cs1, cs2), cs3)
+	    .filter(c -> c != null)
+	    .toArray(BanContext[]::new);
+    }
+
+    private boolean checkingSafe(Ban ban) {
+	return checkingSafe(ban, null);
+    }
+
+    private boolean checkingSafe(Ban ban, MasuState ouState) {
+	var ou = ouState == null
+		? ban.search(s -> this.isOpponentOu(s))
+		    .findFirst()
+		    .get()
+		: ouState;
+	return ou.rangedBy
+	    .stream()
+	    .map(r -> ban.getState(r.getLeft(), r.getRight()))
+	    .filter(s -> s.player != PlayerType)
+	    .findFirst()
+	    .isEmpty();
     }
 
     @Override
