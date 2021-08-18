@@ -46,11 +46,11 @@ jobs:
         branch=${{ github.head_ref }}
         echo "::set-output name=issue-no::${branch#feature/}"
 
-    - uses: begyyal/act_await_wf_execution@v0
+    - uses: begyyal/act_await_wf_execution@v0.1
       with:
         workflowName: 'Update process of the PR'
 
-    - uses: begyyal/act_revise_comments@v0
+    - uses: begyyal/act_revise_comments@v0.1
       with:
         prefix: "#${{ steps.ready.outputs.issue-no }}"
         branch: ${{ github.base_ref }}

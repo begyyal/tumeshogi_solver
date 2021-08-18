@@ -17,7 +17,7 @@ jobs:
         git config --global user.email "begyyal@gmail.com"
         git config --global user.name "begyyal-ghost"
 
-    - uses: begyyal/act_await_wf_execution@v0
+    - uses: begyyal/act_await_wf_execution@v0.1
       with:
         workflowName: 'Post processing of the PR'
 
