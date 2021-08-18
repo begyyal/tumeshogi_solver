@@ -39,8 +39,8 @@ public class Entrypoint {
     public static class TRLogger {
 
 	private static boolean isAvailable = false;
-	private static final String const1 = "[DEBUG][FROM]";
-	private static final String const2 = "[DEBUG][PRINT]";
+	private static final String const1 = "[DEBUG][FROM] ";
+	private static final String const2 = "[DEBUG][PRINT] ";
 
 	public static void print(Object target) {
 	    if (!isAvailable)
