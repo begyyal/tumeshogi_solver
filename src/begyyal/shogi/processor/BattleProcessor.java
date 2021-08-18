@@ -218,9 +218,8 @@ public class BattleProcessor implements Closeable {
 
 	private boolean next(BanContext acon, Set<BanContext> results, int count)
 	    throws InterruptedException, ExecutionException {
-	    return count > numOfMoves
-		    ? true
-		    : this.tools.exe.submit(
+	    return count > numOfMoves ||
+		    this.tools.exe.submit(
 			count % 2 == 0
 				? () -> this.processSelf(acon, results, count + 1)
 				: () -> this.processOpponent(acon, results, count + 1))
