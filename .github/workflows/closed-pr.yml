@@ -39,11 +39,6 @@ jobs:
 
     steps:
     
-    - name: Clone repos
-      run: |
-        git clone https://github.com/begyyal/act_await_wf_execution.git
-        git clone https://github.com/begyyal/act_revise_comments.git
-
     - name: Prepare vars
       id: ready
       shell: bash
@@ -51,13 +46,11 @@ jobs:
         branch=${{ github.head_ref }}
         echo "::set-output name=issue-no::${branch#feature/}"
 
-    - name: Wait
-      uses: ./act_await_wf_execution
+    - uses: begyyal/act_await_wf_execution@v0.1
       with:
         workflowName: 'Update process of the PR'
 
-    - name: Prepend issue no to comments
-      uses: ./act_revise_comments
+    - uses: begyyal/act_revise_comments@v0.1
       with:
         prefix: "#${{ steps.ready.outputs.issue-no }}"
         branch: ${{ github.base_ref }}
