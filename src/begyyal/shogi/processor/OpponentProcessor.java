@@ -69,7 +69,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 
 	// 持ち駒を貼る
 	var outeVector = opponentOu.getVectorTo(outeState);
-	boolean outeIsNotLinear = Math.abs(outeVector.x()) == 1 || Math.abs(outeVector.y()) == 1;
+	boolean outeIsNotLinear = Math.abs(outeVector.x) == 1 || Math.abs(outeVector.y) == 1;
 	var cs3 = context.opponentMotigoma.isEmpty() || outeIsNotLinear
 		? Stream.empty()
 		: Arrays.stream(MatrixResolver.decompose(outeVector))
@@ -79,7 +79,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 			.distinct()
 			.map(k -> {
 			    var newBan = ban.clone();
-			    int x = opponentOu.x + v.x(), y = opponentOu.y + v.y();
+			    int x = opponentOu.x + v.x, y = opponentOu.y + v.y;
 			    var s = newBan.deploy(k, x, y, PlayerType);
 			    return s == MasuState.Invalid
 				    ? null

@@ -89,7 +89,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    var v = s.getVectorTo(opponentOu);
 	    return s.player == PlayerType
 		    && MasuState.isLinearRange(s)
-		    && (v.x() == 0 || v.y() == 0 || Math.abs(v.x() / v.y()) == 1);
+		    && (v.x == 0 || v.y == 0 || Math.abs(v.x / v.y) == 1);
 	}).toArray(MasuState[]::new);
 	if (candidates.length == 0)
 	    return Stream.empty();

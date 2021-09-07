@@ -1,0 +1,47 @@
+Manifest-Version: 1.0
+Export-Package: org.apache.commons.collections4;version="4.1",org.apac
+ he.commons.collections4.bag;version="4.1",org.apache.commons.collecti
+ ons4.bidimap;version="4.1",org.apache.commons.collections4.collection
+ ;version="4.1",org.apache.commons.collections4.comparators;version="4
+ .1",org.apache.commons.collections4.functors;version="4.1",org.apache
+ .commons.collections4.iterators;version="4.1",org.apache.commons.coll
+ ections4.keyvalue;version="4.1",org.apache.commons.collections4.list;
+ version="4.1",org.apache.commons.collections4.map;version="4.1",org.a
+ pache.commons.collections4.multimap;version="4.1",org.apache.commons.
+ collections4.multiset;version="4.1",org.apache.commons.collections4.q
+ ueue;version="4.1",org.apache.commons.collections4.sequence;version="
+ 4.1",org.apache.commons.collections4.set;version="4.1",org.apache.com
+ mons.collections4.splitmap;version="4.1",org.apache.commons.collectio
+ ns4.trie;version="4.1",org.apache.commons.collections4.trie.analyzer;
+ version="4.1"
+Implementation-Title: Apache Commons Collections
+Built-By: tn
+Tool: Bnd-2.3.0.201405100607
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.6))"
+Implementation-Vendor: The Apache Software Foundation
+Implementation-Vendor-Id: org.apache
+Specification-Title: Apache Commons Collections
+Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
+Bundle-SymbolicName: org.apache.commons.collections4
+X-Compile-Target-JDK: 1.6
+Implementation-Version: 4.1
+Specification-Vendor: The Apache Software Foundation
+Bundle-Name: Apache Commons Collections
+Created-By: Apache Maven Bundle Plugin
+X-Compile-Source-JDK: 1.6
+Bundle-Vendor: The Apache Software Foundation
+Build-Jdk: 1.7.0_79
+Bundle-Version: 4.1.0
+Bnd-LastModified: 1448488418679
+Bundle-ManifestVersion: 2
+Bundle-Description: The Apache Commons Collections package contains ty
+ pes that extend and augment the Java Collections Framework.
+Bundle-DocURL: http://commons.apache.org/proper/commons-collections/
+Import-Package: org.w3c.dom
+Include-Resource: META-INF/NOTICE.txt=NOTICE.txt,META-INF/LICENSE.txt=
+ LICENSE.txt
+Specification-Version: 4.1
+Implementation-Build: tags/COLLECTIONS_4_1_RC2@r1716550; 2015-11-25 22
+ :53:13+0100
+Archiver-Version: Plexus Archiver
+
