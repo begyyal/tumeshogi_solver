@@ -78,7 +78,7 @@ public class MasuState {
     }
 
     public Vector getVectorTo(MasuState s) {
-	return new Vector(s.x - this.x, s.y - this.y);
+	return Vector.newi(s.x - this.x, s.y - this.y);
     }
 
     public boolean isEqualXY(MasuState s) {

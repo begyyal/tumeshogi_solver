@@ -114,8 +114,8 @@ public class Ban implements Cloneable {
     }
 
     private boolean markRange(Vector v, int x, int y) {
-	int vx = x + v.x();
-	int vy = y + v.y();
+	int vx = x + v.x;
+	int vy = y + v.y;
 	if (!validateCoordinate(vx, vy))
 	    return false;
 	this.matrix[vx][vy].rangedBy.add(x, y);
@@ -155,7 +155,7 @@ public class Ban implements Cloneable {
      */
     public MasuState exploration(MasuState state, Vector v) {
 	int x = state.x, y = state.y;
-	int vx = x + v.x(), vy = y + v.y();
+	int vx = x + v.x, vy = y + v.y;
 	return validateCoordinate(vx, vy) ? this.matrix[vx][vy] : MasuState.Invalid;
     }
 
