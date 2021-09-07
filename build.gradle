@@ -40,33 +40,33 @@ jar {
 }
 
 FileTree zipTreeByCustom(File f){
-
+	
 	def layerArr = getLayerArr(f.toString())
-    def plainKey = layerArr[layerArr.length-1]
-    def splittedKey = plainKey.split('\\.'), keyStr = splittedKey[0]
-    if(splittedKey.length != 1){
-        def keyLength = plainKey.length() -1 -splittedKey[splittedKey.length-1].length()
-	    keyStr = plainKey.substring(0, keyLength)
-    }
-
+	def plainKey = layerArr[layerArr.length-1]
+	def splittedKey = plainKey.split('\\.'), keyStr = splittedKey[0]
+	if(splittedKey.length != 1){
+		def keyLength = plainKey.length() -1 -splittedKey[splittedKey.length-1].length()
+		keyStr = plainKey.substring(0, keyLength)
+	}
+    
 	def t = zipTree(f)
-    def meta = t.matching{ include 'META-INF/**' }
-    def classes = t.matching{ exclude 'META-INF/**' }
-
-    def pjdirLayerLength = getLayerArr(getProjectDir().toString()).length
-    def metainfLayers = Arrays.copyOfRange(getLayerArr(meta.iterator().next().toString()), pjdirLayerLength, pjdirLayerLength + 5)
-    def metainfRelPath = String.join('/', metainfLayers)
-    def newMetainfRelPath =  'resources/META-INF/' + keyStr
-
-    copy {
-        into newMetainfRelPath
-        from metainfRelPath
-    }
-
+	def meta = t.matching{ include 'META-INF/**' }
+	def classes = t.matching{ exclude 'META-INF/**' }
+	
+	def pjdirLayerLength = getLayerArr(getProjectDir().toString()).length
+	def metainfLayers = Arrays.copyOfRange(getLayerArr(meta.iterator().next().toString()), pjdirLayerLength, pjdirLayerLength + 5)
+	def metainfRelPath = String.join('/', metainfLayers)
+	def newMetainfRelPath =  'resources/META-INF/' + keyStr
+	
+	copy {
+		into newMetainfRelPath
+		from metainfRelPath
+	}
+    
 	return classes
 }
 
 String[] getLayerArr(String path){
-    def isWin = File.separator == '\\'
+	def isWin = File.separator == '\\'
 	return path.split(isWin ? '\\\\' : File.separator)
 }
