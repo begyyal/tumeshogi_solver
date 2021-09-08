@@ -7,9 +7,9 @@ apply plugin: 'java'
 // }
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(15)
-    }
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(15)
+	}
 }
 
 dependencies {
@@ -17,14 +17,14 @@ dependencies {
 }
 
 sourceSets {
-    main {
-        java {
-            srcDirs 'src'
-        }
+	main {
+		java {
+			srcDirs 'src'
+		}
 		resources {
-            srcDir 'resources'
-        }
-    }
+			srcDir 'resources'
+		}
+	}
  }
 
 tasks.withType(JavaCompile){
@@ -33,9 +33,9 @@ tasks.withType(JavaCompile){
 
 delete('resources/META-INF/')
 jar {
-  	manifest {
-    	attributes("Main-Class": 'begyyal.shogi.Entrypoint')
-  	}
+	manifest {
+		attributes("Main-Class": 'begyyal.shogi.Entrypoint')
+	}
 	from configurations.compileClasspath.collect{ it.isDirectory() ? it : zipTreeByCustom(it) }
 }
 
