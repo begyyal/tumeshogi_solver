@@ -20,7 +20,7 @@ jobs:
     - uses: begyyal/act_await_wf_execution@v0.1
       with:
         workflowName: 'Post processing of the PR'
-
+    
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
