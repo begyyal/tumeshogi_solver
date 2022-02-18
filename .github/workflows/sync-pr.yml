@@ -17,15 +17,13 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Attach HEAD
-      run: git checkout ${{ github.head_ref }}
-
     - name: Create snapshot-from
       shell: bash
       run: |
-        branch=${{ github.base_ref }}
+        branch=${{ github.head_ref }}
         snapshot=ss-from${branch#feature}
         [ -n "$(git branch -r | sed 's/ //g' | grep -e ^origin/$snapshot)" ] && git push origin $snapshot --delete
+        git checkout ${{ github.base_ref }}
         git checkout -b $snapshot
         git push origin $snapshot
 
@@ -35,6 +33,7 @@ jobs:
         branch=${{ github.head_ref }}
         snapshot=ss-to${branch#feature}
         [ -n "$(git branch -r | sed 's/ //g' | grep -e ^origin/$snapshot)" ] && git push origin $snapshot --delete
+        git checkout ${{ github.head_ref }}
         git checkout -b $snapshot
         git push origin $snapshot
 
