@@ -20,6 +20,7 @@ jobs:
     - uses: begyyal/act_await_wf_execution@v0.1
       with:
         workflowName: 'Post processing of the PR'
+        timeoutSec: 1200
     
     - uses: actions/checkout@v2
       with:
