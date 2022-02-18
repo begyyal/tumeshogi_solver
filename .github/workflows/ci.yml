@@ -25,15 +25,15 @@ jobs:
       with:
         fetch-depth: 0
         ref: master
-#        submodules: true
+        submodules: true
 
     - name: Attach HEAD
       run: |
         git fetch --all
         git checkout develop
 
-    # - name: Update submodules
-    #   run: git submodule update --remote
+    - name: Update submodules
+      run: git submodule update --remote
 
     - name: Set up JDK 15
       uses: actions/setup-java@v2
@@ -47,8 +47,8 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build
 
-#     - name: Test
-#       run: test.sh
+    - name: Test
+      run: ./test.sh
       
     - name: Push develop if needed
       run: |

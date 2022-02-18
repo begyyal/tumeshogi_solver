@@ -1,0 +1,56 @@
+{
+	"need": [
+		"build/libs/ts_resolver.jar"
+	],
+	"resource": "resources/cmdbbt/",
+	"operations": [
+		{
+			"name": "1te_1",
+			"command": "java -jar ts_resolver.jar 1 31xfz11yb12yh xe1ya18b3c4d4e3f1g2",
+			"exitCode": 0,
+			"expected": [
+				{
+					"act": "console-output",
+					"value": "Self -> 13Kin"
+				}
+			]
+		},
+		{
+			"name": "1te_2",
+			"command": "java -jar ts_resolver.jar 1 31xfz11ye12yh23ya xd1ya17b4c4d3e3f1g2",
+			"exitCode": 0,
+			"expected": [
+				{
+					"act": "console-output",
+					"value": "Self -> 13Gin"
+				}
+			]
+		},
+		{
+			"name": "1te_3",
+			"command": "java -jar ts_resolver.jar 1 31xfz11yb12yh23yf xc1ya18b3c3d4e4g2",
+			"exitCode": 0,
+			"expected": [
+				{
+					"act": "console-output",
+					"value": "Self -> 24Keima"
+				}
+			]
+        },
+        {
+			"name": "3te_1",
+			"command": "java -jar ts_resolver.jar 3 31xfz11yb12yh34ya14ya xd1ya16b3c4d3e4f1g2",
+			"exitCode": 0,
+			"expected": [
+				{
+					"act": "console-output",
+					"value": [
+                        "Self -> 13Gin",
+                        "Opponent -> 23Ou",
+                        "Self -> 22KakuNari"
+                    ]
+				}
+			]
+		}
+	]
+}
