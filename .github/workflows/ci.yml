@@ -53,6 +53,6 @@ jobs:
       run: |
         git fetch
         git checkout master
-        git merge develop
+        git merge origin/develop
         git push origin master
         
