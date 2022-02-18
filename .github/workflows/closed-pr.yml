@@ -54,8 +54,8 @@ jobs:
       with:
         prefix: "#${{ steps.ready.outputs.issue-no }}"
         branch: ${{ github.base_ref }}
-        from: 'master'
-        to: "snapshot/${{ steps.ready.outputs.issue-no }}"
+        from: "ss-from/${{ steps.ready.outputs.issue-no }}"
+        to: "ss-to/${{ steps.ready.outputs.issue-no }}"
 
   termination:
 
@@ -77,5 +77,7 @@ jobs:
         echo "::set-output name=issue-no::${branch#feature/}"
 
     - name: Delete snapshot
-      run: git push origin 'snapshot/'${{ steps.ready.outputs.issue-no }} --delete
+      run: |
+        git push origin 'ss-from/'${{ steps.ready.outputs.issue-no }} --delete
+        git push origin 'ss-to/'${{ steps.ready.outputs.issue-no }} --delete
   
