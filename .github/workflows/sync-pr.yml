@@ -3,7 +3,7 @@ name: Update process of the PR
 on:
   pull_request:
     branches: [ develop ]
-    types: [ synchronize ]
+    types: [ open, synchronize ]
 
 jobs:
   save-snapshot:
