@@ -18,7 +18,7 @@ jobs:
         fetch-depth: 0
 
     - name: Attach HEAD
-      run: git checkout ${{ github.head_ref }}
+      run: git checkout ${{ github.base_ref }}
 
     - name: Create snapshot
       shell: bash
