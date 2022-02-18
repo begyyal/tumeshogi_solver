@@ -20,7 +20,7 @@
     - `./gradlew build` 
     - windowsのコマンドプロンプトの場合は上記コマンド頭の`./`を外してください
 3. 生成されたjarファイルにて以下の要領でプログラムを実行します。
-    - `java -jar ./build/libs/TumeshogiResolver.jar 1 31xfz11yb12yh xe1ya18b3c4d4e3f1g2`
+    - `java -jar ./build/libs/ts_resolver.jar 1 31xfz11yb12yh xe1ya18b3c4d4e3f1g2`
     - 実行時の引数フォーマットの詳細は後述の項をご参照ください
 
 # 引数のフォーマット
