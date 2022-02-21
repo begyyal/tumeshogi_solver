@@ -1,10 +1,10 @@
 - **品質担保**  
-[![Java CI with Gradle](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/ci.yml/badge.svg)](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/ci.yml)
+[![Java CI with Gradle](https://github.com/begyyal/tumeshogi_solver/actions/workflows/ci.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/ci.yml)
 - **開発補助**  
-[![Update process of the PR](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/sync-pr.yml/badge.svg)](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/sync-pr.yml)
-[![Post processing of the PR](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/closed-pr.yml/badge.svg)](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/closed-pr.yml)  
-[![Create feature branch](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/create-feature.yml/badge.svg)](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/create-feature.yml)
-[![Delete feature branch](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/delete-feature.yml/badge.svg)](https://github.com/begyyal/tumeshogi_resolver/actions/workflows/delete-feature.yml)  
+[![Update process of the PR](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr.yml)
+[![Post processing of the PR](https://github.com/begyyal/tumeshogi_solver/actions/workflows/closed-pr.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/closed-pr.yml)  
+[![Create feature branch](https://github.com/begyyal/tumeshogi_solver/actions/workflows/create-feature.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/create-feature.yml)
+[![Delete feature branch](https://github.com/begyyal/tumeshogi_solver/actions/workflows/delete-feature.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/delete-feature.yml)  
 
 # 概要
 
@@ -20,7 +20,7 @@
     - `./gradlew build` 
     - windowsのコマンドプロンプトの場合は上記コマンド頭の`./`を外してください
 3. 生成されたjarファイルにて以下の要領でプログラムを実行します。
-    - `java -jar ./build/libs/ts_resolver.jar 1 31xfz11yb12yh xe1ya18b3c4d4e3f1g2`
+    - `java -jar ./build/libs/ts_solver.jar 1 31xfz11yb12yh xe1ya18b3c4d4e3f1g2`
     - 実行時の引数フォーマットの詳細は後述の項をご参照ください
 
 # 引数のフォーマット

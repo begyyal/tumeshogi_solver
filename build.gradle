@@ -33,7 +33,7 @@ tasks.withType(JavaCompile){
 
 delete('resources/META-INF/')
 jar {
-	baseName = 'ts_resolver'
+	baseName = 'ts_solver'
 	manifest {
 		attributes("Main-Class": 'begyyal.shogi.Entrypoint')
 	}
