@@ -18,6 +18,7 @@ import com.google.common.collect.Sets;
 
 import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.commons.util.object.Tree;
+import begyyal.shogi.Entrypoint.TRLogger;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
@@ -56,7 +57,7 @@ public class BattleProcessor implements Closeable {
     }
 
     private String[] createFailureLabel() {
-	return new String[] { "Could not succeed." };
+	return new String[] { "Can't solve." };
     }
 
     private String[] summarize(List<Ban> bans) {
@@ -271,6 +272,7 @@ public class BattleProcessor implements Closeable {
 		    try {
 			return this.next(b, results, count);
 		    } catch (InterruptedException | ExecutionException e) {
+			TRLogger.print(e.getMessage());
 			return false;
 		    }
 		})
