@@ -159,21 +159,13 @@ public class Ban implements Cloneable {
 	return validateCoordinate(vx, vy) ? this.matrix[vx][vy] : MasuState.Invalid;
     }
 
-    /**
-     * 主体のマトリクスに対してfromからtoへの指定座標への駒の移動を行う。<br>
-     * 中間地点および移動先の検査無し。
-     * 
-     * @param fromX
-     * @param fromY
-     * @param toX
-     * @param toY
-     * @param tryNari
-     * @return 取得した駒。無ければnull
-     */
-    public Koma advance(int fromX, int fromY, int toX, int toY, boolean tryNari) {
+    public MasuState advance(int fromX, int fromY, int toX, int toY, boolean tryNari) {
 
 	var from = this.matrix[fromX][fromY];
 	var to = this.matrix[toX][toY];
+
+	if (!from.nariFlag && !tryNari && !validateState(from.koma, toX, toY, from.player))
+	    return MasuState.Invalid;
 
 	emptyMasu(fromX, fromY);
 
@@ -184,11 +176,10 @@ public class Ban implements Cloneable {
 	    toY,
 	    from.nariFlag || tryNari && from.player == Player.Self ? to.y > 5 : to.y < 3,
 	    to.rangedBy);
-	var occupied = this.matrix[to.x][to.y];
 	this.matrix[toX][toY] = newState;
 
 	refreshRange();
-	return occupied.koma != Koma.Empty ? occupied.koma : null;
+	return newState;
     }
 
     public MasuState deploy(Koma k, int x, int y, Player p) {

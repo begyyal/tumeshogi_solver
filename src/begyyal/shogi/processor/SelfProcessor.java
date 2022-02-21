@@ -41,15 +41,12 @@ public class SelfProcessor extends PlayerProcessorBase {
 		var tryNari = SuperBool.newi();
 		var dest = sp.getRight();
 		return createBranchStream(dest.y, sp.getLeft())
-		    .filter(i -> tryNari.get() ||
-			    Ban.validateState(sp.getLeft().koma, dest.x, dest.y, PlayerType))
 		    .mapToObj(i -> {
 			var newBan = ban.clone();
-			var k = newBan.advance(sp.getLeft().x, sp.getLeft().y, dest.x, dest.y,
+			var newState = newBan.advance(sp.getLeft().x, sp.getLeft().y, dest.x, dest.y,
 			    tryNari.getAndReverse());
-			var newDest = newBan.getState(dest.x, dest.y);
-			return newBan.isOuteBy(PlayerType, dest.x, dest.y)
-				? context.branch(newBan, newDest, k, PlayerType, true)
+			return checkNewState(newBan, newState)
+				? context.branch(newBan, newState, dest.koma, PlayerType, true)
 				: null;
 		    });
 	    })
@@ -68,7 +65,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .map(ks -> {
 		var newBan = ban.clone();
 		var s = newBan.deploy(ks.getLeft(), ks.getRight().x, ks.getRight().y, PlayerType);
-		return s != MasuState.Invalid && newBan.isOuteBy(PlayerType, s.x, s.y)
+		return checkNewState(newBan, s)
 			? context.branch(newBan, s, s.koma, PlayerType, false)
 			: null;
 	    })
@@ -77,6 +74,10 @@ public class SelfProcessor extends PlayerProcessorBase {
 	// 駒移動系は空き王手と他で重複し得るのでdistinctする
 	return Stream.concat(this.distinctContext(Stream.concat(cs1, cs2)), cs3)
 	    .toArray(BanContext[]::new);
+    }
+
+    private boolean checkNewState(Ban ban, MasuState s) {
+	return s != MasuState.Invalid && ban.isOuteBy(PlayerType, s.x, s.y);
     }
 
     private Stream<BanContext> getAkiOuteContextStream(
@@ -117,10 +118,10 @@ public class SelfProcessor extends PlayerProcessorBase {
 			return createBranchStream(to.y, from)
 			    .mapToObj(i -> {
 				var newBan = ban.clone();
-				var k = newBan.advance(
+				var newDest = newBan.advance(
 				    from.x, from.y, to.x, to.y, tryNari.getAndReverse());
 				return context.branch(
-				    newBan, newBan.getState(to.x, to.y), k, PlayerType, true);
+				    newBan, newDest, to.koma, PlayerType, true);
 			    });
 		    });
 	    });

@@ -30,10 +30,9 @@ public class OpponentProcessor extends PlayerProcessorBase {
 		.anyMatch(r -> ban.getState(r.getLeft(), r.getRight()).player != PlayerType))
 	    .map(s -> {
 		var newBan = ban.clone();
-		var k = newBan.advance(opponentOu.x, opponentOu.y, s.x, s.y, false);
-		var dest = newBan.getState(s.x, s.y);
-		return checkingSafe(newBan, dest)
-			? context.branch(newBan, dest, k, PlayerType, true)
+		var newState = newBan.advance(opponentOu.x, opponentOu.y, s.x, s.y, false);
+		return checkingSafe(newBan, newState)
+			? context.branch(newBan, newState, s.koma, PlayerType, true)
 			: null;
 	    });
 
@@ -58,11 +57,10 @@ public class OpponentProcessor extends PlayerProcessorBase {
 			    || Ban.validateState(from.koma, outeState.x, outeState.y, PlayerType))
 		    .mapToObj(i -> {
 			var newBan = ban.clone();
-			var k = newBan.advance(
+			var newState = newBan.advance(
 			    from.x, from.y, outeState.x, outeState.y, tryNari.getAndReverse());
-			var dest = newBan.getState(outeState.x, outeState.y);
 			return checkingSafe(newBan)
-				? context.branch(newBan, dest, k, PlayerType, true)
+				? context.branch(newBan, newState, outeState.koma, PlayerType, true)
 				: null;
 		    });
 	    });
