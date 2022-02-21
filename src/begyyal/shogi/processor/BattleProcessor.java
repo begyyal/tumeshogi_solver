@@ -56,7 +56,7 @@ public class BattleProcessor implements Closeable {
     }
 
     private String[] createFailureLabel() {
-	return new String[] { "詰めませんでした。" };
+	return new String[] { "Could not succeed." };
     }
 
     private String[] summarize(List<Ban> bans) {
