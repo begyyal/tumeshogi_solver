@@ -25,16 +25,6 @@ public abstract class PlayerProcessorBase {
 		&& (state.koma == Koma.Empty || state.player != getPlayerType());
     }
 
-    protected boolean isOpponentOu(MasuState s) {
-	return s.player == Player.Opponent && s.koma == Koma.Ou;
-    }
-
-    protected MasuState getOpponentOu(Ban ban) {
-	return ban
-	    .search(s -> this.isOpponentOu(s))
-	    .findFirst().get();
-    }
-
     // 成ってもいいし成らなくてもいい
     protected IntStream createBranchStream(int y, MasuState from) {
 	return IntStream.range(0,

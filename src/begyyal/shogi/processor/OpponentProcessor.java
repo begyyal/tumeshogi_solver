@@ -22,7 +22,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
     public BanContext[] spread(BanContext context) {
 
 	var ban = context.getLatestBan();
-	var opponentOu = this.getOpponentOu(ban);
+	var opponentOu = ban.search(MasuState::isOpponentOu).findFirst().get();
 
 	// 王手範囲から避ける(王による王手駒の取得含む)
 	var cs1 = spreadMasuState(opponentOu, ban)
@@ -91,15 +91,13 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	    .toArray(BanContext[]::new);
     }
 
-    private boolean checkingSafe(Ban ban) {
+    private static boolean checkingSafe(Ban ban) {
 	return checkingSafe(ban, null);
     }
 
-    private boolean checkingSafe(Ban ban, MasuState ouState) {
+    private static boolean checkingSafe(Ban ban, MasuState ouState) {
 	var ou = ouState == null
-		? ban.search(s -> this.isOpponentOu(s))
-		    .findFirst()
-		    .get()
+		? ban.search(MasuState::isOpponentOu).findFirst().get()
 		: ouState;
 	return ou.rangedBy
 	    .stream()
