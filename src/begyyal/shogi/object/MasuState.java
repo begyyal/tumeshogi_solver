@@ -92,6 +92,10 @@ public class MasuState {
 		&& this.nariFlag == s.nariFlag;
     }
 
+    public boolean isOpponentOu() {
+	return player == Player.Opponent && koma == Koma.Ou;
+    }
+    
     public static MasuState emptyOf(int suzi, int dan, PairList<Integer, Integer> rangedBy) {
 	return new MasuState(
 	    Player.None,
@@ -129,7 +133,7 @@ public class MasuState {
 		s.koma == Koma.Hisha ||
 		s.koma == Koma.Kaku;
     }
-
+   
     @Override
     public boolean equals(Object o) {
 
