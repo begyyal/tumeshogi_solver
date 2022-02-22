@@ -78,7 +78,7 @@ public class MasuState {
     }
 
     public Vector getVectorTo(MasuState s) {
-	return Vector.newi(s.x - this.x, s.y - this.y);
+	return new Vector(s.x - this.x, s.y - this.y);
     }
 
     public boolean isEqualXY(MasuState s) {
@@ -95,7 +95,7 @@ public class MasuState {
     public boolean isOpponentOu() {
 	return player == Player.Opponent && koma == Koma.Ou;
     }
-    
+
     public static MasuState emptyOf(int suzi, int dan, PairList<Integer, Integer> rangedBy) {
 	return new MasuState(
 	    Player.None,
@@ -133,7 +133,7 @@ public class MasuState {
 		s.koma == Koma.Hisha ||
 		s.koma == Koma.Kaku;
     }
-   
+
     @Override
     public boolean equals(Object o) {
 

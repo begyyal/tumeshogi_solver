@@ -147,7 +147,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .findFirst();
     }
 
-    private MasuState getAkiObstructionOnVector(
+    private static MasuState getAkiObstructionOnVector(
 	Ban ban,
 	Vector[] decomposed,
 	MasuState state) {

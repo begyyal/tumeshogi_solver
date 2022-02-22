@@ -27,8 +27,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 
 	// 王手範囲から避ける(王による王手駒の取得含む)
 	Stream<BanContext> cs1 = spreadMasuState(opponentOu, ban)
-	    .filter(s -> !s.rangedBy
-		.anyMatch(r -> ban.getState(r.getLeft(), r.getRight()).player != playerType))
+	    .filter(s -> checkingSafe(ban, s))
 	    .map(s -> {
 		var newBan = ban.clone();
 		var newState = newBan.advance(opponentOu.x, opponentOu.y, s.x, s.y, false);
@@ -88,27 +87,22 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	return executeCS(context, Stream.concat(Stream.concat(cs1, cs2), cs3));
     }
 
-    private static boolean checkingSafe(Ban ban) {
-	return checkingSafe(ban, null);
-    }
-
-    private static boolean checkingSafe(Ban ban, MasuState ouState) {
-	var ou = ouState == null
-		? ban.search(MasuState::isOpponentOu).findFirst().get()
-		: ouState;
-	return ou.rangedBy
-	    .stream()
-	    .map(r -> ban.getState(r.getLeft(), r.getRight()))
-	    .filter(s -> s.player != playerType)
-	    .findFirst()
-	    .isEmpty();
-    }
-
     private BanContext[] executeCS(BanContext beforeContext, Stream<BanContext> cs) {
 	if (this.numOfMoves <= beforeContext.log.size()) {
 	    return cs.anyMatch(c -> c != null) ? dummyResult : null;
 	} else
 	    return cs.filter(c -> c != null).toArray(BanContext[]::new);
+    }
+
+    private static boolean checkingSafe(Ban ban) {
+	return checkingSafe(ban, ban.search(MasuState::isOpponentOu).findFirst().get());
+    }
+
+    private static boolean checkingSafe(Ban ban, MasuState state) {
+	return state.rangedBy
+	    .stream()
+	    .map(r -> ban.getState(r.getLeft(), r.getRight()))
+	    .allMatch(s -> s.player == playerType);
     }
 
     @Override
