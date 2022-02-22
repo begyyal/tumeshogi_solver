@@ -1,11 +1,7 @@
 package begyyal.shogi.object;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import org.apache.commons.lang3.StringUtils;
 
 import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
@@ -17,8 +13,6 @@ public class BanContext {
 
     private static final AtomicInteger idGen = new AtomicInteger();
     public final int id = idGen.getAndIncrement();
-
-    private static final String motigomaArgRegex = "([xy]([a][1-9][1-8]?|[b-e][1-4]|[fg][12])+){1,2}";
 
     public final SuperList<Ban> log;
     // 持ち駒は最新断面のみ
@@ -35,14 +29,17 @@ public class BanContext {
     // これにより終端のコンテキスト選定の段でフラグを元にダミーの相手方の手をlogに１手だけ加え、失敗を判断する
     public boolean isFailure = false;
 
-    private BanContext(String banStr, String motigomaStr) {
-	var ban = Ban.of(banStr);
-	this.log = SuperListGen.of(Ban.of(banStr));
-	this.selfMotigoma = SuperListGen.newi();
-	this.opponentMotigoma = SuperListGen.newi();
-	fillMotigoma(motigomaStr);
+    public BanContext(
+	Ban initBan, 
+	SuperList<Koma> selfMotigoma, 
+	SuperList<Koma> opponentMotigoma) {
+	
+	this.log = SuperListGen.of(initBan);
+	this.selfMotigoma = selfMotigoma;
+	this.opponentMotigoma = opponentMotigoma;
 	this.beforeId = -1;
-	validateCondition(ban);
+	
+	validateCondition(initBan);
     }
 
     private BanContext(
@@ -50,6 +47,7 @@ public class BanContext {
 	SuperList<Koma> selfMotigoma,
 	SuperList<Koma> opponentMotigoma,
 	int beforeId) {
+	
 	this.log = log;
 	this.selfMotigoma = selfMotigoma;
 	this.opponentMotigoma = opponentMotigoma;
@@ -113,48 +111,6 @@ public class BanContext {
 	    this.id);
     }
 
-    private void fillMotigoma(String arg) {
-
-	if (arg == null)
-	    return;
-
-	if (!arg.matches(motigomaArgRegex))
-	    throw new IllegalArgumentException("Motigoma argument format is invalid.");
-
-	int xIndex = arg.indexOf(Player.Self.id);
-	int yIndex = arg.indexOf(Player.Opponent.id);
-	var single = xIndex < 0 ? this.opponentMotigoma : yIndex < 0 ? this.selfMotigoma : null;
-	if (single != null) {
-	    getMotigomaParser(single).accept(arg.substring(1));
-	    return;
-	}
-
-	boolean xy = xIndex < yIndex;
-	var low = xy ? this.selfMotigoma : this.opponentMotigoma;
-	var high = xy ? this.opponentMotigoma : this.selfMotigoma;
-	getMotigomaParser(low).accept(arg.substring(1, xy ? yIndex : xIndex));
-	getMotigomaParser(high).accept(arg.substring((xy ? yIndex : xIndex) + 1, arg.length()));
-    }
-
-    private static Consumer<String> getMotigomaParser(SuperList<Koma> motigoma) {
-	return arg -> {
-	    int i = 0;
-	    while (i < arg.length()) {
-
-		var type = Koma.of(arg.substring(i, i + 1));
-		var count = arg.substring(i + 1, i + 2);
-		if (i + 3 < arg.length()) { // 歩は保持数2桁があり得る
-		    var count2dig = arg.substring(i + 1, i + 3);
-		    if (StringUtils.isNumeric(count2dig) && ++i > 0)
-			count = count2dig;
-		}
-
-		IntStream.range(0, Integer.valueOf(count)).forEach(idx -> motigoma.add(type));
-		i += 2;
-	    }
-	};
-    }
-
     @Override
     public boolean equals(Object o) {
 	if (!(o instanceof BanContext))
@@ -163,9 +119,5 @@ public class BanContext {
 	return casted.beforeId == this.beforeId &&
 		casted.latestState == this.latestState &&
 		casted.beforeLatestState == this.beforeLatestState;
-    }
-
-    public static BanContext newi(String banStr, String motigomaStr) {
-	return new BanContext(banStr, motigomaStr);
     }
 }

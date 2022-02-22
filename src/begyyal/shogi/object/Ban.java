@@ -5,8 +5,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import begyyal.commons.constant.Strs;
-import begyyal.commons.util.function.SuperStrings;
 import begyyal.commons.util.matrix.MatrixResolver;
 import begyyal.commons.util.matrix.Vector;
 import begyyal.commons.util.object.PairList;
@@ -21,46 +19,20 @@ public class Ban implements Cloneable {
     private static final AtomicInteger idGen = new AtomicInteger();
     public final int id = idGen.getAndIncrement();
 
-    private static final String banArgRegex = "([1-9][1-9][xy][a-dfg][z]?|[1-9][1-9][xy][eh])+";
-
     // インデックスの振り順は将棋盤の読み方に倣わない。x/y座標で見る。
     private MasuState[][] matrix;
 
-    private Ban(String arg) {
+    public Ban(MasuState[][] matrix) {
+	this.matrix = matrix;
+    }
 
-	if (!arg.matches(banArgRegex))
-	    throw new IllegalArgumentException("Ban argument format is invalid.");
-
-	this.matrix = new MasuState[9][9];
-
-	String draft = arg;
-	while (!draft.isBlank()) {
-
-	    int skipIndex = SuperStrings.firstIndexOf(draft, "x", "y").getRight();
-	    var next = SuperStrings.firstIndexOf(draft.substring(skipIndex + 1), "x", "y");
-	    int kiritori = next == null ? draft.length() : next.getRight() + skipIndex - 1;
-	    var masu = draft.substring(0, kiritori);
-	    draft = kiritori == draft.length() ? Strs.empty : draft.substring(kiritori);
-
-	    int x = Integer.valueOf(masu.substring(0, 1));
-	    int y = Integer.valueOf(masu.substring(1, 2));
-	    if (this.matrix[9 - x][9 - y] != null)
-		throw new IllegalArgumentException(
-		    "The masu states of [" + x + "-" + y + "] are duplicated.");
-	    this.matrix[9 - x][9 - y] = MasuState.of(masu.substring(2), x, y);
-	}
-
+    public void setup() {
 	for (int x = 0; x < 9; x++)
 	    for (int y = 0; y < 9; y++)
 		if (this.matrix[x][y] == null)
 		    emptyMasu(x, y, PairListGen.newi());
-
 	markRangeAll();
 	validateCondition();
-    }
-
-    private Ban(MasuState[][] matrix) {
-	this.matrix = matrix;
     }
 
     private void validateCondition() {
@@ -99,7 +71,8 @@ public class Ban implements Cloneable {
     private void markRangeAll() {
 	for (int x = 0; x < 9; x++)
 	    for (int y = 0; y < 9; y++)
-		markRangeBy(this.matrix[x][y]);
+		if (this.matrix[x][y].koma != Koma.Empty)
+		    markRangeBy(this.matrix[x][y]);
     }
 
     public void markRangeBy(MasuState s) {
@@ -248,10 +221,6 @@ public class Ban implements Cloneable {
 	    return false;
 	var casted = (Ban) o;
 	return this.id == casted.id;
-    }
-
-    public static Ban of(String arg) {
-	return new Ban(arg);
     }
 
     public static int generateId() {

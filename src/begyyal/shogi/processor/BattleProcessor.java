@@ -12,15 +12,14 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import com.google.common.collect.Sets;
 
 import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.commons.util.object.Tree;
-import begyyal.shogi.Entrypoint.TRLogger;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
+import begyyal.shogi.object.Args;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
 import begyyal.shogi.object.MasuState;
@@ -40,11 +39,15 @@ public class BattleProcessor implements Closeable {
      * @throws ExecutionException
      * @throws InterruptedException
      */
-    public String[] calculate(String numStr, String banStr, String motigomaStr)
+    public String[] calculate(Args args)
 	throws InterruptedException, ExecutionException {
 
 	var results = Sets.<BanContext>newConcurrentHashSet();
-	var calculator = new OneshotCalculator(numStr, banStr, motigomaStr, this.tools);
+
+	var calculator = new OneshotCalculator(
+	    args.numOfMoves,
+	    new BanContext(args.initBan, args.selfMotigoma, args.opponentMotigoma),
+	    this.tools);
 
 	if (!calculator.ignite(results) || results.isEmpty())
 	    return createFailureLabel();
@@ -201,19 +204,11 @@ public class BattleProcessor implements Closeable {
 	private final CalculationTools tools;
 
 	private OneshotCalculator(
-	    String numStr,
-	    String banStr,
-	    String motigomaStr,
+	    int numOfMoves,
+	    BanContext origin,
 	    CalculationTools tools) {
-
-	    if (!NumberUtils.isParsable(numStr))
-		throw new IllegalArgumentException(
-		    "The argument of number of moves must be number format.");
-	    this.numOfMoves = Integer.parseInt(numStr);
-	    if (numOfMoves % 2 != 1)
-		throw new IllegalArgumentException(
-		    "The argument of number of moves must be odd number.");
-	    this.origin = BanContext.newi(banStr, motigomaStr);
+	    this.numOfMoves = numOfMoves;
+	    this.origin = origin;
 	    this.tools = tools;
 	}
 
@@ -272,7 +267,7 @@ public class BattleProcessor implements Closeable {
 		    try {
 			return this.next(b, results, count);
 		    } catch (InterruptedException | ExecutionException e) {
-			TRLogger.print(e.getMessage());
+			e.printStackTrace();
 			return false;
 		    }
 		})
