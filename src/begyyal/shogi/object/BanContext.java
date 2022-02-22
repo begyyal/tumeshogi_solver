@@ -1,11 +1,9 @@
 package begyyal.shogi.object;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 
 import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
-import begyyal.commons.util.object.SuperMap.SuperMapGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 
@@ -30,16 +28,13 @@ public class BanContext {
     public boolean isFailure = false;
 
     public BanContext(
-	Ban initBan, 
 	SuperList<Koma> selfMotigoma, 
 	SuperList<Koma> opponentMotigoma) {
 	
-	this.log = SuperListGen.of(initBan);
+	this.log = SuperListGen.newi();
 	this.selfMotigoma = selfMotigoma;
 	this.opponentMotigoma = opponentMotigoma;
 	this.beforeId = -1;
-	
-	validateCondition(initBan);
     }
 
     private BanContext(
@@ -52,20 +47,6 @@ public class BanContext {
 	this.selfMotigoma = selfMotigoma;
 	this.opponentMotigoma = opponentMotigoma;
 	this.beforeId = beforeId;
-    }
-
-    private void validateCondition(Ban ban) {
-	var tooMany = Stream.concat(ban.serializeMatrix().stream().map(s -> s.koma),
-	    Stream.concat(this.selfMotigoma.stream(), this.opponentMotigoma.stream()))
-	    .filter(k -> k != Koma.Empty)
-	    .collect(SuperMapGen.collect(k -> k, k -> 1, (v1, v2) -> v1 + v2))
-	    .entrySet()
-	    .stream()
-	    .filter(e -> e.getKey().numLimit < e.getValue())
-	    .findFirst()
-	    .orElse(null);
-	if (tooMany != null)
-	    throw new IllegalArgumentException("The koma [" + tooMany + "] exceeeds number limit.");
     }
 
     public Ban getBan(int index) {

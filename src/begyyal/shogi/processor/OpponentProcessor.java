@@ -15,8 +15,8 @@ public class OpponentProcessor extends PlayerProcessorBase {
 
     public static final Player PlayerType = Player.Opponent;
 
-    private OpponentProcessor() {
-	super();
+    public OpponentProcessor(int numOfMoves) {
+	super(numOfMoves);
     }
 
     public BanContext[] spread(BanContext context) {
@@ -108,9 +108,5 @@ public class OpponentProcessor extends PlayerProcessorBase {
     @Override
     protected Player getPlayerType() {
 	return PlayerType;
-    }
-
-    public static OpponentProcessor newi() {
-	return new OpponentProcessor();
     }
 }
