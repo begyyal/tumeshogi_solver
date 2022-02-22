@@ -27,11 +27,11 @@ public class OpponentProcessor extends PlayerProcessorBase {
 
 	// 王手範囲から避ける(王による王手駒の取得含む)
 	Stream<BanContext> cs1 = spreadMasuState(opponentOu, ban)
-	    .filter(s -> checkingSafe(ban, s))
+	    .filter(s -> ban.checkingSafe(s))
 	    .map(s -> {
 		var newBan = ban.clone();
 		var newState = newBan.advance(opponentOu.x, opponentOu.y, s.x, s.y, false);
-		return checkingSafe(newBan, newState)
+		return newBan.checkingSafe(newState)
 			? context.branch(newBan, newState, s.koma, playerType, true)
 			: null;
 	    });
@@ -59,7 +59,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 			var newBan = ban.clone();
 			var newState = newBan.advance(
 			    from.x, from.y, outeState.x, outeState.y, tryNari.getAndReverse());
-			return checkingSafe(newBan)
+			return newBan.checkingSafe()
 				? context.branch(newBan, newState, outeState.koma, playerType, true)
 				: null;
 		    });
@@ -92,17 +92,6 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	    return cs.anyMatch(c -> c != null) ? dummyResult : null;
 	} else
 	    return cs.filter(c -> c != null).toArray(BanContext[]::new);
-    }
-
-    private static boolean checkingSafe(Ban ban) {
-	return checkingSafe(ban, ban.search(MasuState::isOpponentOu).findFirst().get());
-    }
-
-    private static boolean checkingSafe(Ban ban, MasuState state) {
-	return state.rangedBy
-	    .stream()
-	    .map(r -> ban.getState(r.getLeft(), r.getRight()))
-	    .allMatch(s -> s.player == playerType);
     }
 
     @Override

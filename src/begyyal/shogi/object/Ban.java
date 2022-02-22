@@ -151,9 +151,15 @@ public class Ban implements Cloneable {
 	this.matrix[x][y] = MasuState.emptyOf(x, y, rangedBy);
     }
 
-    public boolean isOuteBy(Player p, int x, int y) {
-	return search(s -> s.koma == Koma.Ou && s.player != p)
-	    .findFirst().get().rangedBy.anyMatch(s -> s.getLeft() == x && s.getRight() == y);
+    public boolean checkingSafe() {
+	return checkingSafe(search(MasuState::isOpponentOu).findFirst().get());
+    }
+
+    public boolean checkingSafe(MasuState ouState) {
+	return ouState.rangedBy
+	    .stream()
+	    .map(r -> getState(r.getLeft(), r.getRight()))
+	    .allMatch(s -> s.player == Player.Opponent);
     }
 
     public static boolean validateState(Koma koma, int x, int y, Player p) {

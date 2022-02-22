@@ -1,14 +1,17 @@
 package begyyal.shogi.object;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 
 import com.google.common.collect.Lists;
 
+import begyyal.commons.util.matrix.MatrixResolver;
 import begyyal.commons.util.matrix.Vector;
 import begyyal.commons.util.object.PairList;
 import begyyal.commons.util.object.PairList.PairListGen;
@@ -19,6 +22,19 @@ import begyyal.shogi.def.Player;
 
 // nullは入れない方針
 public class MasuState {
+
+    public static final MasuState Invalid = new MasuState(
+	Player.None,
+	Koma.Empty,
+	-1,
+	-1,
+	false,
+	PairListGen.empty());
+
+    private static final ConcurrentHashMap<Pair<Koma, Boolean>, ImmutableSuperList<Vector>> reverseTerritoryCache = //
+	    new ConcurrentHashMap<Pair<Koma, Boolean>, ImmutableSuperList<Vector>>();
+    private static final ConcurrentHashMap<Triple<Koma, Boolean, Player>, ImmutableSuperList<Vector>> decomposedTerritoryCache = //
+	    new ConcurrentHashMap<Triple<Koma, Boolean, Player>, ImmutableSuperList<Vector>>();
 
     public final Player player;
     public final Koma koma;
@@ -47,17 +63,6 @@ public class MasuState {
 	this.rangedBy = rangedBy;
     }
 
-    public static final MasuState Invalid = new MasuState(
-	Player.None,
-	Koma.Empty,
-	-1,
-	-1,
-	false,
-	PairListGen.empty());
-
-    public static final ConcurrentHashMap<Pair<Koma, Boolean>, ImmutableSuperList<Vector>> ReverseTerritoryCache = //
-	    new ConcurrentHashMap<Pair<Koma, Boolean>, ImmutableSuperList<Vector>>();
-
     public int getSuzi() {
 	return 9 - x;
     }
@@ -71,9 +76,19 @@ public class MasuState {
 	if (base == null)
 	    return SuperListGen.empty();
 	return player == Player.Opponent
-		? ReverseTerritoryCache.computeIfAbsent(Pair.of(koma, nariFlag),
+		? reverseTerritoryCache.computeIfAbsent(Pair.of(koma, nariFlag),
 		    k -> SuperListGen.immutableOf(
 			base.stream().map(v -> v.reverse(false, true)).toArray(Vector[]::new)))
+		: base;
+    }
+
+    public ImmutableSuperList<Vector> getDecomposedTerritory() {
+	var base = this.getTerritory();
+	return isLinearRange(this)
+		? decomposedTerritoryCache.computeIfAbsent(Triple.of(koma, nariFlag, player),
+		    k -> SuperListGen.immutableOf(
+			base.stream().flatMap(v -> Arrays.stream(MatrixResolver.decompose(v)))
+			    .toArray(Vector[]::new)))
 		: base;
     }
 
