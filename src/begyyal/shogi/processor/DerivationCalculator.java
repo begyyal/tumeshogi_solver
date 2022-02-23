@@ -50,6 +50,7 @@ public class DerivationCalculator implements Closeable {
 
 	var branches = this.tools.selfProcessor.spread(acon);
 	if (branches.length == 0) {
+	    results.add(acon);
 	    return true;
 	} else
 	    return this.spread(branches, results, count);

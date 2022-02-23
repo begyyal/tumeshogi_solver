@@ -4,10 +4,8 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 import begyyal.commons.util.matrix.MatrixResolver;
-import begyyal.commons.util.object.SuperBool;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
-import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
 import begyyal.shogi.object.MasuState;
 
@@ -50,20 +48,15 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	    .stream()
 	    .map(r -> ban.getState(r.getLeft(), r.getRight()))
 	    .filter(s -> s.player == playerType && s.koma != Koma.Ou)
-	    .flatMap(from -> {
-		var tryNari = SuperBool.newi();
-		return createBranchStream(outeState.y, from)
-		    .filter(i -> tryNari.get()
-			    || Ban.validateState(from.koma, outeState.x, outeState.y, playerType))
-		    .mapToObj(i -> {
-			var newBan = ban.clone();
-			var newState = newBan.advance(
-			    from.x, from.y, outeState.x, outeState.y, tryNari.getAndReverse());
-			return newBan.checkingSafe()
-				? context.branch(newBan, newState, outeState.koma, playerType, true)
-				: null;
-		    });
-	    });
+	    .flatMap(from -> createBranchStream(outeState.y, from)
+		.map(tryNari -> {
+		    var newBan = ban.clone();
+		    var newState = newBan.advance(
+			from.x, from.y, outeState.x, outeState.y, tryNari);
+		    return newState != MasuState.Invalid && newBan.checkingSafe()
+			    ? context.branch(newBan, newState, outeState.koma, playerType, true)
+			    : null;
+		}));
 
 	// 持ち駒を貼る
 	var outeVector = opponentOu.getVectorTo(outeState);
