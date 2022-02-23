@@ -93,15 +93,16 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .stream()
 	    .distinct()
 	    .flatMap(k -> ban
-		.search(s -> s.koma == Koma.Empty)
-		.map(s -> Pair.of(k, s)))
-	    .map(ks -> {
-		var newBan = ban.clone();
-		var s = newBan.deploy(ks.getLeft(), ks.getRight().x, ks.getRight().y, playerType);
-		return s != MasuState.Invalid && !newBan.checkingSafe()
-			? context.branch(newBan, s, s.koma, playerType, false)
-			: null;
-	    });
+		.search(s -> s.koma == Koma.Empty
+			&& MasuState.getDecomposedTerritory(k, false, playerType)
+			    .contains(s.getVectorTo(opponentOu)))
+		.map(to -> {
+		    var newBan = ban.clone();
+		    var newState = newBan.deploy(k, to.x, to.y, playerType);
+		    return newState != MasuState.Invalid && !newBan.checkingSafe()
+			    ? context.branch(newBan, newState, k, playerType, false)
+			    : null;
+		}));
 
 	// 駒移動系は空き王手と他で重複し得るのでdistinctする
 	var cs4 = Stream.concat(cs1, cs2)
