@@ -91,7 +91,7 @@
 					"act": "console-output",
 					"value": [
                         "Self -> 25Keima",
-                        "Opponent -> 25Kaku",
+                        "Opponent -> 25KakuNari",
                         "Self -> 22Gin",
                         "Opponent -> 14Ou",
                         "Self -> 13HishaNari"
@@ -144,7 +144,7 @@
                         "Self -> 33HishaNari",
                         "Opponent -> 11Ou",
                         "Self -> 32HishaNari",
-                        "Opponent -> 55Hisha",
+                        "Opponent -> 55HishaNari",
                         "Self -> 23Keima"
                     ]
 				}
