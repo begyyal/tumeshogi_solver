@@ -3,7 +3,6 @@ package begyyal.shogi.processor;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import begyyal.commons.util.matrix.MatrixResolver;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.BanContext;
@@ -63,7 +62,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	boolean outeIsNotLinear = Math.abs(outeVector.x) == 1 || Math.abs(outeVector.y) == 1;
 	Stream<BanContext> cs3 = context.opponentMotigoma.isEmpty() || outeIsNotLinear
 		? Stream.empty()
-		: Arrays.stream(MatrixResolver.decompose(outeVector))
+		: Arrays.stream(outeVector.decompose())
 		    .filter(miniV -> !outeVector.equals(miniV))
 		    .flatMap(v -> context.opponentMotigoma
 			.stream()

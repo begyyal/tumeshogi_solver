@@ -5,7 +5,6 @@ import java.util.stream.Stream;
 
 import com.google.common.collect.Sets;
 
-import begyyal.commons.util.matrix.MatrixResolver;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
@@ -52,7 +51,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 		if (Math.abs(v.x) <= 1 && Math.abs(v.y) <= 1
 			|| !s.getDecomposedTerritory().contains(v))
 		    return null;
-		var dv = MatrixResolver.decompose(v);
+		var dv = v.decompose();
 		MasuState obstruction = null;
 		for (var miniV : dv) {
 		    var result = ban.exploration(s, miniV);

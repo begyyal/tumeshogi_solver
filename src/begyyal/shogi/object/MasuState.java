@@ -2,7 +2,6 @@ package begyyal.shogi.object;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -11,12 +10,12 @@ import org.apache.commons.lang3.tuple.Triple;
 
 import com.google.common.collect.Lists;
 
-import begyyal.commons.util.matrix.MatrixResolver;
-import begyyal.commons.util.matrix.Vector;
+import begyyal.commons.util.cache.SimpleCacheResolver;
 import begyyal.commons.util.object.PairList;
 import begyyal.commons.util.object.PairList.PairListGen;
 import begyyal.commons.util.object.SuperList.ImmutableSuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
+import begyyal.commons.util.object.Vector;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 
@@ -30,11 +29,6 @@ public class MasuState {
 	-1,
 	false,
 	PairListGen.empty());
-
-    private static final ConcurrentHashMap<Pair<Koma, Boolean>, ImmutableSuperList<Vector>> reverseTerritoryCache = //
-	    new ConcurrentHashMap<Pair<Koma, Boolean>, ImmutableSuperList<Vector>>();
-    private static final ConcurrentHashMap<Triple<Koma, Boolean, Player>, ImmutableSuperList<Vector>> decomposedTerritoryCache = //
-	    new ConcurrentHashMap<Triple<Koma, Boolean, Player>, ImmutableSuperList<Vector>>();
 
     public final Player player;
     public final Koma koma;
@@ -117,8 +111,8 @@ public class MasuState {
 	if (base == null)
 	    return SuperListGen.empty();
 	return player == Player.Opponent
-		? reverseTerritoryCache.computeIfAbsent(Pair.of(koma, nariFlag),
-		    k -> SuperListGen.immutableOf(
+		? SimpleCacheResolver.get(Pair.of(koma, nariFlag),
+		    () -> SuperListGen.immutableOf(
 			base.stream().map(v -> v.reverse(false, true)).toArray(Vector[]::new)))
 		: base;
     }
@@ -130,10 +124,9 @@ public class MasuState {
 
 	var base = getTerritory(koma, nariFlag, player);
 	return isLinearRange(koma, nariFlag)
-		? decomposedTerritoryCache.computeIfAbsent(Triple.of(koma, nariFlag, player),
-		    k -> SuperListGen.immutableOf(
-			base.stream().flatMap(v -> Arrays.stream(MatrixResolver.decompose(v)))
-			    .toArray(Vector[]::new)))
+		? SimpleCacheResolver.get(Triple.of(koma, nariFlag, player),
+		    () -> SuperListGen.immutableOf(base.stream()
+			.flatMap(v -> Arrays.stream(v.decompose())).toArray(Vector[]::new)))
 		: base;
     }
 
