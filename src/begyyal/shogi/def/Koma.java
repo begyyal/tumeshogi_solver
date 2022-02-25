@@ -46,7 +46,7 @@ public enum Koma {
 	SuperListGen.immutableOf(new Vector(0, 1), new Vector(1, 1),
 	    new Vector(-1, 1), new Vector(1, 0),
 	    new Vector(-1, 0), new Vector(0, -1)),
-	null,
+	SuperListGen.empty(),
 	4),
     Kaku(
 	"f",
@@ -72,7 +72,7 @@ public enum Koma {
 	    new Vector(-1, 1), new Vector(1, 0),
 	    new Vector(-1, 0), new Vector(0, -1),
 	    new Vector(1, -1), new Vector(-1, -1)),
-	null,
+	SuperListGen.empty(),
 	2),
     Empty(
 	"*",
@@ -83,6 +83,8 @@ public enum Koma {
     private final String id;
     public final ImmutableSuperList<Vector> territory;
     public final ImmutableSuperList<Vector> nariTerri;
+    public final ImmutableSuperList<Vector> territoryRev;
+    public final ImmutableSuperList<Vector> nariTerriRev;
     public final int numLimit;
 
     private Koma(
@@ -90,9 +92,14 @@ public enum Koma {
 	ImmutableSuperList<Vector> territory,
 	ImmutableSuperList<Vector> nariTerri,
 	int numLimit) {
+	
 	this.id = id;
 	this.territory = territory;
 	this.nariTerri = nariTerri;
+	this.territoryRev = SuperListGen.immutableOf(
+	    territory.stream().map(v -> v.reverse(false, true)).toArray(Vector[]::new));
+	this.nariTerriRev = SuperListGen.immutableOf(
+	    nariTerri.stream().map(v -> v.reverse(false, true)).toArray(Vector[]::new));
 	this.numLimit = numLimit;
     }
 
