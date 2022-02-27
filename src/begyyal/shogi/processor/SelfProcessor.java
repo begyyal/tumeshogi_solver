@@ -5,6 +5,7 @@ import java.util.stream.Stream;
 
 import com.google.common.collect.Sets;
 
+import begyyal.commons.util.cache.SimpleCacheResolver;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
@@ -28,21 +29,21 @@ public class SelfProcessor extends PlayerProcessorBase {
 
 	// 駒の移動による王手(開き王手は除く)
 	var cs1 = ban.search(s -> s.player == playerType)
-	    .flatMap(from -> {
-		var dt = Sets.newHashSet(from.getDecomposedTerritory());
-		if (!from.nariFlag)
-		    dt.addAll(MasuState.getDecomposedTerritory(from.koma, true, playerType));
-		return spreadMasuState(from, ban)
-		    .filter(to -> dt.contains(to.getVectorTo(opponentOu)))
-		    .flatMap(to -> createBranchStream(to.y, from)
-			.map(tryNari -> {
-			    var newBan = ban.clone();
-			    var newState = newBan.advance(from.x, from.y, to.x, to.y, tryNari);
-			    return newState != MasuState.Invalid && !newBan.checkingSafe()
-				    ? context.branch(newBan, newState, to.koma, playerType, true)
-				    : null;
-			}));
-	    });
+	    .flatMap(from -> spreadMasuState(from, ban)
+		.filter(to -> SimpleCacheResolver.getAsPrivate(this.getClass(), 1, from, () -> {
+		    var dt = Sets.newHashSet(from.getDecomposedTerritory());
+		    if (!from.nariFlag)
+			dt.addAll(MasuState.getDecomposedTerritory(from.koma, true, playerType));
+		    return dt;
+		}).contains(to.getVectorTo(opponentOu)))
+		.flatMap(to -> createBranchStream(to.y, from)
+		    .map(tryNari -> {
+			var newBan = ban.clone();
+			var newState = newBan.advance(from.x, from.y, to.x, to.y, tryNari);
+			return newState != MasuState.Invalid && !newBan.checkingSafe()
+				? context.branch(newBan, newState, to.koma, playerType, true)
+				: null;
+		    })));
 
 	// 開き王手
 	var cs2 = ban.search(s -> s.player == playerType && MasuState.isLinearRange(s))

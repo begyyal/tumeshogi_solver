@@ -5,7 +5,6 @@ import java.util.Collections;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
 import com.google.common.collect.Lists;
@@ -106,25 +105,21 @@ public class MasuState {
 	Koma koma,
 	boolean nariFlag,
 	Player player) {
-
-	var base = nariFlag ? koma.nariTerri : koma.territory;
-	if (base == null)
+	if (player == Player.None)
 	    return SuperListGen.empty();
-	return player == Player.Opponent
-		? SimpleCacheResolver.get(Pair.of(koma, nariFlag),
-		    () -> SuperListGen.immutableOf(
-			base.stream().map(v -> v.reverse(false, true)).toArray(Vector[]::new)))
-		: base;
+	return player == Player.Self
+		? (nariFlag ? koma.nariTerri : koma.territory)
+		: (nariFlag ? koma.nariTerriRev : koma.territoryRev);
     }
 
     public static ImmutableSuperList<Vector> getDecomposedTerritory(
 	Koma koma,
 	boolean nariFlag,
 	Player player) {
-
 	var base = getTerritory(koma, nariFlag, player);
 	return isLinearRange(koma, nariFlag)
-		? SimpleCacheResolver.get(Triple.of(koma, nariFlag, player),
+		? SimpleCacheResolver.getAsPrivate(MasuState.class, 1,
+		    Triple.of(koma, nariFlag, player),
 		    () -> SuperListGen.immutableOf(base.stream()
 			.flatMap(v -> Arrays.stream(v.decompose())).toArray(Vector[]::new)))
 		: base;
