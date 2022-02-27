@@ -43,7 +43,8 @@ public class SelfProcessor extends PlayerProcessorBase {
 		return createBranchStream(dest.y, sp.getLeft())
 		    .mapToObj(i -> {
 			var newBan = ban.clone();
-			var newState = newBan.advance(sp.getLeft().x, sp.getLeft().y, dest.x, dest.y,
+			var newState = newBan.advance(sp.getLeft().x, sp.getLeft().y, dest.x,
+			    dest.y,
 			    tryNari.getAndReverse());
 			return checkNewState(newBan, newState)
 				? context.branch(newBan, newState, dest.koma, PlayerType, true)
@@ -118,13 +119,16 @@ public class SelfProcessor extends PlayerProcessorBase {
 			return createBranchStream(to.y, from)
 			    .mapToObj(i -> {
 				var newBan = ban.clone();
-				var newDest = newBan.advance(
+				var newState = newBan.advance(
 				    from.x, from.y, to.x, to.y, tryNari.getAndReverse());
-				return context.branch(
-				    newBan, newDest, to.koma, PlayerType, true);
+				return newState != MasuState.Invalid
+					? context.branch(newBan, newState, to.koma, PlayerType,
+					    true)
+					: null;
 			    });
 		    });
-	    });
+	    })
+	    .filter(c -> c != null);
     }
 
     // 1ステートからの空き王手は複数にならない
