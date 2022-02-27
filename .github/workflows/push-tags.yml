@@ -1,0 +1,25 @@
+name: Update tag
+
+on:
+  push:
+    tags: [ v1.* ]
+
+jobs:
+
+  update-tag:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - name: Set git configs
+      run: |
+        git config --global user.email "begyyal@gmail.com"
+        git config --global user.name "begyyal-ghost"
+
+    - name: Update tag
+      run: |
+        git tag -a v1 -m "BY-CI"
+        git push origin v1 -f
