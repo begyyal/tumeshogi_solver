@@ -7,6 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.google.common.collect.Sets;
+
 import begyyal.commons.constant.Strs;
 import begyyal.commons.util.function.SuperStrings;
 import begyyal.commons.util.object.SuperList;
@@ -21,7 +23,7 @@ public class ArgParser {
 
     private final String motigomaArgRegex = "([xy]([a][1-9][1-8]?|[b-e][1-4]|[fg][12])+){1,2}";
     private final String banArgRegex = "([1-9][1-9][xy][a-dfg][z]?|[1-9][1-9][xy][eh])+";
-    
+
     public ArgParser() {
     }
 
@@ -60,14 +62,28 @@ public class ArgParser {
 	    if (matrix[9 - x][9 - y] != null)
 		throw new IllegalArgumentException(
 		    "The masu states of [" + x + "-" + y + "] are duplicated.");
-	    matrix[9 - x][9 - y] = MasuState.of(masu.substring(2), x, y);
+	    matrix[9 - x][9 - y] = parseMasuStateStr(masu.substring(2), x, y);
 	}
-
 
 	var ban = new Ban(matrix);
 	ban.setup();
-	
+
 	return ban;
+    }
+
+    private static MasuState parseMasuStateStr(String value, int suzi, int dan) {
+
+	var p = Player.of(value.substring(0, 1));
+	if (p == null)
+	    throw new IllegalArgumentException("Can't parse [" + value + "] to Player object.");
+
+	var k = Koma.of(value.substring(1, 2));
+	if (k == null)
+	    throw new IllegalArgumentException("Can't parse [" + value + "] to Koma object.");
+
+	boolean nari = value.length() > 2 && StringUtils.equals(value.substring(2, 3), "z");
+
+	return new MasuState(p, k, 9 - suzi, 9 - dan, nari, Sets.newHashSet());
     }
 
     public Pair<SuperList<Koma>, SuperList<Koma>> parseMotigomaStr(String arg) {

@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -124,28 +123,6 @@ public class MasuState {
 		    () -> SuperListGen.immutableOf(base.stream()
 			.flatMap(v -> Arrays.stream(v.decompose())).toArray(Vector[]::new)))
 		: base;
-    }
-
-    /**
-     * player(x/y) + koma(a~h) + nari(z/) <br>
-     * バリデーション含む。
-     * 
-     * @param value 文字列値
-     * @return マス状態
-     */
-    public static MasuState of(String value, int suzi, int dan) {
-
-	var p = Player.of(value.substring(0, 1));
-	if (p == null)
-	    throw new IllegalArgumentException("Can't parse [" + value + "] to Player object.");
-
-	var k = Koma.of(value.substring(1, 2));
-	if (k == null)
-	    throw new IllegalArgumentException("Can't parse [" + value + "] to Koma object.");
-
-	boolean nari = value.length() > 2 && StringUtils.equals(value.substring(2, 3), "z");
-
-	return new MasuState(p, k, 9 - suzi, 9 - dan, nari, Sets.newHashSet());
     }
 
     public static boolean isLinearRange(MasuState s) {
