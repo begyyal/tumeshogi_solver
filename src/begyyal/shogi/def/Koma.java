@@ -4,9 +4,9 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.StringUtils;
 
-import begyyal.commons.util.matrix.Vector;
 import begyyal.commons.util.object.SuperList.ImmutableSuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
+import begyyal.commons.util.object.Vector;
 
 public enum Koma {
 

@@ -5,12 +5,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import begyyal.commons.util.matrix.MatrixResolver;
-import begyyal.commons.util.matrix.Vector;
 import begyyal.commons.util.object.PairList;
 import begyyal.commons.util.object.PairList.PairListGen;
 import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
+import begyyal.commons.util.object.Vector;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 
@@ -56,7 +55,7 @@ public class Ban implements Cloneable {
 	boolean haveLinearRange = MasuState.isLinearRange(s);
 	for (var v : s.getTerritory())
 	    if (haveLinearRange) {
-		for (var miniV : MatrixResolver.decompose(v))
+		for (var miniV : v.decompose())
 		    if (!markRange(miniV, s.x, s.y))
 			break;
 	    } else
