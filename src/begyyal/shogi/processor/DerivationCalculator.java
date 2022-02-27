@@ -59,7 +59,7 @@ public class DerivationCalculator implements Closeable {
     private boolean processOpponent(BanContext acon, Set<BanContext> results, int count) {
 
 	var branches = this.tools.opponentProcessor.spread(acon);
-	if (branches.length == 0) {
+	if (branches == null || branches.length == 0) {
 	    results.add(acon);
 	    return true;
 	} else if (count == numOfMoves + 1) {

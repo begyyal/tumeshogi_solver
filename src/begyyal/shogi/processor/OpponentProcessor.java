@@ -13,7 +13,8 @@ import begyyal.shogi.object.MasuState;
 
 public class OpponentProcessor extends PlayerProcessorBase {
 
-    public static final Player PlayerType = Player.Opponent;
+    public static final Player playerType = Player.Opponent;
+    private static final BanContext[] dummyResult = new BanContext[] { null };
 
     public OpponentProcessor(int numOfMoves) {
 	super(numOfMoves);
@@ -25,42 +26,42 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	var opponentOu = ban.search(MasuState::isOpponentOu).findFirst().get();
 
 	// 王手範囲から避ける(王による王手駒の取得含む)
-	var cs1 = spreadMasuState(opponentOu, ban)
+	Stream<BanContext> cs1 = spreadMasuState(opponentOu, ban)
 	    .filter(s -> !s.rangedBy
-		.anyMatch(r -> ban.getState(r.getLeft(), r.getRight()).player != PlayerType))
+		.anyMatch(r -> ban.getState(r.getLeft(), r.getRight()).player != playerType))
 	    .map(s -> {
 		var newBan = ban.clone();
 		var newState = newBan.advance(opponentOu.x, opponentOu.y, s.x, s.y, false);
 		return checkingSafe(newBan, newState)
-			? context.branch(newBan, newState, s.koma, PlayerType, true)
+			? context.branch(newBan, newState, s.koma, playerType, true)
 			: null;
 	    });
 
 	var outeArray = opponentOu.rangedBy
 	    .stream()
 	    .map(r -> ban.getState(r.getLeft(), r.getRight()))
-	    .filter(s -> s.player != PlayerType)
+	    .filter(s -> s.player != playerType)
 	    .toArray(MasuState[]::new);
 	if (outeArray.length > 1)
-	    return cs1.filter(c -> c != null).toArray(BanContext[]::new);
+	    return executeCS(context, cs1);
 
 	// 王手駒を取得する(王による取得は含まず)
 	var outeState = outeArray[0];
-	var cs2 = outeState.rangedBy
+	Stream<BanContext> cs2 = outeState.rangedBy
 	    .stream()
 	    .map(r -> ban.getState(r.getLeft(), r.getRight()))
-	    .filter(s -> s.player == PlayerType && s.koma != Koma.Ou)
+	    .filter(s -> s.player == playerType && s.koma != Koma.Ou)
 	    .flatMap(from -> {
 		var tryNari = SuperBool.newi();
 		return createBranchStream(outeState.y, from)
 		    .filter(i -> tryNari.get()
-			    || Ban.validateState(from.koma, outeState.x, outeState.y, PlayerType))
+			    || Ban.validateState(from.koma, outeState.x, outeState.y, playerType))
 		    .mapToObj(i -> {
 			var newBan = ban.clone();
 			var newState = newBan.advance(
 			    from.x, from.y, outeState.x, outeState.y, tryNari.getAndReverse());
 			return checkingSafe(newBan)
-				? context.branch(newBan, newState, outeState.koma, PlayerType, true)
+				? context.branch(newBan, newState, outeState.koma, playerType, true)
 				: null;
 		    });
 	    });
@@ -68,7 +69,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	// 持ち駒を貼る
 	var outeVector = opponentOu.getVectorTo(outeState);
 	boolean outeIsNotLinear = Math.abs(outeVector.x) == 1 || Math.abs(outeVector.y) == 1;
-	var cs3 = context.opponentMotigoma.isEmpty() || outeIsNotLinear
+	Stream<BanContext> cs3 = context.opponentMotigoma.isEmpty() || outeIsNotLinear
 		? Stream.empty()
 		: Arrays.stream(MatrixResolver.decompose(outeVector))
 		    .filter(miniV -> !outeVector.equals(miniV))
@@ -78,15 +79,13 @@ public class OpponentProcessor extends PlayerProcessorBase {
 			.map(k -> {
 			    var newBan = ban.clone();
 			    int x = opponentOu.x + v.x, y = opponentOu.y + v.y;
-			    var s = newBan.deploy(k, x, y, PlayerType);
+			    var s = newBan.deploy(k, x, y, playerType);
 			    return s == MasuState.Invalid
 				    ? null
-				    : context.branch(newBan, s, k, PlayerType, false);
+				    : context.branch(newBan, s, k, playerType, false);
 			}));
 
-	return Stream.concat(Stream.concat(cs1, cs2), cs3)
-	    .filter(c -> c != null)
-	    .toArray(BanContext[]::new);
+	return executeCS(context, Stream.concat(Stream.concat(cs1, cs2), cs3));
     }
 
     private static boolean checkingSafe(Ban ban) {
@@ -100,13 +99,20 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	return ou.rangedBy
 	    .stream()
 	    .map(r -> ban.getState(r.getLeft(), r.getRight()))
-	    .filter(s -> s.player != PlayerType)
+	    .filter(s -> s.player != playerType)
 	    .findFirst()
 	    .isEmpty();
     }
 
+    private BanContext[] executeCS(BanContext beforeContext, Stream<BanContext> cs) {
+	if (this.numOfMoves <= beforeContext.log.size()) {
+	    return cs.anyMatch(c -> c != null) ? dummyResult : null;
+	} else
+	    return cs.filter(c -> c != null).toArray(BanContext[]::new);
+    }
+
     @Override
     protected Player getPlayerType() {
-	return PlayerType;
+	return playerType;
     }
 }

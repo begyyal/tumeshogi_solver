@@ -20,7 +20,7 @@ import begyyal.shogi.object.MasuState;
 
 public class SelfProcessor extends PlayerProcessorBase {
 
-    public static final Player PlayerType = Player.Self;
+    public static final Player playerType = Player.Self;
     private final Ban initBan;
 
     public SelfProcessor(int numOfMoves, Ban initBan) {
@@ -34,7 +34,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 
 	// 駒の移動による王手(開き王手は除く)
 	var moveSpread = ban
-	    .search(s -> s.player == PlayerType)
+	    .search(s -> s.player == playerType)
 	    .flatMap(s -> spreadMasuState(s, ban).map(dest -> Pair.of(s, dest)))
 	    .collect(PairListGen.collect());
 	var cs1 = moveSpread
@@ -49,7 +49,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 			    dest.y,
 			    tryNari.getAndReverse());
 			return checkNewState(newBan, newState)
-				? context.branch(newBan, newState, dest.koma, PlayerType, true)
+				? context.branch(newBan, newState, dest.koma, playerType, true)
 				: null;
 		    });
 	    })
@@ -67,9 +67,9 @@ public class SelfProcessor extends PlayerProcessorBase {
 		.map(s -> Pair.of(k, s)))
 	    .map(ks -> {
 		var newBan = ban.clone();
-		var s = newBan.deploy(ks.getLeft(), ks.getRight().x, ks.getRight().y, PlayerType);
+		var s = newBan.deploy(ks.getLeft(), ks.getRight().x, ks.getRight().y, playerType);
 		return checkNewState(newBan, s)
-			? context.branch(newBan, s, s.koma, PlayerType, false)
+			? context.branch(newBan, s, s.koma, playerType, false)
 			: null;
 	    })
 	    .filter(c -> c != null);
@@ -80,7 +80,7 @@ public class SelfProcessor extends PlayerProcessorBase {
     }
 
     private boolean checkNewState(Ban ban, MasuState s) {
-	return s != MasuState.Invalid && ban.isOuteBy(PlayerType, s.x, s.y);
+	return s != MasuState.Invalid && ban.isOuteBy(playerType, s.x, s.y);
     }
 
     private Stream<BanContext> getAkiOuteContextStream(
@@ -91,7 +91,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	var opponentOu = ban.search(MasuState::isOpponentOu).findFirst().get();
 	var candidates = ban.search(s -> {
 	    var v = s.getVectorTo(opponentOu);
-	    return s.player == PlayerType
+	    return s.player == playerType
 		    && MasuState.isLinearRange(s)
 		    && (v.x == 0 || v.y == 0 || Math.abs(v.x / v.y) == 1);
 	}).toArray(MasuState[]::new);
@@ -124,7 +124,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 				var newState = newBan.advance(
 				    from.x, from.y, to.x, to.y, tryNari.getAndReverse());
 				return newState != MasuState.Invalid
-					? context.branch(newBan, newState, to.koma, PlayerType,
+					? context.branch(newBan, newState, to.koma, playerType,
 					    true)
 					: null;
 			    });
@@ -166,7 +166,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    if (result.player == Player.None)
 		continue;
 	    if (i == 0) {
-		if (result.player == PlayerType) {
+		if (result.player == playerType) {
 		    obstruction = result;
 		    i++;
 		} else
@@ -183,6 +183,6 @@ public class SelfProcessor extends PlayerProcessorBase {
 
     @Override
     protected Player getPlayerType() {
-	return PlayerType;
+	return playerType;
     }
 }
