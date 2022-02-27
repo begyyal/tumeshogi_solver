@@ -33,17 +33,7 @@ public class DerivationCalculator implements Closeable {
 
     public boolean ignite(Set<BanContext> results)
 	throws InterruptedException, ExecutionException {
-	return this.next(origin, results, 0);
-    }
-
-    private boolean next(BanContext acon, Set<BanContext> results, int count)
-	throws InterruptedException, ExecutionException {
-	return count > numOfMoves ||
-		this.tools.exe.submit(
-		    count % 2 == 0
-			    ? () -> this.processSelf(acon, results, count + 1)
-			    : () -> this.processOpponent(acon, results, count + 1))
-		    .get();
+	return processSelf(origin, results, 1);
     }
 
     private boolean processSelf(BanContext acon, Set<BanContext> results, int count) {
@@ -69,7 +59,7 @@ public class DerivationCalculator implements Closeable {
 	}
 
 	if (Arrays.stream(branches).anyMatch(b -> {
-	    long selfBanCount = b.getLatestBan().search(s -> s.player == Player.Self).count();
+	    long selfBanCount = b.ban.search(s -> s.player == Player.Self).count();
 	    return selfBanCount == 0 || selfBanCount + b.selfMotigoma.size() <= 1;
 	})) {
 	    acon.isFailure = true;
@@ -81,16 +71,13 @@ public class DerivationCalculator implements Closeable {
     }
 
     private boolean spread(BanContext[] branches, Set<BanContext> results, int count) {
-	return Arrays.stream(branches)
-	    .map(b -> {
-		try {
-		    return this.next(b, results, count);
-		} catch (InterruptedException | ExecutionException e) {
-		    e.printStackTrace();
-		    return false;
-		}
-	    })
-	    .allMatch(b -> b);
+	if (count <= numOfMoves)
+	    for (var b : branches)
+		if (count % 2 == 0)
+		    this.processSelf(b, results, count + 1);
+		else
+		    this.processOpponent(b, results, count + 1);
+	return true;
     }
 
     @Override

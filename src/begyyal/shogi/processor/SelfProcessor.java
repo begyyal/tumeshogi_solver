@@ -24,7 +24,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 
     public BanContext[] spread(BanContext context) {
 
-	var ban = context.getLatestBan() == null ? this.initBan : context.getLatestBan();
+	var ban = context.ban == null ? this.initBan : context.ban;
 	var opponentOu = ban.search(MasuState::isOpponentOu).findFirst().get();
 
 	// 駒の移動による王手(開き王手は除く)

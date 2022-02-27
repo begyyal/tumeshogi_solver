@@ -2,6 +2,8 @@ package begyyal.shogi.processor;
 
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
@@ -16,7 +18,7 @@ public abstract class PlayerProcessorBase {
     }
 
     protected Stream<MasuState> spreadMasuState(MasuState from, Ban ban) {
-	return ban.search(s -> s.rangedBy.contains(from.x, from.y))
+	return ban.search(s -> s.rangedBy.contains(Pair.of(from.x, from.y)))
 	    .filter(s -> this.canAdvanceTo(s));
     }
 
