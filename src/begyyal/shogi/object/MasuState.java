@@ -72,24 +72,11 @@ public class MasuState {
     }
 
     public ImmutableSuperList<Vector> getTerritory() {
-	var base = nariFlag ? koma.nariTerri : koma.territory;
-	if (base == null)
-	    return SuperListGen.empty();
-	return player == Player.Opponent
-		? reverseTerritoryCache.computeIfAbsent(Pair.of(koma, nariFlag),
-		    k -> SuperListGen.immutableOf(
-			base.stream().map(v -> v.reverse(false, true)).toArray(Vector[]::new)))
-		: base;
+	return getTerritory(this.koma, this.nariFlag, this.player);
     }
 
     public ImmutableSuperList<Vector> getDecomposedTerritory() {
-	var base = this.getTerritory();
-	return isLinearRange(this)
-		? decomposedTerritoryCache.computeIfAbsent(Triple.of(koma, nariFlag, player),
-		    k -> SuperListGen.immutableOf(
-			base.stream().flatMap(v -> Arrays.stream(MatrixResolver.decompose(v)))
-			    .toArray(Vector[]::new)))
-		: base;
+	return getDecomposedTerritory(this.koma, this.nariFlag, this.player);
     }
 
     public Vector getVectorTo(MasuState s) {
@@ -121,6 +108,35 @@ public class MasuState {
 	    rangedBy);
     }
 
+    public static ImmutableSuperList<Vector> getTerritory(
+	Koma koma,
+	boolean nariFlag,
+	Player player) {
+
+	var base = nariFlag ? koma.nariTerri : koma.territory;
+	if (base == null)
+	    return SuperListGen.empty();
+	return player == Player.Opponent
+		? reverseTerritoryCache.computeIfAbsent(Pair.of(koma, nariFlag),
+		    k -> SuperListGen.immutableOf(
+			base.stream().map(v -> v.reverse(false, true)).toArray(Vector[]::new)))
+		: base;
+    }
+
+    public static ImmutableSuperList<Vector> getDecomposedTerritory(
+	Koma koma,
+	boolean nariFlag,
+	Player player) {
+
+	var base = getTerritory(koma, nariFlag, player);
+	return isLinearRange(koma, nariFlag)
+		? decomposedTerritoryCache.computeIfAbsent(Triple.of(koma, nariFlag, player),
+		    k -> SuperListGen.immutableOf(
+			base.stream().flatMap(v -> Arrays.stream(MatrixResolver.decompose(v)))
+			    .toArray(Vector[]::new)))
+		: base;
+    }
+
     /**
      * player(x/y) + koma(a~h) + nari(z/) <br>
      * バリデーション含む。
@@ -144,9 +160,13 @@ public class MasuState {
     }
 
     public static boolean isLinearRange(MasuState s) {
-	return s.koma == Koma.Kyousha && !s.nariFlag ||
-		s.koma == Koma.Hisha ||
-		s.koma == Koma.Kaku;
+	return isLinearRange(s.koma, s.nariFlag);
+    }
+
+    public static boolean isLinearRange(Koma koma, boolean nariFlag) {
+	return koma == Koma.Kyousha && !nariFlag ||
+		koma == Koma.Hisha ||
+		koma == Koma.Kaku;
     }
 
     @Override
