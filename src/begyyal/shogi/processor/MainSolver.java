@@ -75,9 +75,10 @@ public class MainSolver implements Closeable {
     public String[] calculate()
 	throws InterruptedException, ExecutionException {
 
-	var results = Sets.<BanContext>newConcurrentHashSet();
+	var results = Sets.<BanContext>newHashSet();
 
-	if (!this.dc.ignite(results) || results.isEmpty())
+	this.dc.ignite(results);
+	if (results.isEmpty())
 	    return createFailureLabel();
 
 	var result = this.rdc.calculate(results);

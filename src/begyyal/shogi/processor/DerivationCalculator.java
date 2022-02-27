@@ -7,6 +7,9 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import com.google.common.collect.Maps;
 
 import begyyal.commons.util.object.SuperList;
 import begyyal.shogi.def.Koma;
@@ -31,53 +34,61 @@ public class DerivationCalculator implements Closeable {
 	this.tools = new CalculationTools(numOfMoves, initBan);
     }
 
-    public boolean ignite(Set<BanContext> results)
+    public void ignite(Set<BanContext> results)
 	throws InterruptedException, ExecutionException {
-	return processSelf(origin, results, 1);
+	this.postProcessSelf(origin, this.tools.selfProcessor.spread(origin), results, 1);
     }
 
-    private boolean processSelf(BanContext acon, Set<BanContext> results, int count) {
+    private void postProcessSelf(
+	BanContext acon,
+	BanContext[] branches,
+	Set<BanContext> results,
+	int count) throws InterruptedException, ExecutionException {
 
-	var branches = this.tools.selfProcessor.spread(acon);
 	if (branches.length == 0) {
 	    results.add(acon);
-	    return true;
 	} else
-	    return this.spread(branches, results, count);
+	    this.spread(branches, results, count);
     }
 
-    private boolean processOpponent(BanContext acon, Set<BanContext> results, int count) {
+    private void postProcessOpponent(
+	BanContext acon,
+	BanContext[] branches,
+	Set<BanContext> results,
+	int count) throws InterruptedException, ExecutionException {
 
-	var branches = this.tools.opponentProcessor.spread(acon);
 	if (branches == null || branches.length == 0) {
 	    results.add(acon);
-	    return true;
 	} else if (count == numOfMoves + 1) {
 	    acon.isFailure = true;
 	    results.add(acon);
-	    return true;
-	}
-
-	if (Arrays.stream(branches).anyMatch(b -> {
+	} else if (Arrays.stream(branches).anyMatch(b -> {
 	    long selfBanCount = b.ban.search(s -> s.player == Player.Self).count();
 	    return selfBanCount == 0 || selfBanCount + b.selfMotigoma.size() <= 1;
 	})) {
 	    acon.isFailure = true;
 	    results.add(acon);
-	    return true;
-	}
-
-	return this.spread(branches, results, count);
+	} else
+	    this.spread(branches, results, count);
     }
 
-    private boolean spread(BanContext[] branches, Set<BanContext> results, int count) {
+    private void spread(BanContext[] branches, Set<BanContext> results, int count)
+	throws InterruptedException, ExecutionException {
+
+	var futureMap = Maps.<BanContext, Future<BanContext[]>>newHashMap();
 	if (count <= numOfMoves)
 	    for (var b : branches)
-		if (count % 2 == 0)
-		    this.processSelf(b, results, count + 1);
-		else
-		    this.processOpponent(b, results, count + 1);
-	return true;
+		futureMap.put(b, this.tools.exe.submit(count % 2 == 0
+			? () -> this.tools.selfProcessor.spread(b)
+			: () -> this.tools.opponentProcessor.spread(b)));
+
+	for (var e : futureMap.entrySet()) {
+	    var newBranches = e.getValue().get();
+	    if (count % 2 == 0)
+		this.postProcessSelf(e.getKey(), newBranches, results, count + 1);
+	    else
+		this.postProcessOpponent(e.getKey(), newBranches, results, count + 1);
+	}
     }
 
     @Override
