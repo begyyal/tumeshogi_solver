@@ -32,29 +32,6 @@ public class Ban implements Cloneable {
 		if (this.matrix[x][y] == null)
 		    emptyMasu(x, y, PairListGen.newi());
 	markRangeAll();
-	validateCondition();
-    }
-
-    private void validateCondition() {
-
-	boolean existOu = false;
-	for (int x = 0; x < 9; x++) {
-	    int huCountX = 0, huCountY = 0;
-	    for (int y = 0; y < 9; y++) {
-		var state = this.matrix[x][y];
-		if (state.koma == Koma.Empty)
-		    continue;
-		existOu = existOu || state.koma == Koma.Ou && state.player == Player.Opponent;
-		if (state.koma == Koma.Hu && !state.nariFlag
-			&& (state.player == Player.Self ? ++huCountX == 2 : ++huCountY == 2))
-		    throw new IllegalArgumentException("It's 2hu.");
-		if (!state.nariFlag && !validateState(state.koma, x, y, state.player))
-		    throw new IllegalArgumentException("There is invalid arrangement.");
-	    }
-	}
-
-	if (!existOu)
-	    throw new IllegalArgumentException("There must be the koma [Ou] in y's arguments.");
     }
 
     public MasuState getState(int x, int y) {
@@ -92,9 +69,7 @@ public class Ban implements Cloneable {
 	if (!validateCoordinate(vx, vy))
 	    return false;
 	this.matrix[vx][vy].rangedBy.add(x, y);
-	if (this.matrix[vx][vy].koma != Koma.Empty)
-	    return false;
-	return true;
+	return this.matrix[vx][vy].koma == Koma.Empty;
     }
 
     public void unmarkRangeBy(int targetX, int targetY) {
@@ -119,13 +94,6 @@ public class Ban implements Cloneable {
 	    .collect(SuperListGen.collect());
     }
 
-    /**
-     * 進行先のステートを取得する。
-     * 
-     * @param state
-     * @param v
-     * @return ステート
-     */
     public MasuState exploration(MasuState state, Vector v) {
 	int x = state.x, y = state.y;
 	int vx = x + v.x, vy = y + v.y;
@@ -167,20 +135,6 @@ public class Ban implements Cloneable {
 	return state;
     }
 
-    /**
-     * 対象の座標に対象の駒の配置が可能か検証を行う。(2歩を除く静的なもの)
-     * 
-     * @param koma
-     * @param x
-     * @param y
-     * @return 違反しなければtrue
-     */
-    public static boolean validateState(Koma koma, int x, int y, Player p) {
-	int end = p == Player.Self ? 8 : 0;
-	return (koma != Koma.Hu && koma != Koma.Kyousha || y != end)
-		&& (koma != Koma.Keima || (p == Player.Self ? y < 7 : y > 1));
-    }
-
     public boolean checkNihu(Player player, int x) {
 	return search(s -> s.x == x
 		&& s.koma == Koma.Hu
@@ -197,13 +151,19 @@ public class Ban implements Cloneable {
 	this.matrix[x][y] = MasuState.emptyOf(x, y, rangedBy);
     }
 
-    private boolean validateCoordinate(int x, int y) {
-	return 0 <= x && x < 9 && 0 <= y && y < 9;
-    }
-
     public boolean isOuteBy(Player p, int x, int y) {
 	return search(s -> s.koma == Koma.Ou && s.player != p)
 	    .findFirst().get().rangedBy.anyMatch(s -> s.getLeft() == x && s.getRight() == y);
+    }
+
+    public static boolean validateState(Koma koma, int x, int y, Player p) {
+	int end = p == Player.Self ? 8 : 0;
+	return (koma != Koma.Hu && koma != Koma.Kyousha || y != end)
+		&& (koma != Koma.Keima || (p == Player.Self ? y < 7 : y > 1));
+    }
+
+    private static boolean validateCoordinate(int x, int y) {
+	return 0 <= x && x < 9 && 0 <= y && y < 9;
     }
 
     @Override
