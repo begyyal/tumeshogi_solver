@@ -1,6 +1,5 @@
 package begyyal.shogi.processor;
 
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import begyyal.shogi.def.Koma;
@@ -27,12 +26,12 @@ public abstract class PlayerProcessorBase {
     }
 
     // 成ってもいいし成らなくてもいい
-    protected IntStream createBranchStream(int y, MasuState from) {
-	return IntStream.range(0,
-	    !from.nariFlag
-		    && (getPlayerType() == Player.Self ? y > 5 : y < 3)
-		    && from.koma.canNari()
-			    ? 2 : 1);
+    protected Stream<Boolean> createBranchStream(int y, MasuState from) {
+	return !from.nariFlag
+		&& (getPlayerType() == Player.Self ? y > 5 : y < 3)
+		&& from.koma.canNari()
+			? Stream.of(false, true)
+			: Stream.of(false);
     }
 
     protected abstract Player getPlayerType();

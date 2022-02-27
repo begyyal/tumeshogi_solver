@@ -115,7 +115,7 @@ public class Ban implements Cloneable {
 	    from.koma,
 	    toX,
 	    toY,
-	    from.nariFlag || tryNari && from.player == Player.Self ? to.y > 5 : to.y < 3,
+	    from.nariFlag || (tryNari && from.player == Player.Self ? to.y > 5 : to.y < 3),
 	    to.rangedBy);
 	this.matrix[toX][toY] = newState;
 
