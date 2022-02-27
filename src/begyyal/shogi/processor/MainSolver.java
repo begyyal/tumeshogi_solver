@@ -2,14 +2,12 @@ package begyyal.shogi.processor;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
 import com.google.common.collect.Sets;
 
 import begyyal.commons.util.object.SuperList;
-import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.commons.util.object.SuperMap.SuperMapGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
@@ -24,9 +22,9 @@ public class MainSolver implements Closeable {
     private final ReverseDerivationCalculator rdc;
 
     public MainSolver(Args args) {
-	
+
 	validate(args.initBan, args.selfMotigoma, args.opponentMotigoma);
-	
+
 	this.dc = new DerivationCalculator(
 	    args.numOfMoves,
 	    args.initBan,
@@ -93,31 +91,8 @@ public class MainSolver implements Closeable {
 	return new String[] { "Can't solve." };
     }
 
-    private String[] summarize(List<Ban> bans) {
-
-	var tejun = SuperListGen.<MasuState>newi();
-
-	Ban from = null;
-	for (Ban to : bans) {
-	    if (from != null)
-		tejun.add(parseBanDiff(from, to));
-	    from = to;
-	}
-
-	return tejun.stream()
-	    .map(s -> writeItte(s))
-	    .toArray(String[]::new);
-    }
-
-    private MasuState parseBanDiff(Ban from, Ban to) {
-	return from.serializeMatrix()
-	    .zip(to.serializeMatrix())
-	    .stream()
-	    .filter(p -> !p.getLeft().isEqualWithoutRange(p.getRight()))
-	    .map(p -> p.getRight())
-	    .filter(s -> s.koma != Koma.Empty)
-	    .findFirst()
-	    .get();
+    private String[] summarize(SuperList<MasuState> result) {
+	return result.stream().map(this::writeItte).toArray(String[]::new);
     }
 
     private String writeItte(MasuState state) {

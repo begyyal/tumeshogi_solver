@@ -2,7 +2,6 @@ package begyyal.shogi.processor;
 
 import java.util.Comparator;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -10,6 +9,7 @@ import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.Tree;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
+import begyyal.shogi.object.MasuState;
 
 public class ReverseDerivationCalculator {
 
@@ -19,15 +19,15 @@ public class ReverseDerivationCalculator {
 	this.initBan = initBan;
     }
 
-    public SuperList<Ban> calculate(Set<BanContext> results) {
+    public SuperList<MasuState> calculate(Set<BanContext> results) {
 	var resultTree = recursive4selectContext(context2tree(results), true);
-	return resultTree == null
-		? null
-		: results
-		    .stream()
-		    .filter(c -> c.getLatestBan().id == resultTree.getValue())
-		    .map(c -> c.log.append(0, initBan))
-		    .findFirst().get();
+	if (resultTree == null)
+	    return null;
+	return results
+	    .stream()
+	    .filter(c -> c.ban.id == resultTree.getValue())
+	    .map(c -> c.log.getV2List())
+	    .findFirst().get();
     }
 
     // return -> 選択結果の末端ツリーノード。無ければnull。
@@ -82,7 +82,7 @@ public class ReverseDerivationCalculator {
 	var origin = Tree.newi(this.initBan.id, null);
 	results.stream()
 	    .map(c -> {
-		var idList = c.log.stream().map(b -> b.id).collect(Collectors.toList());
+		var idList = c.log.getV1List();
 		if (c.isFailure)
 		    idList.add(Ban.generateId());
 		return idList;

@@ -2,6 +2,8 @@ package begyyal.shogi.object;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import begyyal.commons.util.object.PairList;
+import begyyal.commons.util.object.PairList.PairListGen;
 import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.shogi.def.Koma;
@@ -12,11 +14,13 @@ public class BanContext {
     private static final AtomicInteger idGen = new AtomicInteger();
     public final int id = idGen.getAndIncrement();
 
-    public final SuperList<Ban> log;
+    // 盤id/latestState
+    public final PairList<Integer, MasuState> log;
     // 持ち駒は最新断面のみ
     public final SuperList<Koma> selfMotigoma;
     public final SuperList<Koma> opponentMotigoma;
 
+    public Ban ban;
     public MasuState latestState;
     // 低コストなequalsを行うためにlatestStateと併せて3点セットで保持
     public MasuState beforeLatestState;
@@ -28,37 +32,27 @@ public class BanContext {
     public boolean isFailure = false;
 
     public BanContext(
-	SuperList<Koma> selfMotigoma, 
+	SuperList<Koma> selfMotigoma,
 	SuperList<Koma> opponentMotigoma) {
-	
-	this.log = SuperListGen.newi();
+
+	this.log = PairListGen.newi();
 	this.selfMotigoma = selfMotigoma;
 	this.opponentMotigoma = opponentMotigoma;
 	this.beforeId = -1;
     }
 
     private BanContext(
-	SuperList<Ban> log,
+	PairList<Integer, MasuState> log,
+	Ban ban,
 	SuperList<Koma> selfMotigoma,
 	SuperList<Koma> opponentMotigoma,
 	int beforeId) {
-	
+
 	this.log = log;
+	this.ban = ban;
 	this.selfMotigoma = selfMotigoma;
 	this.opponentMotigoma = opponentMotigoma;
 	this.beforeId = beforeId;
-    }
-
-    public Ban getBan(int index) {
-	return this.log.get(index);
-    }
-
-    public Ban getLatestBan() {
-	return this.log.getTip();
-    }
-
-    public void addLatestBan(Ban ban) {
-	this.log.add(ban);
     }
 
     public BanContext branch(
@@ -68,8 +62,8 @@ public class BanContext {
 	Player player,
 	boolean isAddition) {
 
-	var newContext = this.copy();
-	newContext.log.add(latestBan);
+	var newContext = this.copyOf(latestBan);
+	newContext.log.add(latestBan.id, latestState);
 	var motigoma = player == Player.Self ? newContext.selfMotigoma
 		: newContext.opponentMotigoma;
 
@@ -84,9 +78,10 @@ public class BanContext {
 	return newContext;
     }
 
-    public BanContext copy() {
+    public BanContext copyOf(Ban ban) {
 	return new BanContext(
-	    SuperListGen.of(this.log),
+	    PairListGen.of(this.log),
+	    ban,
 	    SuperListGen.of(this.selfMotigoma),
 	    SuperListGen.of(this.opponentMotigoma),
 	    this.id);
@@ -100,5 +95,10 @@ public class BanContext {
 	return casted.beforeId == this.beforeId &&
 		casted.latestState == this.latestState &&
 		casted.beforeLatestState == this.beforeLatestState;
+    }
+
+    @Override
+    public int hashCode() {
+	return id;
     }
 }

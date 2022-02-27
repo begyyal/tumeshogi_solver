@@ -2,16 +2,17 @@ package begyyal.shogi.object;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import begyyal.commons.util.cache.SimpleCacheResolver;
-import begyyal.commons.util.object.PairList;
-import begyyal.commons.util.object.PairList.PairListGen;
 import begyyal.commons.util.object.SuperList.ImmutableSuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.commons.util.object.Vector;
@@ -27,17 +28,17 @@ public class MasuState {
 	-1,
 	-1,
 	false,
-	PairListGen.empty());
+	Collections.emptySet());
 
     public final Player player;
     public final Koma koma;
     public final int x;
     public final int y;
     public final boolean nariFlag;
-    public final PairList<Integer, Integer> rangedBy; // left=X,right=Y
+    public final Set<Pair<Integer, Integer>> rangedBy; // left=X,right=Y
 
     public MasuState(MasuState s) {
-	this(s.player, s.koma, s.x, s.y, s.nariFlag, PairListGen.of(s.rangedBy));
+	this(s.player, s.koma, s.x, s.y, s.nariFlag, Sets.newHashSet(s.rangedBy));
     }
 
     public MasuState(
@@ -46,7 +47,7 @@ public class MasuState {
 	int x,
 	int y,
 	boolean nariFlag,
-	PairList<Integer, Integer> rangedBy) {
+	Set<Pair<Integer, Integer>> rangedBy) {
 
 	this.player = player;
 	this.koma = koma;
@@ -91,7 +92,7 @@ public class MasuState {
 	return player == Player.Opponent && koma == Koma.Ou;
     }
 
-    public static MasuState emptyOf(int suzi, int dan, PairList<Integer, Integer> rangedBy) {
+    public static MasuState emptyOf(int suzi, int dan, Set<Pair<Integer, Integer>> rangedBy) {
 	return new MasuState(
 	    Player.None,
 	    Koma.Empty,
@@ -144,7 +145,7 @@ public class MasuState {
 
 	boolean nari = value.length() > 2 && StringUtils.equals(value.substring(2, 3), "z");
 
-	return new MasuState(p, k, 9 - suzi, 9 - dan, nari, PairListGen.newi());
+	return new MasuState(p, k, 9 - suzi, 9 - dan, nari, Sets.newHashSet());
     }
 
     public static boolean isLinearRange(MasuState s) {

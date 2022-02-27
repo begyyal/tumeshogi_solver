@@ -5,8 +5,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import begyyal.commons.util.object.PairList;
-import begyyal.commons.util.object.PairList.PairListGen;
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.collect.Sets;
+
 import begyyal.commons.util.object.SuperList;
 import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.commons.util.object.Vector;
@@ -29,7 +31,7 @@ public class Ban implements Cloneable {
 	for (int x = 0; x < 9; x++)
 	    for (int y = 0; y < 9; y++)
 		if (this.matrix[x][y] == null)
-		    emptyMasu(x, y, PairListGen.newi());
+		    this.matrix[x][y] = MasuState.emptyOf(x, y, Sets.newHashSet());
 	markRangeAll();
     }
 
@@ -43,39 +45,37 @@ public class Ban implements Cloneable {
 		this.matrix[x][y].rangedBy.clear();
 	markRangeAll();
     }
-
+    
     private void markRangeAll() {
 	for (int x = 0; x < 9; x++)
 	    for (int y = 0; y < 9; y++)
-		if (this.matrix[x][y].koma != Koma.Empty)
-		    markRangeBy(this.matrix[x][y]);
+		markRangeBy(x, y);
     }
 
-    public void markRangeBy(MasuState s) {
+    public void markRangeBy(int x, int y) {
+	var s = this.matrix[x][y];
+	if (s.koma == Koma.Empty)
+	    return;
 	boolean haveLinearRange = MasuState.isLinearRange(s);
 	for (var v : s.getTerritory())
 	    if (haveLinearRange) {
 		for (var miniV : v.decompose())
-		    if (!markRange(miniV, s.x, s.y))
+		    if (!markRange(miniV, s.x, s.y, false))
 			break;
 	    } else
-		markRange(v, s.x, s.y);
+		markRange(v, s.x, s.y, false);
     }
 
-    private boolean markRange(Vector v, int x, int y) {
+    private boolean markRange(Vector v, int x, int y, boolean unmark) {
 	int vx = x + v.x;
 	int vy = y + v.y;
 	if (!validateCoordinate(vx, vy))
 	    return false;
-	this.matrix[vx][vy].rangedBy.add(x, y);
+	if (unmark)
+	    this.matrix[vx][vy].rangedBy.removeIf(p -> p.getLeft() == x && p.getRight() == y);
+	else
+	    this.matrix[vx][vy].rangedBy.add(Pair.of(x, y));
 	return this.matrix[vx][vy].koma == Koma.Empty;
-    }
-
-    public void unmarkRangeBy(int targetX, int targetY) {
-	for (int x = 0; x < 9; x++)
-	    for (int y = 0; y < 9; y++)
-		this.matrix[x][y].rangedBy
-		    .removeIf(p -> p.getLeft() == targetX && p.getRight() == targetY);
     }
 
     public Stream<MasuState> search(Predicate<MasuState> filter) {
@@ -119,6 +119,7 @@ public class Ban implements Cloneable {
 	this.matrix[toX][toY] = newState;
 
 	refreshRange();
+	
 	return newState;
     }
 
@@ -131,6 +132,7 @@ public class Ban implements Cloneable {
 	this.matrix[x][y] = state;
 
 	refreshRange();
+	
 	return state;
     }
 
@@ -143,11 +145,8 @@ public class Ban implements Cloneable {
     }
 
     private void emptyMasu(int x, int y) {
-	emptyMasu(x, y, this.matrix[x][y].rangedBy);
-    }
-
-    private void emptyMasu(int x, int y, PairList<Integer, Integer> rangedBy) {
-	this.matrix[x][y] = MasuState.emptyOf(x, y, rangedBy);
+	this.matrix[x][y] = MasuState.emptyOf(x, y, this.matrix[x][y].rangedBy);
+	//unmarkRangeBy(x, y);
     }
 
     public boolean checkingSafe() {
@@ -186,6 +185,11 @@ public class Ban implements Cloneable {
 	    return false;
 	var casted = (Ban) o;
 	return this.id == casted.id;
+    }
+
+    @Override
+    public int hashCode() {
+	return id;
     }
 
     public static int generateId() {
