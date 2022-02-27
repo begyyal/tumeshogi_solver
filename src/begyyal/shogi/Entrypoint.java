@@ -3,6 +3,7 @@ package begyyal.shogi;
 import begyyal.shogi.log.TSLogger;
 import begyyal.shogi.object.Args;
 import begyyal.shogi.processor.ArgParser;
+import begyyal.shogi.processor.ArgsValidator;
 import begyyal.shogi.processor.MainSolver;
 
 public class Entrypoint {
@@ -11,7 +12,7 @@ public class Entrypoint {
 
 	long start = System.currentTimeMillis();
 
-	try (var processor = new MainSolver(parseArgs(plainArgs))) {
+	try (var processor = preProcess(plainArgs)) {
 
 	    for (String str : processor.calculate())
 		System.out.println(str);
@@ -25,7 +26,7 @@ public class Entrypoint {
 	TSLogger.print("processing time -> " + (System.currentTimeMillis() - start) / 1000 + "sec");
     }
 
-    private static Args parseArgs(String[] plainArgs) {
+    private static MainSolver preProcess(String[] plainArgs) {
 
 	if (plainArgs.length < 2)
 	    throw new IllegalArgumentException("Arguments lack.");
@@ -37,10 +38,14 @@ public class Entrypoint {
 	var banStr = plainArgs[1];
 	var motigomaPair = ap.parseMotigomaStr(motigomaStr);
 
-	return new Args(
+	var args = new Args(
 	    ap.parseNumStr(numStr),
 	    ap.parseBanStr(banStr),
 	    motigomaPair.getLeft(),
 	    motigomaPair.getRight());
+	
+	new ArgsValidator().validate(args);
+
+	return new MainSolver(args);
     }
 }
