@@ -21,14 +21,16 @@ import begyyal.shogi.object.MasuState;
 public class SelfProcessor extends PlayerProcessorBase {
 
     public static final Player PlayerType = Player.Self;
+    private final Ban initBan;
 
-    private SelfProcessor() {
-	super();
+    public SelfProcessor(int numOfMoves, Ban initBan) {
+	super(numOfMoves);
+	this.initBan = initBan;
     }
 
     public BanContext[] spread(BanContext context) {
 
-	var ban = context.getLatestBan();
+	var ban = context.getLatestBan() == null ? this.initBan : context.getLatestBan();
 
 	// 駒の移動による王手(開き王手は除く)
 	var moveSpread = ban
@@ -182,9 +184,5 @@ public class SelfProcessor extends PlayerProcessorBase {
     @Override
     protected Player getPlayerType() {
 	return PlayerType;
-    }
-
-    public static SelfProcessor newi() {
-	return new SelfProcessor();
     }
 }

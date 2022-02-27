@@ -12,7 +12,10 @@ import begyyal.shogi.object.MasuState;
 
 public abstract class PlayerProcessorBase {
 
-    protected PlayerProcessorBase() {
+    protected final int numOfMoves;
+
+    protected PlayerProcessorBase(int numOfMoves) {
+	this.numOfMoves = numOfMoves;
     }
 
     protected Stream<MasuState> spreadMasuState(MasuState from, Ban ban) {
