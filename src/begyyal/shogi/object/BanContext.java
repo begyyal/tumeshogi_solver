@@ -94,7 +94,7 @@ public class BanContext {
 	var motigoma = player == Player.Self ? newContext.selfMotigoma
 		: newContext.opponentMotigoma;
 
-	if (koma != null)
+	if (koma != null && koma != Koma.Empty)
 	    if (isAddition)
 		motigoma.add(koma);
 	    else
