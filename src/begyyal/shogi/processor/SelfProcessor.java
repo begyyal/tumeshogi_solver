@@ -84,7 +84,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	BanContext context,
 	PairList<MasuState, MasuState> moveSpread) {
 
-	var opponentOu = this.getOpponentOu(ban);
+	var opponentOu = ban.search(MasuState::isOpponentOu).findFirst().get();
 	var candidates = ban.search(s -> {
 	    var v = s.getVectorTo(opponentOu);
 	    return s.player == PlayerType
@@ -165,7 +165,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 		} else
 		    break;
 	    } else if (i == 1)
-		if (this.isOpponentOu(result)) {
+		if (result.isOpponentOu()) {
 		    return obstruction;
 		} else
 		    break;
