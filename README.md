@@ -101,7 +101,7 @@
     - 〇 : 最遅でも約1分以内
     - △ : 難度次第では1分を大幅に超過してしまう
     - ？ : 未検証
-  - [v1.0.0](https://github.com/begyyal/tumeshogi_solver/releases/tag/v1) 時点
+  - [v1.0.1](https://github.com/begyyal/tumeshogi_solver/releases/tag/v1) 時点
     - 3手詰め迄◎
     - 5手詰め◎
     - 7手詰め△
