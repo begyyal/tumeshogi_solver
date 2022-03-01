@@ -101,7 +101,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	// 駒移動系は空き王手と他で重複し得るのでdistinctする
 	var cs4 = Stream.concat(cs1, cs2)
 	    .filter(c -> c != null)
-	    .collect(Collectors.toMap(c -> c.latestState, c -> c, (c1, c2) -> c1))
+	    .collect(Collectors.toMap(c -> c.getLatestState(), c -> c, (c1, c2) -> c1))
 	    .values()
 	    .stream();
 	return Stream.concat(cs4, cs3).filter(c -> c != null).toArray(BanContext[]::new);

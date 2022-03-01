@@ -4,11 +4,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-import com.google.common.collect.Sets;
-
 import begyyal.commons.util.object.SuperList;
 import begyyal.shogi.object.Args;
-import begyyal.shogi.object.BanContext;
 import begyyal.shogi.object.MasuState;
 
 public class MainSolver implements Closeable {
@@ -22,18 +19,16 @@ public class MainSolver implements Closeable {
 	    args.initBan,
 	    args.selfMotigoma,
 	    args.opponentMotigoma);
-	this.rdc = new ReverseDerivationCalculator(args.initBan);
+	this.rdc = new ReverseDerivationCalculator();
     }
 
     public String[] calculate() throws InterruptedException, ExecutionException {
 
-	var results = Sets.<BanContext>newHashSet();
-
-	this.dc.ignite(results);
-	if (results.isEmpty())
+	var resultTree = this.dc.calculateDerivationTree();
+	if (resultTree == null)
 	    return createFailureLabel();
 
-	var result = this.rdc.calculate(results);
+	var result = this.rdc.calculateConclusion(resultTree);
 	if (result == null)
 	    return createFailureLabel();
 
