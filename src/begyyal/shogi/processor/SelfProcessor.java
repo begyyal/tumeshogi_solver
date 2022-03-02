@@ -27,6 +27,15 @@ public class SelfProcessor extends PlayerProcessorBase {
 	var ban = context.ban == null ? this.initBan : context.ban;
 	var opponentOu = ban.search(MasuState::isOpponentOu).findFirst().get();
 
+	if (context.log.size() == 4 &&
+		context.latestState.x == 8 && context.latestState.y == 8
+		&& context.latestState.koma == Koma.Ou)
+	    if (context.beforeLatestState.x == 6 && context.beforeLatestState.y == 6
+		    && context.beforeLatestState.koma == Koma.Keima)
+		if (context.log.get(0).getRight().x == 7 && context.log.get(0).getRight().y == 6
+			&& context.log.get(0).getRight().koma == Koma.Hisha)
+		    System.out.println();
+
 	// 駒の移動による王手(開き王手は除く)
 	var cs1 = ban.search(s -> s.player == playerType)
 	    .flatMap(from -> spreadMasuState(from, ban)
@@ -83,8 +92,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 		    })));
 
 	// 持ち駒配置による王手
-	var cs3 = context.selfMotigoma
-	    .stream()
+	var cs3 = context.selfMotigoma.stream()
 	    .distinct()
 	    .flatMap(k -> {
 		var dt = MasuState.getDecomposedTerritory(k, false, playerType);

@@ -146,7 +146,6 @@ public class Ban implements Cloneable {
 
     private void emptyMasu(int x, int y) {
 	this.matrix[x][y] = MasuState.emptyOf(x, y, this.matrix[x][y].rangedBy);
-	//unmarkRangeBy(x, y);
     }
 
     public boolean checkingSafe() {
