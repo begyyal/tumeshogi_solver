@@ -49,8 +49,8 @@ public class ReverseDerivationCalculator {
 	    var selected = recursive4selectContext(child, !isSelf);
 
 	    if (isSelf) {
-		if (selected != null)
-		    return selected;
+		if (selected != null && (result == null || result.getDepth() > selected.getDepth()))
+		    result = selected;
 	    } else {
 		if (selected == null)
 		    return null;
