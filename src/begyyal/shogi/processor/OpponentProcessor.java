@@ -73,7 +73,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	var state = ban.getState(x, y);
 	var c1 = state.rangedBy.stream()
 	    .map(p -> ban.getState(p.getLeft(), p.getRight()))
-	    .filter(s -> s.player == playerType)
+	    .filter(s -> s.player == playerType && s.koma != Koma.Ou)
 	    .flatMap(from -> createBranchStream(state.y, from)
 		.map(tryNari -> {
 		    var newBan = ban.clone();
