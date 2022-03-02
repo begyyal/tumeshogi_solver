@@ -166,6 +166,23 @@
                     ]
 				}
 			]
+		},
+        {
+			"name": "5te_6",
+			"command": "java -jar ts_solver.jar 5 54xf11yd21yh31ya12ya32ye xe1c1g1ya16b4c3d3e1f1g1",
+			"exitCode": 0,
+			"expected": [
+				{
+					"act": "console-output",
+					"value": [
+						"Self -> 23Hisha",
+						"Opponent -> 22Gin",
+						"Self -> 33Keima",
+						"Opponent -> 11Ou",
+						"Self -> 21Kin"
+                    ]
+				}
+			]
 		}
 	]
 }
