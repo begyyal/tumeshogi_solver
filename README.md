@@ -103,10 +103,10 @@
     - △ : 難度次第では1分を大幅に超過してしまう
     - ？ : 未検証
   - [v1.0.2](https://github.com/begyyal/tumeshogi_solver/releases/tag/v1) 時点
-    - 3手詰め迄◎
-    - 5手詰め◎
-    - 7手詰め〇
-    - 9手詰め以降(？)
+    - 3手詰め迄 : ◎
+    - 5手詰め : ◎
+    - 7手詰め : 〇
+    - 9手詰め以降 : ？
   - 最遅問題
     - 5手詰め
       - `5 55xfz44xgz11xaz52ygz34ya22yh xc1ya16b4c3d4e4f1`
