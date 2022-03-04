@@ -21,20 +21,20 @@ public class OpponentProcessor extends PlayerProcessorBase {
     public BanContext[] spread(BanContext context) {
 
 	var ban = context.ban;
-	var opponentOu = ban.search(MasuState::isOpponentOu).findFirst().get();
-	
+	var ou = ban.search(MasuState::isOpponentOu).findFirst().get();
+
 	// 王手範囲から避ける(王による王手駒の取得含む)
-	Stream<BanContext> cs1 = spreadMasuState(opponentOu, ban)
+	Stream<BanContext> cs1 = spreadMasuState(ou, ban)
 	    .filter(s -> ban.checkingSafe(s))
 	    .map(s -> {
 		var newBan = ban.clone();
-		var newState = newBan.advance(opponentOu.x, opponentOu.y, s.x, s.y, false);
+		var newState = newBan.advance(ou.x, ou.y, s.x, s.y, false);
 		return newBan.checkingSafe(newState)
 			? context.branch(newBan, newState, s.koma, playerType, true)
 			: null;
 	    });
 
-	var outeArray = opponentOu.rangedBy.stream()
+	var outeArray = ou.rangedBy.stream()
 	    .map(r -> ban.getState(r.getLeft(), r.getRight()))
 	    .filter(s -> s.player != playerType)
 	    .toArray(MasuState[]::new);
@@ -57,13 +57,15 @@ public class OpponentProcessor extends PlayerProcessorBase {
 		}));
 
 	// 王手妨害(持ち駒を貼る+駒を移動する)
-	var outeVector = opponentOu.getVectorTo(outeState);
+	var outeVector = ou.getVectorTo(outeState);
 	Stream<BanContext> cs3 = Math.abs(outeVector.x) == 1 || Math.abs(outeVector.y) == 1
 		? Stream.empty()
 		: Arrays.stream(outeVector.decompose())
-		    .filter(miniV -> !outeVector.equals(miniV))
-		    .flatMap(v -> getOuteObstructionCS(
-			opponentOu.x + v.x, opponentOu.y + v.y, context, ban));
+		    .filter(v -> !outeVector.equals(v) &&
+			    ban.getState(ou.x + v.x, ou.y + v.y).rangedBy.stream()
+				.map(p -> ban.getState(p.getLeft(), p.getRight()))
+				.anyMatch(s -> s.player == playerType))
+		    .flatMap(v -> getOuteObstructionCS(ou.x + v.x, ou.y + v.y, context, ban));
 
 	return executeCS(context, Stream.concat(Stream.concat(cs1, cs2), cs3));
     }
