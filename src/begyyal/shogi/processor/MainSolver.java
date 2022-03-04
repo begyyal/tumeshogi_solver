@@ -4,7 +4,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-import begyyal.commons.util.object.SuperList;
+import begyyal.commons.object.collection.XList;
 import begyyal.shogi.object.Args;
 import begyyal.shogi.object.MasuState;
 
@@ -39,7 +39,7 @@ public class MainSolver implements Closeable {
 	return new String[] { "Can't solve." };
     }
 
-    private String[] summarize(SuperList<MasuState> result) {
+    private String[] summarize(XList<MasuState> result) {
 	return result.stream().map(this::writeItte).toArray(String[]::new);
     }
 

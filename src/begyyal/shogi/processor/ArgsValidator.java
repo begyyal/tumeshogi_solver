@@ -2,7 +2,7 @@ package begyyal.shogi.processor;
 
 import java.util.stream.Stream;
 
-import begyyal.commons.util.object.SuperMap.SuperMapGen;
+import begyyal.commons.object.collection.XMap.XMapGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Args;
@@ -20,9 +20,8 @@ public class ArgsValidator {
 	var tooMany = Stream.concat(args.initBan.serializeMatrix().stream().map(s -> s.koma),
 	    Stream.concat(args.selfMotigoma.stream(), args.opponentMotigoma.stream()))
 	    .filter(k -> k != Koma.Empty)
-	    .collect(SuperMapGen.collect(k -> k, k -> 1, (v1, v2) -> v1 + v2))
-	    .entrySet()
-	    .stream()
+	    .collect(XMapGen.collect4count(k -> k))
+	    .entrySet().stream()
 	    .filter(e -> e.getKey().numLimit < e.getValue())
 	    .findFirst()
 	    .orElse(null);

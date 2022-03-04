@@ -3,8 +3,7 @@ package begyyal.shogi.processor;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.common.collect.Sets;
-
+import begyyal.commons.object.collection.XGen;
 import begyyal.commons.util.cache.SimpleCacheResolver;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
@@ -31,7 +30,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	var cs1 = ban.search(s -> s.player == playerType)
 	    .flatMap(from -> spreadMasuState(from, ban)
 		.filter(to -> SimpleCacheResolver.getAsPrivate(this.getClass(), 1, from, () -> {
-		    var dt = Sets.newHashSet(from.getDecomposedTerritory());
+		    var dt = XGen.newHashSet(from.getDecomposedTerritory());
 		    if (!from.nariFlag)
 			dt.addAll(MasuState.getDecomposedTerritory(from.koma, true, playerType));
 		    return dt;

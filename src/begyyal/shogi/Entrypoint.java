@@ -41,8 +41,8 @@ public class Entrypoint {
 	var args = new Args(
 	    ap.parseNumStr(numStr),
 	    ap.parseBanStr(banStr),
-	    motigomaPair.getLeft(),
-	    motigomaPair.getRight());
+	    motigomaPair.v1,
+	    motigomaPair.v2);
 	
 	new ArgsValidator().validate(args);
 

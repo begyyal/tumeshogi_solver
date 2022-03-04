@@ -10,10 +10,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import com.google.common.collect.Maps;
-
-import begyyal.commons.util.object.SuperList;
-import begyyal.commons.util.object.Tree;
+import begyyal.commons.object.Tree;
+import begyyal.commons.object.collection.XGen;
+import begyyal.commons.object.collection.XList;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
@@ -30,8 +29,8 @@ public class DerivationCalculator implements Closeable {
     public DerivationCalculator(
 	int numOfMoves,
 	Ban initBan,
-	SuperList<Koma> selfMotigoma,
-	SuperList<Koma> opponentMotigoma) {
+	XList<Koma> selfMotigoma,
+	XList<Koma> opponentMotigoma) {
 
 	this.numOfMoves = numOfMoves;
 	this.initBan = initBan;
@@ -86,7 +85,7 @@ public class DerivationCalculator implements Closeable {
 	int count)
 	throws InterruptedException, ExecutionException {
 
-	var futureMap = Maps.<BanContext, Future<BanContext[]>>newHashMap();
+	var futureMap = XGen.<BanContext, Future<BanContext[]>>newHashMap();
 	if (count <= numOfMoves)
 	    for (var b : branches)
 		futureMap.put(b, this.tools.exe.submit(count % 2 == 0
@@ -105,7 +104,7 @@ public class DerivationCalculator implements Closeable {
     public Tree<ResultRecord> calculateDerivationTree()
 	throws InterruptedException, ExecutionException {
 
-	var results = Maps.<Integer, Set<ResultRecord>>newHashMap();
+	var results = XGen.<Integer, Set<ResultRecord>>newHashMap();
 	this.ignite(results);
 	if (results.isEmpty())
 	    return null;

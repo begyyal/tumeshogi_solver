@@ -2,19 +2,16 @@ package begyyal.shogi.object;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
+import begyyal.commons.object.Pair;
+import begyyal.commons.object.Triple;
+import begyyal.commons.object.Vector;
+import begyyal.commons.object.collection.XGen;
+import begyyal.commons.object.collection.XList.ImmutableXList;
+import begyyal.commons.object.collection.XList.XListGen;
 import begyyal.commons.util.cache.SimpleCacheResolver;
-import begyyal.commons.util.object.SuperList.ImmutableSuperList;
-import begyyal.commons.util.object.SuperList.SuperListGen;
-import begyyal.commons.util.object.Vector;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 
@@ -37,7 +34,7 @@ public class MasuState {
     public final Set<Pair<Integer, Integer>> rangedBy; // left=X,right=Y
 
     public MasuState(MasuState s) {
-	this(s.player, s.koma, s.x, s.y, s.nariFlag, Sets.newHashSet(s.rangedBy));
+	this(s.player, s.koma, s.x, s.y, s.nariFlag, XGen.newHashSet(s.rangedBy));
     }
 
     public MasuState(
@@ -64,11 +61,11 @@ public class MasuState {
 	return 9 - y;
     }
 
-    public ImmutableSuperList<Vector> getTerritory() {
+    public ImmutableXList<Vector> getTerritory() {
 	return getTerritory(this.koma, this.nariFlag, this.player);
     }
 
-    public ImmutableSuperList<Vector> getDecomposedTerritory() {
+    public ImmutableXList<Vector> getDecomposedTerritory() {
 	return getDecomposedTerritory(this.koma, this.nariFlag, this.player);
     }
 
@@ -92,6 +89,7 @@ public class MasuState {
     }
 
     public static MasuState emptyOf(int suzi, int dan, Set<Pair<Integer, Integer>> rangedBy) {
+	Objects.requireNonNull(rangedBy);
 	return new MasuState(
 	    Player.None,
 	    Koma.Empty,
@@ -101,18 +99,18 @@ public class MasuState {
 	    rangedBy);
     }
 
-    public static ImmutableSuperList<Vector> getTerritory(
+    public static ImmutableXList<Vector> getTerritory(
 	Koma koma,
 	boolean nariFlag,
 	Player player) {
 	if (player == Player.None)
-	    return SuperListGen.empty();
+	    return XListGen.empty();
 	return player == Player.Self
 		? (nariFlag ? koma.nariTerri : koma.territory)
 		: (nariFlag ? koma.nariTerriRev : koma.territoryRev);
     }
 
-    public static ImmutableSuperList<Vector> getDecomposedTerritory(
+    public static ImmutableXList<Vector> getDecomposedTerritory(
 	Koma koma,
 	boolean nariFlag,
 	Player player) {
@@ -120,7 +118,7 @@ public class MasuState {
 	return isLinearRange(koma, nariFlag)
 		? SimpleCacheResolver.getAsPrivate(MasuState.class, 1,
 		    Triple.of(koma, nariFlag, player),
-		    () -> SuperListGen.immutableOf(base.stream()
+		    () -> XListGen.immutableOf(base.stream()
 			.flatMap(v -> Arrays.stream(v.decompose())).toArray(Vector[]::new)))
 		: base;
     }
@@ -137,18 +135,9 @@ public class MasuState {
 
     @Override
     public boolean equals(Object o) {
-
 	if (!(o instanceof MasuState))
 	    return false;
 	var casted = (MasuState) o;
-
-	if (this.isEqualWithoutRange(casted) && this.rangedBy.size() == casted.rangedBy.size()) {
-	    var a = Lists.newArrayList(this.rangedBy);
-	    var b = Lists.newArrayList(casted.rangedBy);
-	    Collections.sort(a);
-	    Collections.sort(b);
-	    return CollectionUtils.isEqualCollection(a, b);
-	} else
-	    return false;
+	return this.isEqualWithoutRange(casted) && this.rangedBy.equals(casted.rangedBy);
     }
 }

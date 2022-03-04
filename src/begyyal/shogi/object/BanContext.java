@@ -5,10 +5,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.google.common.collect.Sets;
-
-import begyyal.commons.util.object.SuperList;
-import begyyal.commons.util.object.SuperList.SuperListGen;
+import begyyal.commons.object.collection.XGen;
+import begyyal.commons.object.collection.XList;
+import begyyal.commons.object.collection.XList.XListGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 
@@ -17,28 +16,28 @@ public class BanContext {
     private static final AtomicInteger idGen = new AtomicInteger();
     public final int id = idGen.getAndIncrement();
 
-    public final SuperList<ResultRecord> log;
-    public final SuperList<Koma> selfMotigoma;
-    public final SuperList<Koma> opponentMotigoma;
+    public final XList<ResultRecord> log;
+    public final XList<Koma> selfMotigoma;
+    public final XList<Koma> opponentMotigoma;
 
     public Ban ban;
     public final int beforeId;
 
     public BanContext(
-	SuperList<Koma> selfMotigoma,
-	SuperList<Koma> opponentMotigoma) {
+	XList<Koma> selfMotigoma,
+	XList<Koma> opponentMotigoma) {
 
-	this.log = SuperListGen.newi();
+	this.log = XListGen.newi();
 	this.selfMotigoma = selfMotigoma;
 	this.opponentMotigoma = opponentMotigoma;
 	this.beforeId = -1;
     }
 
     private BanContext(
-	SuperList<ResultRecord> log,
+	XList<ResultRecord> log,
 	Ban ban,
-	SuperList<Koma> selfMotigoma,
-	SuperList<Koma> opponentMotigoma,
+	XList<Koma> selfMotigoma,
+	XList<Koma> opponentMotigoma,
 	int beforeId) {
 
 	this.log = log;
@@ -71,10 +70,10 @@ public class BanContext {
 
     public BanContext copyOf(Ban ban) {
 	return new BanContext(
-	    SuperListGen.of(this.log),
+	    XListGen.of(this.log),
 	    ban,
-	    SuperListGen.of(this.selfMotigoma),
-	    SuperListGen.of(this.opponentMotigoma),
+	    XListGen.of(this.selfMotigoma),
+	    XListGen.of(this.opponentMotigoma),
 	    this.id);
     }
 
@@ -89,7 +88,7 @@ public class BanContext {
 
 	int parentId = 0;
 	for (var point : this.log) {
-	    results.computeIfAbsent(parentId, k -> Sets.newHashSet()).add(point);
+	    results.computeIfAbsent(parentId, k -> XGen.newHashSet()).add(point);
 	    parentId = point.id;
 	}
 

@@ -2,8 +2,7 @@ package begyyal.shogi.processor;
 
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.tuple.Pair;
-
+import begyyal.commons.object.Pair;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;

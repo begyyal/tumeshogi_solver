@@ -2,11 +2,9 @@ package begyyal.shogi.processor;
 
 import java.util.Comparator;
 
-import org.apache.commons.collections4.CollectionUtils;
-
-import begyyal.commons.util.object.SuperList;
-import begyyal.commons.util.object.SuperList.SuperListGen;
-import begyyal.commons.util.object.Tree;
+import begyyal.commons.object.Tree;
+import begyyal.commons.object.collection.XList;
+import begyyal.commons.object.collection.XList.XListGen;
 import begyyal.shogi.object.MasuState;
 import begyyal.shogi.object.ResultRecord;
 
@@ -15,14 +13,14 @@ public class ReverseDerivationCalculator {
     public ReverseDerivationCalculator() {
     }
 
-    public SuperList<MasuState> calculateConclusion(Tree<ResultRecord> tree) {
+    public XList<MasuState> calculateConclusion(Tree<ResultRecord> tree) {
 	var resultTree = r4selectConclusion(tree, true);
 	if (resultTree == null)
 	    return null;
 	return resultTree.traceRoots().stream()
 	    .map(t -> t.getValue().state)
 	    .filter(s -> s != null)
-	    .collect(SuperListGen.collect());
+	    .collect(XListGen.collect());
     }
 
     // return -> 選択結果の末端ツリーノード。無ければnull。
@@ -32,7 +30,7 @@ public class ReverseDerivationCalculator {
 	// つまり、自分はorかつ相手はandで詰みを再帰的に判断する
 
 	var children = tree.getChildren();
-	if (CollectionUtils.isEmpty(children))
+	if (children.isEmpty())
 	    return tree.getDepth() % 2 == 1 ? tree : null;
 
 	Tree<ResultRecord> result = null;
