@@ -118,13 +118,12 @@ public class DerivationCalculator implements Closeable {
 	Map<Integer, Set<ResultRecord>> results,
 	Tree<ResultRecord> tree) {
 
-	var childrenRec = results.get(tree.getValue().id);
+	var childrenRec = results.remove(tree.getValue().id);
 	if (childrenRec == null)
 	    return;
 
 	for (var r : childrenRec)
 	    tree.addChild(r);
-	results.remove(tree.getValue().id);
 
 	for (var c : tree.getChildren())
 	    r4recordmap2tree(results, c);
