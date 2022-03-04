@@ -45,10 +45,6 @@ jobs:
     - name: Test
       run: ./test.sh
       
-    - name: Push develop if needed
-      run: |
-        git diff --exit-code || (git add . && git commit -m "BY-CI" && git push origin HEAD)
-
     - name: Push to master
       if: success()
       run: |
