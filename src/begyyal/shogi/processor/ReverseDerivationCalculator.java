@@ -1,52 +1,48 @@
 package begyyal.shogi.processor;
 
 import java.util.Comparator;
-import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
 import begyyal.commons.util.object.SuperList;
+import begyyal.commons.util.object.SuperList.SuperListGen;
 import begyyal.commons.util.object.Tree;
-import begyyal.shogi.object.Ban;
-import begyyal.shogi.object.BanContext;
 import begyyal.shogi.object.MasuState;
+import begyyal.shogi.object.ResultRecord;
 
 public class ReverseDerivationCalculator {
 
-    private final Ban initBan;
-
-    public ReverseDerivationCalculator(Ban initBan) {
-	this.initBan = initBan;
+    public ReverseDerivationCalculator() {
     }
 
-    public SuperList<MasuState> calculate(Set<BanContext> results) {
-	var resultTree = recursive4selectContext(context2tree(results), true);
+    public SuperList<MasuState> calculateConclusion(Tree<ResultRecord> tree) {
+	var resultTree = r4selectConclusion(tree, true);
 	if (resultTree == null)
 	    return null;
-	return results
-	    .stream()
-	    .filter(c -> c.ban.id == resultTree.getValue())
-	    .map(c -> c.log.getV2List())
-	    .findFirst().get();
+	return resultTree.traceRoots().stream()
+	    .map(t -> t.getValue().state)
+	    .filter(s -> s != null)
+	    .collect(SuperListGen.collect());
     }
 
     // return -> 選択結果の末端ツリーノード。無ければnull。
     @SuppressWarnings("unchecked")
-    private Tree<Integer> recursive4selectContext(Tree<Integer> tree, boolean isSelf) {
+    private Tree<ResultRecord> r4selectConclusion(Tree<ResultRecord> tree, boolean isSelf) {
 	// 自分は選択の余地があり、相手の選択は全てカバーしている必要がある
 	// つまり、自分はorかつ相手はandで詰みを再帰的に判断する
 
-	if (CollectionUtils.isEmpty(tree.getChildren()))
+	var children = tree.getChildren();
+	if (CollectionUtils.isEmpty(children))
 	    return tree.getDepth() % 2 == 1 ? tree : null;
 
-	Tree<Integer> result = null;
+	Tree<ResultRecord> result = null;
 	long criterion = 0, criterion2 = 0, temp;
 
-	for (Tree<Integer> child : tree.getChildren().stream()
-	    .sorted((a, b) -> a.getValue() - b.getValue())
+	for (Tree<ResultRecord> child : children.stream()
+	    .sorted((a, b) -> a.getValue().id - b.getValue().id)
 	    .toArray(Tree[]::new)) {
 
-	    var selected = recursive4selectContext(child, !isSelf);
+	    var selected = r4selectConclusion(child, !isSelf);
 
 	    if (isSelf) {
 		if (selected != null && (result == null || result.getDepth() > selected.getDepth()))
@@ -74,21 +70,5 @@ public class ReverseDerivationCalculator {
 	}
 
 	return result;
-    }
-
-    // 引数のコンテキストのログを集積して初期配置からの盤面の分岐をツリー化
-    private Tree<Integer> context2tree(Set<BanContext> results) {
-
-	var origin = Tree.newi(this.initBan.id, null);
-	results.stream()
-	    .map(c -> {
-		var idList = c.log.getV1List();
-		if (c.isFailure)
-		    idList.add(Ban.generateId());
-		return idList;
-	    })
-	    .forEach(idList -> origin.compound(idList));
-
-	return origin;
     }
 }

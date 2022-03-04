@@ -3,6 +3,7 @@ package begyyal.shogi.processor;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -12,14 +13,17 @@ import java.util.concurrent.Future;
 import com.google.common.collect.Maps;
 
 import begyyal.commons.util.object.SuperList;
+import begyyal.commons.util.object.Tree;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
+import begyyal.shogi.object.ResultRecord;
 
 public class DerivationCalculator implements Closeable {
 
     private final int numOfMoves;
+    private final Ban initBan;
     private final BanContext origin;
     private final CalculationTools tools;
 
@@ -30,23 +34,26 @@ public class DerivationCalculator implements Closeable {
 	SuperList<Koma> opponentMotigoma) {
 
 	this.numOfMoves = numOfMoves;
+	this.initBan = initBan;
 	this.origin = new BanContext(selfMotigoma, opponentMotigoma);
 	this.tools = new CalculationTools(numOfMoves, initBan);
     }
 
-    public void ignite(Set<BanContext> results)
+    private void ignite(Map<Integer, Set<ResultRecord>> results)
 	throws InterruptedException, ExecutionException {
-	this.postProcessSelf(origin, this.tools.selfProcessor.spread(origin), results, 1);
+	var branches = this.tools.selfProcessor.spread(origin);
+	if (branches.length != 0)
+	    this.spread(branches, results, 1);
     }
 
     private void postProcessSelf(
 	BanContext acon,
 	BanContext[] branches,
-	Set<BanContext> results,
+	Map<Integer, Set<ResultRecord>> results,
 	int count) throws InterruptedException, ExecutionException {
 
 	if (branches.length == 0) {
-	    results.add(acon);
+	    acon.fillResult(results, false);
 	} else
 	    this.spread(branches, results, count);
     }
@@ -54,25 +61,29 @@ public class DerivationCalculator implements Closeable {
     private void postProcessOpponent(
 	BanContext acon,
 	BanContext[] branches,
-	Set<BanContext> results,
+	Map<Integer, Set<ResultRecord>> results,
 	int count) throws InterruptedException, ExecutionException {
 
 	if (branches == null || branches.length == 0) {
-	    results.add(acon);
+	    acon.fillResult(results, false);
+
 	} else if (count == numOfMoves + 1) {
-	    acon.isFailure = true;
-	    results.add(acon);
+	    acon.fillResult(results, true);
+
 	} else if (Arrays.stream(branches).anyMatch(b -> {
 	    long selfBanCount = b.ban.search(s -> s.player == Player.Self).count();
 	    return selfBanCount == 0 || selfBanCount + b.selfMotigoma.size() <= 1;
 	})) {
-	    acon.isFailure = true;
-	    results.add(acon);
+	    acon.fillResult(results, true);
+
 	} else
 	    this.spread(branches, results, count);
     }
 
-    private void spread(BanContext[] branches, Set<BanContext> results, int count)
+    private void spread(
+	BanContext[] branches,
+	Map<Integer, Set<ResultRecord>> results,
+	int count)
 	throws InterruptedException, ExecutionException {
 
 	var futureMap = Maps.<BanContext, Future<BanContext[]>>newHashMap();
@@ -89,6 +100,35 @@ public class DerivationCalculator implements Closeable {
 	    else
 		this.postProcessOpponent(e.getKey(), newBranches, results, count + 1);
 	}
+    }
+
+    public Tree<ResultRecord> calculateDerivationTree()
+	throws InterruptedException, ExecutionException {
+
+	var results = Maps.<Integer, Set<ResultRecord>>newHashMap();
+	this.ignite(results);
+	if (results.isEmpty())
+	    return null;
+
+	var tree = Tree.newi(new ResultRecord(this.initBan.id, null), null);
+	r4recordmap2tree(results, tree);
+	return tree;
+    }
+
+    private void r4recordmap2tree(
+	Map<Integer, Set<ResultRecord>> results,
+	Tree<ResultRecord> tree) {
+
+	var childrenRec = results.get(tree.getValue().id);
+	if (childrenRec == null)
+	    return;
+
+	for (var r : childrenRec)
+	    tree.addChild(r);
+	results.remove(tree.getValue().id);
+
+	for (var c : tree.getChildren())
+	    r4recordmap2tree(results, c);
     }
 
     @Override
