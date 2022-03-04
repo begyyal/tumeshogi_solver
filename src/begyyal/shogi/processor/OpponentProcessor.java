@@ -67,6 +67,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 				.map(p -> ban.getState(p.v1, p.v2))
 				.collect(XMapGen.collect4count(s -> s.player))
 				.entrySet().stream()
+				.sorted((e1, e2) -> e1.getKey() == playerType ? -1 : 1)
 				.sorted((e1, e2) -> e2.getValue() - e1.getValue())
 				.findFirst().get().getKey() == playerType)
 		    .flatMap(v -> getOuteObstructionCS(ou.x + v.x, ou.y + v.y, context, ban));
