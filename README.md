@@ -98,14 +98,14 @@
     - ヒープサイズ : 4G
     - プロセッサ : intel core i7-8650U
   - 指標
-    - ◎ : 最遅でも約10秒以内
-    - 〇 : 最遅でも約1分以内
+    - ◎ : 最遅でも10秒以内
+    - 〇 : 最遅でも1分以内
     - △ : 難度次第では1分を大幅に超過してしまう
     - ？ : 未検証
-  - [v1.0.1](https://github.com/begyyal/tumeshogi_solver/releases/tag/v1) 時点
+  - [v1.0.2](https://github.com/begyyal/tumeshogi_solver/releases/tag/v1) 時点
     - 3手詰め迄◎
     - 5手詰め◎
-    - 7手詰め△
+    - 7手詰め〇
     - 9手詰め以降(？)
   - 最遅問題
     - 5手詰め

@@ -24,31 +24,6 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	var ban = context.ban;
 	var ou = ban.search(MasuState::isOpponentOu).findFirst().get();
 
-	if (context.log.size() == 7) {
-	    var s = context.log.get(6).state;
-	    if (s.x == 6 && s.y == 5 && s.koma == Koma.Kin) {
-		var s2 = context.log.get(5).state;
-		if (s2.x == 6 && s2.y == 6 && s2.koma == Koma.Ou) {
-		    var s3 = context.log.get(4).state;
-		    if (s3.x == 6 && s3.y == 6 && s3.koma == Koma.Kaku) {
-			var s4 = context.log.get(3).state;
-			if (s4.x == 7 && s4.y == 6 && s4.koma == Koma.Ou) {
-			    var s5 = context.log.get(2).state;
-			    if (s5.x == 7 && s5.y == 6 && s5.koma == Koma.Hisha && s5.nariFlag) {
-				var s6 = context.log.get(1).state;
-				if (s6.x == 8 && s6.y == 5 && s6.koma == Koma.Ou) {
-				    var s7 = context.log.get(0).state;
-				    if (s7.x == 7 && s7.y == 7 && s7.koma == Koma.Hisha) {
-					System.out.println();
-				    }
-				}
-			    }
-			}
-		    }
-		}
-	    }
-	}
-
 	// 王手範囲から避ける(王による王手駒の取得含む)
 	Stream<BanContext> cs1 = spreadMasuState(ou, ban)
 	    .filter(s -> ban.checkingSafe(s))
