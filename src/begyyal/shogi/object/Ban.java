@@ -5,13 +5,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.google.common.collect.Sets;
-
-import begyyal.commons.util.object.SuperList;
-import begyyal.commons.util.object.SuperList.SuperListGen;
-import begyyal.commons.util.object.Vector;
+import begyyal.commons.object.Pair;
+import begyyal.commons.object.Vector;
+import begyyal.commons.object.collection.XGen;
+import begyyal.commons.object.collection.XList;
+import begyyal.commons.object.collection.XList.XListGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 
@@ -31,7 +29,7 @@ public class Ban implements Cloneable {
 	for (int x = 0; x < 9; x++)
 	    for (int y = 0; y < 9; y++)
 		if (this.matrix[x][y] == null)
-		    this.matrix[x][y] = MasuState.emptyOf(x, y, Sets.newHashSet());
+		    this.matrix[x][y] = MasuState.emptyOf(x, y, XGen.newHashSet());
 	markRangeAll();
     }
 
@@ -45,7 +43,7 @@ public class Ban implements Cloneable {
 		this.matrix[x][y].rangedBy.clear();
 	markRangeAll();
     }
-    
+
     private void markRangeAll() {
 	for (int x = 0; x < 9; x++)
 	    for (int y = 0; y < 9; y++)
@@ -72,7 +70,7 @@ public class Ban implements Cloneable {
 	if (!validateCoordinate(vx, vy))
 	    return false;
 	if (unmark)
-	    this.matrix[vx][vy].rangedBy.removeIf(p -> p.getLeft() == x && p.getRight() == y);
+	    this.matrix[vx][vy].rangedBy.removeIf(p -> p.v1 == x && p.v2 == y);
 	else
 	    this.matrix[vx][vy].rangedBy.add(Pair.of(x, y));
 	return this.matrix[vx][vy].koma == Koma.Empty;
@@ -88,9 +86,9 @@ public class Ban implements Cloneable {
 	return count == 0 ? Stream.empty() : Arrays.stream(result, 0, count);
     }
 
-    public SuperList<MasuState> serializeMatrix() {
+    public XList<MasuState> serializeMatrix() {
 	return Arrays.stream(this.matrix).flatMap(l -> Arrays.stream(l))
-	    .collect(SuperListGen.collect());
+	    .collect(XListGen.collect());
     }
 
     public MasuState exploration(MasuState state, Vector v) {
@@ -119,7 +117,7 @@ public class Ban implements Cloneable {
 	this.matrix[toX][toY] = newState;
 
 	refreshRange();
-	
+
 	return newState;
     }
 
@@ -132,7 +130,7 @@ public class Ban implements Cloneable {
 	this.matrix[x][y] = state;
 
 	refreshRange();
-	
+
 	return state;
     }
 
@@ -153,9 +151,8 @@ public class Ban implements Cloneable {
     }
 
     public boolean checkingSafe(MasuState ouState) {
-	return ouState.rangedBy
-	    .stream()
-	    .map(r -> getState(r.getLeft(), r.getRight()))
+	return ouState.rangedBy.stream()
+	    .map(r -> getState(r.v1, r.v2))
 	    .allMatch(s -> s.player == Player.Opponent);
     }
 

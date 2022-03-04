@@ -3,6 +3,7 @@ package begyyal.shogi.processor;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import begyyal.commons.object.collection.XMap.XMapGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
@@ -35,7 +36,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	    });
 
 	var outeArray = ou.rangedBy.stream()
-	    .map(r -> ban.getState(r.getLeft(), r.getRight()))
+	    .map(r -> ban.getState(r.v1, r.v2))
 	    .filter(s -> s.player != playerType)
 	    .toArray(MasuState[]::new);
 	if (outeArray.length > 1)
@@ -44,7 +45,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	// 王手駒を取得する(王による取得は含まず)
 	var outeState = outeArray[0];
 	Stream<BanContext> cs2 = outeState.rangedBy.stream()
-	    .map(r -> ban.getState(r.getLeft(), r.getRight()))
+	    .map(r -> ban.getState(r.v1, r.v2))
 	    .filter(s -> s.player == playerType && s.koma != Koma.Ou)
 	    .flatMap(from -> createBranchStream(outeState.y, from)
 		.map(tryNari -> {
@@ -63,8 +64,11 @@ public class OpponentProcessor extends PlayerProcessorBase {
 		: Arrays.stream(outeVector.decompose())
 		    .filter(v -> !outeVector.equals(v) &&
 			    ban.getState(ou.x + v.x, ou.y + v.y).rangedBy.stream()
-				.map(p -> ban.getState(p.getLeft(), p.getRight()))
-				.anyMatch(s -> s.player == playerType))
+				.map(p -> ban.getState(p.v1, p.v2))
+				.collect(XMapGen.collect4count(s -> s.player))
+				.entrySet().stream()
+				.sorted((e1, e2) -> e2.getValue() - e1.getValue())
+				.findFirst().get().getKey() == playerType)
 		    .flatMap(v -> getOuteObstructionCS(ou.x + v.x, ou.y + v.y, context, ban));
 
 	return executeCS(context, Stream.concat(Stream.concat(cs1, cs2), cs3));
@@ -74,7 +78,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 
 	var state = ban.getState(x, y);
 	var c1 = state.rangedBy.stream()
-	    .map(p -> ban.getState(p.getLeft(), p.getRight()))
+	    .map(p -> ban.getState(p.v1, p.v2))
 	    .filter(s -> s.player == playerType && s.koma != Koma.Ou)
 	    .flatMap(from -> createBranchStream(state.y, from)
 		.map(tryNari -> {

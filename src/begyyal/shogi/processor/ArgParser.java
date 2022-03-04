@@ -3,16 +3,13 @@ package begyyal.shogi.processor;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.google.common.collect.Sets;
-
 import begyyal.commons.constant.Strs;
-import begyyal.commons.util.function.SuperStrings;
-import begyyal.commons.util.object.SuperList;
-import begyyal.commons.util.object.SuperList.SuperListGen;
+import begyyal.commons.object.Pair;
+import begyyal.commons.object.collection.XGen;
+import begyyal.commons.object.collection.XList;
+import begyyal.commons.object.collection.XList.XListGen;
+import begyyal.commons.util.function.XIntegers;
+import begyyal.commons.util.function.XStrings;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.log.TSLogger;
@@ -29,7 +26,7 @@ public class ArgParser {
 
     public int parseNumStr(String arg) {
 
-	if (!NumberUtils.isParsable(arg))
+	if (!XIntegers.checkIfParsable(arg))
 	    throw new IllegalArgumentException(
 		"The argument of number of moves must be number format.");
 
@@ -51,9 +48,9 @@ public class ArgParser {
 	String draft = arg;
 	while (!draft.isBlank()) {
 
-	    int skipIndex = SuperStrings.firstIndexOf(draft, "x", "y").getRight();
-	    var next = SuperStrings.firstIndexOf(draft.substring(skipIndex + 1), "x", "y");
-	    int kiritori = next == null ? draft.length() : next.getRight() + skipIndex - 1;
+	    int skipIndex = XStrings.firstIndexOf(draft, "x", "y").v2;
+	    var next = XStrings.firstIndexOf(draft.substring(skipIndex + 1), "x", "y");
+	    int kiritori = next == null ? draft.length() : next.v2 + skipIndex - 1;
 	    var masu = draft.substring(0, kiritori);
 	    draft = kiritori == draft.length() ? Strs.empty : draft.substring(kiritori);
 
@@ -81,18 +78,18 @@ public class ArgParser {
 	if (k == null)
 	    throw new IllegalArgumentException("Can't parse [" + value + "] to Koma object.");
 
-	boolean nari = value.length() > 2 && StringUtils.equals(value.substring(2, 3), "z");
+	boolean nari = value.length() > 2 && XStrings.equals(value.substring(2, 3), "z");
 
-	return new MasuState(p, k, 9 - suzi, 9 - dan, nari, Sets.newHashSet());
+	return new MasuState(p, k, 9 - suzi, 9 - dan, nari, XGen.newHashSet());
     }
 
-    public Pair<SuperList<Koma>, SuperList<Koma>> parseMotigomaStr(String arg) {
+    public Pair<XList<Koma>, XList<Koma>> parseMotigomaStr(String arg) {
 
 	if (!arg.matches(motigomaArgRegex))
 	    throw new IllegalArgumentException("Motigoma argument format is invalid.");
 
-	var selfMotigoma = SuperListGen.<Koma>newi();
-	var opponentMotigoma = SuperListGen.<Koma>newi();
+	var selfMotigoma = XListGen.<Koma>newi();
+	var opponentMotigoma = XListGen.<Koma>newi();
 	var motigomaPair = Pair.of(selfMotigoma, opponentMotigoma);
 
 	int xIndex = arg.indexOf(Player.Self.id);
@@ -112,7 +109,7 @@ public class ArgParser {
 	return motigomaPair;
     }
 
-    private Consumer<String> getMotigomaParser(SuperList<Koma> motigoma) {
+    private Consumer<String> getMotigomaParser(XList<Koma> motigoma) {
 	return arg -> {
 	    int i = 0;
 	    while (i < arg.length()) {
@@ -120,10 +117,10 @@ public class ArgParser {
 		var count = arg.substring(i + 1, i + 2);
 		if (i + 3 < arg.length()) { // 歩は保持数2桁があり得る
 		    var count2dig = arg.substring(i + 1, i + 3);
-		    if (StringUtils.isNumeric(count2dig) && ++i > 0)
+		    if (XIntegers.checkIfParsable(count2dig) && ++i > 0)
 			count = count2dig;
 		}
-		IntStream.range(0, Integer.valueOf(count)).forEach(idx -> motigoma.add(type));
+		IntStream.range(0, Integer.parseInt(count)).forEach(idx -> motigoma.add(type));
 		i += 2;
 	    }
 	};

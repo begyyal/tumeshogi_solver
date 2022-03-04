@@ -13,7 +13,7 @@ java {
 }
 
 dependencies {
-	implementation files('jar/java_commons.jar')
+	implementation files('jar/xj_commons.jar')
 }
 
 sourceSets {
