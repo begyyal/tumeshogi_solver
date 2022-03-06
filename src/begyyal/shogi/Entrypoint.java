@@ -23,7 +23,7 @@ public class Entrypoint {
 		System.out.println(st);
 	}
 
-	TSLogger.print("processing time -> " + (System.currentTimeMillis() - start) / 1000 + "sec");
+	TSLogger.print("processing time -> " + (System.currentTimeMillis() - start) + "msec");
     }
 
     private static MainSolver preProcess(String[] plainArgs) {
