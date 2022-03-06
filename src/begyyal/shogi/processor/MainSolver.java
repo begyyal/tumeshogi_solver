@@ -4,14 +4,13 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-import begyyal.commons.object.collection.XList;
 import begyyal.shogi.object.Args;
+import begyyal.shogi.object.BanContext;
 import begyyal.shogi.object.MasuState;
 
 public class MainSolver implements Closeable {
 
     private final DerivationCalculator dc;
-    private final ReverseDerivationCalculator rdc;
 
     public MainSolver(Args args) {
 	this.dc = new DerivationCalculator(
@@ -19,28 +18,21 @@ public class MainSolver implements Closeable {
 	    args.initBan,
 	    args.selfMotigoma,
 	    args.opponentMotigoma);
-	this.rdc = new ReverseDerivationCalculator();
     }
 
     public String[] calculate() throws InterruptedException, ExecutionException {
-
-	var resultTree = this.dc.calculateDerivationTree();
-	if (resultTree == null)
-	    return createFailureLabel();
-
-	var result = this.rdc.calculateConclusion(resultTree);
-	if (result == null)
-	    return createFailureLabel();
-
-	return this.summarize(result);
+	var result = this.dc.ignite();
+	return result == null
+		? createFailureLabel()
+		: this.summarize(result);
     }
 
     private String[] createFailureLabel() {
 	return new String[] { "Can't solve." };
     }
 
-    private String[] summarize(XList<MasuState> result) {
-	return result.stream().map(this::writeItte).toArray(String[]::new);
+    private String[] summarize(BanContext result) {
+	return result.log.stream().map(r -> writeItte(r.state)).toArray(String[]::new);
     }
 
     private String writeItte(MasuState state) {
