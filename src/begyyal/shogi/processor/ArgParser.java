@@ -80,7 +80,7 @@ public class ArgParser {
 
 	boolean nari = value.length() > 2 && XStrings.equals(value.substring(2, 3), "z");
 
-	return new MasuState(p, k, 9 - suzi, 9 - dan, nari, XGen.newHashSet());
+	return new MasuState(p, k, 9 - suzi, 9 - dan, nari, false, XGen.newHashSet());
     }
 
     public Pair<XList<Koma>, XList<Koma>> parseMotigomaStr(String arg) {
