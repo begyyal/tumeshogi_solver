@@ -24,6 +24,7 @@ public class MasuState {
 	-1,
 	-1,
 	false,
+	false,
 	Collections.emptySet());
 
     public final Player player;
@@ -31,10 +32,11 @@ public class MasuState {
     public final int x;
     public final int y;
     public final boolean nariFlag;
+    public final boolean utu;
     public final Set<Pair<Integer, Integer>> rangedBy; // left=X,right=Y
 
     public MasuState(MasuState s) {
-	this(s.player, s.koma, s.x, s.y, s.nariFlag, XGen.newHashSet(s.rangedBy));
+	this(s.player, s.koma, s.x, s.y, s.nariFlag, s.utu, XGen.newHashSet(s.rangedBy));
     }
 
     public MasuState(
@@ -43,6 +45,7 @@ public class MasuState {
 	int x,
 	int y,
 	boolean nariFlag,
+	boolean utu,
 	Set<Pair<Integer, Integer>> rangedBy) {
 
 	this.player = player;
@@ -50,6 +53,7 @@ public class MasuState {
 	this.x = x;
 	this.y = y;
 	this.nariFlag = nariFlag;
+	this.utu = utu;
 	this.rangedBy = rangedBy;
     }
 
@@ -95,6 +99,7 @@ public class MasuState {
 	    Koma.Empty,
 	    suzi,
 	    dan,
+	    false,
 	    false,
 	    rangedBy);
     }

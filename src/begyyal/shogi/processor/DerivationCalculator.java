@@ -39,7 +39,11 @@ public class DerivationCalculator implements Closeable {
 	throws InterruptedException, ExecutionException {
 
 	if (branches == null || branches.length == 0)
-	    return count % 2 == 0 ? context : null;
+	    if (count % 2 == 0) {
+		var s = context.getLatestState();
+		return s.koma == Koma.Hu && s.utu ? null : context;
+	    } else
+		return null;
 
 	var futureMap = XGen.<BanContext, Future<BanContext[]>>newHashMap();
 	if (count <= numOfMoves)

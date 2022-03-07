@@ -113,6 +113,7 @@ public class Ban implements Cloneable {
 	    toX,
 	    toY,
 	    from.nariFlag || tryNari && (from.player == Player.Self ? to.y > 5 : to.y < 3),
+	    false,
 	    to.rangedBy);
 	this.matrix[toX][toY] = newState;
 
@@ -126,7 +127,7 @@ public class Ban implements Cloneable {
 	if (!validateState(k, x, y, p) || k == Koma.Hu && !checkNihu(p, x))
 	    return MasuState.Invalid;
 
-	var state = new MasuState(p, k, x, y, false, this.matrix[x][y].rangedBy);
+	var state = new MasuState(p, k, x, y, false, true, this.matrix[x][y].rangedBy);
 	this.matrix[x][y] = state;
 
 	refreshRange();
