@@ -240,6 +240,48 @@
 					]
 				}
 			]
+		},
+		{
+			"name": "9te_1",
+			"command": "java -jar ts_solver.jar 9 14yb24yc34yc44yc54yc15yh66xg xg1e4ya18b3d4f2",
+			"exitCode": 0,
+			"expected": [
+				{
+					"act": "console-output",
+					"value": [
+						"Self -> 25Kin",
+						"Opponent -> 25Ou",
+						"Self -> 35Kin",
+						"Opponent -> 35Ou",
+						"Self -> 45Kin",
+						"Opponent -> 45Ou",
+						"Self -> 55Kin",
+						"Opponent -> 55Ou",
+						"Self -> 65Hisha"
+					]
+				}
+			]
+		},
+		{
+			"name": "9te_2",
+			"command": "java -jar ts_solver.jar 9 21xd31xe32xd42xgz22yh13yg24ye xd1ya18b4c4d1e2f2",
+			"exitCode": 0,
+			"expected": [
+				{
+					"act": "console-output",
+					"value": [
+						"Self -> 23Gin",
+						"Opponent -> 23Kin",
+						"Self -> 41GinNari",
+						"Opponent -> 11Ou",
+						"Self -> 12Gin",
+						"Opponent -> 12Hisha",
+						"Self -> 21Kin",
+						"Opponent -> 21Ou",
+						"Self -> 31HishaNari"
+					]
+				}
+			]
 		}
 	]
 }

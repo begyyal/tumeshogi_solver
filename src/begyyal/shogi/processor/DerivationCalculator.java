@@ -38,19 +38,20 @@ public class DerivationCalculator implements Closeable {
     private BanContext r4spread(BanContext context, BanContext[] branches, int count)
 	throws InterruptedException, ExecutionException {
 
-	if (branches == null || branches.length == 0)
+	if (branches == null || branches.length == 0) {
 	    if (count % 2 == 0) {
 		var s = context.getLatestState();
 		return s.koma == Koma.Hu && s.utu ? null : context;
 	    } else
 		return null;
+	} else if (count > numOfMoves)
+	    return null;
 
 	var futureMap = XGen.<BanContext, Future<BanContext[]>>newHashMap();
-	if (count <= numOfMoves)
-	    for (var b : branches)
-		futureMap.put(b, this.tools.exe.submit(count % 2 == 0
-			? () -> this.tools.selfProcessor.spread(b)
-			: () -> this.tools.opponentProcessor.spread(b)));
+	for (var b : branches)
+	    futureMap.put(b, this.tools.exe.submit(count % 2 == 0
+		    ? () -> this.tools.selfProcessor.spread(b)
+		    : () -> this.tools.opponentProcessor.spread(b)));
 
 	BanContext result = null;
 	int depth = 0;
