@@ -124,7 +124,8 @@ public class MasuState {
 		? SimpleCacheResolver.getAsPrivate(MasuState.class, 1,
 		    Triple.of(koma, nariFlag, player),
 		    () -> XListGen.immutableOf(base.stream()
-			.flatMap(v -> Arrays.stream(v.decompose())).toArray(Vector[]::new)))
+			.flatMap(v -> Arrays.stream(v.decompose()))
+			.toArray(Vector[]::new)))
 		: base;
     }
 
