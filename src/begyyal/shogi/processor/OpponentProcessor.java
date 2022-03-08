@@ -3,7 +3,6 @@ package begyyal.shogi.processor;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import begyyal.commons.object.collection.XMap.XMapGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
@@ -57,7 +56,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 			    : null;
 		}));
 
-	// 王手妨害(持ち駒を貼る+駒を移動する)
+	// 合駒(持ち駒を貼る+駒を移動する)
 	var outeVector = ou.getVectorTo(outeState);
 	Stream<BanContext> cs3 = Math.abs(outeVector.x) == 1 || Math.abs(outeVector.y) == 1
 		? Stream.empty()
@@ -65,11 +64,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 		    .filter(v -> !outeVector.equals(v) &&
 			    ban.getState(ou.x + v.x, ou.y + v.y).rangedBy.stream()
 				.map(p -> ban.getState(p.v1, p.v2))
-				.collect(XMapGen.collect4count(s -> s.player))
-				.entrySet().stream()
-				.sorted((e1, e2) -> e1.getKey() == playerType ? -1 : 1)
-				.sorted((e1, e2) -> e2.getValue() - e1.getValue())
-				.findFirst().get().getKey() == playerType)
+				.anyMatch(s -> s.player == playerType && s.koma != Koma.Ou))
 		    .flatMap(v -> getOuteObstructionCS(ou.x + v.x, ou.y + v.y, context, ban));
 
 	return executeCS(context, Stream.concat(Stream.concat(cs1, cs2), cs3));
