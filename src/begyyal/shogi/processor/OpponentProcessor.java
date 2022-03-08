@@ -3,6 +3,8 @@ package begyyal.shogi.processor;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import begyyal.commons.object.collection.XList;
+import begyyal.commons.object.collection.XList.XListGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
@@ -61,13 +63,23 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	Stream<BanContext> cs3 = Math.abs(outeVector.x) == 1 || Math.abs(outeVector.y) == 1
 		? Stream.empty()
 		: Arrays.stream(outeVector.decompose())
-		    .filter(v -> !outeVector.equals(v) &&
-			    ban.getState(ou.x + v.x, ou.y + v.y).rangedBy.stream()
-				.map(p -> ban.getState(p.v1, p.v2))
-				.anyMatch(s -> s.player == playerType && s.koma != Koma.Ou))
+		    .filter(v -> !outeVector.equals(v)
+			    && checkMudaai(ban, ban.getState(ou.x + v.x, ou.y + v.y), outeState))
 		    .flatMap(v -> getOuteObstructionCS(ou.x + v.x, ou.y + v.y, context, ban));
 
 	return executeCS(context, Stream.concat(Stream.concat(cs1, cs2), cs3));
+    }
+
+    private static boolean checkMudaai(Ban ban, MasuState state, MasuState outeState) {
+	XList<MasuState> rangedBy = state.rangedBy.stream()
+	    .map(p -> ban.getState(p.v1, p.v2))
+	    .collect(XListGen.collect());
+	rangedBy.remove(outeState);
+	boolean ouYoko = false;
+	for (var s : rangedBy)
+	    if (s.player == playerType && !(ouYoko |= s.koma == Koma.Ou))
+		return true;
+	return ouYoko && rangedBy.allMatch(s -> s.player == playerType);
     }
 
     private Stream<BanContext> getOuteObstructionCS(int x, int y, BanContext context, Ban ban) {
