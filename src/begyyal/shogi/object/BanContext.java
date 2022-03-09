@@ -39,8 +39,7 @@ public class BanContext {
 	this.selfMotigoma = selfMotigoma;
 	this.opponentMotigoma = opponentMotigoma;
 	this.beforeId = beforeId;
-	//this.hash = Objects.hash(log.size(), ban, selfMotigoma, opponentMotigoma);
-	this.hash = 0;
+	this.hash = Objects.hash(log.size(), ban, selfMotigoma, opponentMotigoma);
     }
 
     public BanContext branch(

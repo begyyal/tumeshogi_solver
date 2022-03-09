@@ -7,7 +7,6 @@ import begyyal.commons.object.collection.XGen;
 import begyyal.commons.util.cache.SimpleCacheResolver;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
-import begyyal.shogi.log.TSLogger;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
 import begyyal.shogi.object.MasuState;
