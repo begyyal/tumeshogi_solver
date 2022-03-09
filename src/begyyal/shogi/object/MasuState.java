@@ -92,13 +92,13 @@ public class MasuState {
 	return player == Player.Opponent && koma == Koma.Ou;
     }
 
-    public static MasuState emptyOf(int suzi, int dan, Set<Pair<Integer, Integer>> rangedBy) {
+    public static MasuState emptyOf(int x, int y, Set<Pair<Integer, Integer>> rangedBy) {
 	Objects.requireNonNull(rangedBy);
 	return new MasuState(
 	    Player.None,
 	    Koma.Empty,
-	    suzi,
-	    dan,
+	    x,
+	    y,
 	    false,
 	    false,
 	    rangedBy);

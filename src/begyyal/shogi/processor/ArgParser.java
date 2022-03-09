@@ -43,7 +43,7 @@ public class ArgParser {
 	if (!arg.matches(banArgRegex))
 	    throw new IllegalArgumentException("Ban argument format is invalid.");
 
-	var matrix = new MasuState[9][9];
+	var matrix = new MasuState[81];
 
 	String draft = arg;
 	while (!draft.isBlank()) {
@@ -54,12 +54,12 @@ public class ArgParser {
 	    var masu = draft.substring(0, kiritori);
 	    draft = kiritori == draft.length() ? Strs.empty : draft.substring(kiritori);
 
-	    int x = Integer.valueOf(masu.substring(0, 1));
-	    int y = Integer.valueOf(masu.substring(1, 2));
-	    if (matrix[9 - x][9 - y] != null)
+	    int x = 9 - Integer.valueOf(masu.substring(0, 1));
+	    int y = 9 - Integer.valueOf(masu.substring(1, 2));
+	    if (matrix[x * 9 + y] != null)
 		throw new IllegalArgumentException(
-		    "The masu states of [" + x + "-" + y + "] are duplicated.");
-	    matrix[9 - x][9 - y] = parseMasuStateStr(masu.substring(2), x, y);
+		    "The masu states of [" + (9 - x) + "-" + (9 - y) + "] are duplicated.");
+	    matrix[x * 9 + y] = parseMasuStateStr(masu.substring(2), x, y);
 	}
 
 	var ban = new Ban(matrix);
@@ -68,7 +68,7 @@ public class ArgParser {
 	return ban;
     }
 
-    private static MasuState parseMasuStateStr(String value, int suzi, int dan) {
+    private static MasuState parseMasuStateStr(String value, int x, int y) {
 
 	var p = Player.of(value.substring(0, 1));
 	if (p == null)
@@ -80,7 +80,7 @@ public class ArgParser {
 
 	boolean nari = value.length() > 2 && XStrings.equals(value.substring(2, 3), "z");
 
-	return new MasuState(p, k, 9 - suzi, 9 - dan, nari, false, XGen.newHashSet());
+	return new MasuState(p, k, x, y, nari, false, XGen.newHashSet());
     }
 
     public Pair<XList<Koma>, XList<Koma>> parseMotigomaStr(String arg) {

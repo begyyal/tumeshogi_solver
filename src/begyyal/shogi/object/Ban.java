@@ -1,6 +1,7 @@
 package begyyal.shogi.object;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -8,8 +9,6 @@ import java.util.stream.Stream;
 import begyyal.commons.object.Pair;
 import begyyal.commons.object.Vector;
 import begyyal.commons.object.collection.XGen;
-import begyyal.commons.object.collection.XList;
-import begyyal.commons.object.collection.XList.XListGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 
@@ -19,28 +18,26 @@ public class Ban implements Cloneable {
     public final int id = idGen.getAndIncrement();
 
     // インデックスの振り順は将棋盤の読み方に倣わない。x/y座標で見る。
-    private MasuState[][] matrix;
+    private MasuState[] matrix;
 
-    public Ban(MasuState[][] matrix) {
+    public Ban(MasuState[] matrix) {
 	this.matrix = matrix;
     }
 
     public void setup() {
-	for (int x = 0; x < 9; x++)
-	    for (int y = 0; y < 9; y++)
-		if (this.matrix[x][y] == null)
-		    this.matrix[x][y] = MasuState.emptyOf(x, y, XGen.newHashSet());
+	for (int i = 0; i < 81; i++)
+	    if (this.matrix[i] == null)
+		this.matrix[i] = MasuState.emptyOf(i / 9, i % 9, XGen.newHashSet());
 	markRangeAll();
     }
 
     public MasuState getState(int x, int y) {
-	return this.matrix[x][y];
+	return this.matrix[x * 9 + y];
     }
 
     private void refreshRange() {
-	for (int x = 0; x < 9; x++)
-	    for (int y = 0; y < 9; y++)
-		this.matrix[x][y].rangedBy.clear();
+	for (int i = 0; i < 81; i++)
+	    this.matrix[i].rangedBy.clear();
 	markRangeAll();
     }
 
@@ -51,56 +48,51 @@ public class Ban implements Cloneable {
     }
 
     public void markRangeBy(int x, int y) {
-	var s = this.matrix[x][y];
+	var s = this.matrix[x * 9 + y];
 	if (s.koma == Koma.Empty)
 	    return;
 	boolean haveLinearRange = MasuState.isLinearRange(s);
 	for (var v : s.getTerritory())
 	    if (haveLinearRange) {
 		for (var miniV : v.decompose())
-		    if (!markRange(miniV, s.x, s.y, false))
+		    if (!markRange(miniV, s.x, s.y))
 			break;
 	    } else
-		markRange(v, s.x, s.y, false);
+		markRange(v, s.x, s.y);
     }
 
-    private boolean markRange(Vector v, int x, int y, boolean unmark) {
+    private boolean markRange(Vector v, int x, int y) {
 	int vx = x + v.x;
 	int vy = y + v.y;
 	if (!validateCoordinate(vx, vy))
 	    return false;
-	if (unmark)
-	    this.matrix[vx][vy].rangedBy.removeIf(p -> p.v1 == x && p.v2 == y);
-	else
-	    this.matrix[vx][vy].rangedBy.add(Pair.of(x, y));
-	return this.matrix[vx][vy].koma == Koma.Empty;
+	this.matrix[vx * 9 + vy].rangedBy.add(Pair.of(x, y));
+	return this.matrix[vx * 9 + vy].koma == Koma.Empty;
     }
 
     public Stream<MasuState> search(Predicate<MasuState> filter) {
 	var result = new MasuState[81];
 	int count = 0;
-	for (int x = 0; x < 9; x++)
-	    for (int y = 0; y < 9; y++)
-		if (filter.test(matrix[x][y]))
-		    result[count++] = matrix[x][y];
+	for (int i = 0; i < 81; i++)
+	    if (filter.test(matrix[i]))
+		result[count++] = matrix[i];
 	return count == 0 ? Stream.empty() : Arrays.stream(result, 0, count);
     }
 
-    public XList<MasuState> serializeMatrix() {
-	return Arrays.stream(this.matrix).flatMap(l -> Arrays.stream(l))
-	    .collect(XListGen.collect());
+    public Stream<MasuState> matrixStream() {
+	return Arrays.stream(this.matrix);
     }
 
     public MasuState exploration(MasuState state, Vector v) {
 	int x = state.x, y = state.y;
 	int vx = x + v.x, vy = y + v.y;
-	return validateCoordinate(vx, vy) ? this.matrix[vx][vy] : MasuState.Invalid;
+	return validateCoordinate(vx, vy) ? this.matrix[vx * 9 + vy] : MasuState.Invalid;
     }
 
     public MasuState advance(int fromX, int fromY, int toX, int toY, boolean tryNari) {
 
-	var from = this.matrix[fromX][fromY];
-	var to = this.matrix[toX][toY];
+	var from = this.matrix[fromX * 9 + fromY];
+	var to = this.matrix[toX * 9 + toY];
 
 	if (!from.nariFlag && !tryNari && !validateState(from.koma, toX, toY, from.player))
 	    return MasuState.Invalid;
@@ -115,7 +107,7 @@ public class Ban implements Cloneable {
 	    from.nariFlag || tryNari && (from.player == Player.Self ? to.y > 5 : to.y < 3),
 	    false,
 	    to.rangedBy);
-	this.matrix[toX][toY] = newState;
+	this.matrix[toX * 9 + toY] = newState;
 
 	refreshRange();
 
@@ -127,8 +119,8 @@ public class Ban implements Cloneable {
 	if (!validateState(k, x, y, p) || k == Koma.Hu && !checkNihu(p, x))
 	    return MasuState.Invalid;
 
-	var state = new MasuState(p, k, x, y, false, true, this.matrix[x][y].rangedBy);
-	this.matrix[x][y] = state;
+	var state = new MasuState(p, k, x, y, false, true, this.matrix[x * 9 + y].rangedBy);
+	this.matrix[x * 9 + y] = state;
 
 	refreshRange();
 
@@ -144,7 +136,7 @@ public class Ban implements Cloneable {
     }
 
     private void emptyMasu(int x, int y) {
-	this.matrix[x][y] = MasuState.emptyOf(x, y, this.matrix[x][y].rangedBy);
+	this.matrix[x * 9 + y] = MasuState.emptyOf(x, y, this.matrix[x * 9 + y].rangedBy);
     }
 
     public boolean checkingSafe() {
@@ -169,10 +161,9 @@ public class Ban implements Cloneable {
 
     @Override
     public Ban clone() {
-	var newMatrix = new MasuState[9][9];
-	for (int x = 0; x < 9; x++)
-	    for (int y = 0; y < 9; y++)
-		newMatrix[x][y] = new MasuState(this.matrix[x][y]);
+	var newMatrix = new MasuState[81];
+	for (int i = 0; i < 81; i++)
+	    newMatrix[i] = new MasuState(this.matrix[i]);
 	return new Ban(newMatrix);
     }
 
@@ -186,7 +177,7 @@ public class Ban implements Cloneable {
 
     @Override
     public int hashCode() {
-	return id;
+	return Objects.hashCode(this.matrix);
     }
 
     public static int generateId() {
