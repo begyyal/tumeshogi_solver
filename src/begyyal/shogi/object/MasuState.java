@@ -6,7 +6,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import begyyal.commons.object.Pair;
-import begyyal.commons.object.Triple;
 import begyyal.commons.object.Vector;
 import begyyal.commons.object.collection.XGen;
 import begyyal.commons.object.collection.XList.ImmutableXList;
@@ -34,6 +33,7 @@ public class MasuState {
     public final boolean nariFlag;
     public final boolean utu;
     public final Set<Pair<Integer, Integer>> rangedBy; // left=X,right=Y
+    public final int cacheHash;
 
     public MasuState(MasuState s) {
 	this(s.player, s.koma, s.x, s.y, s.nariFlag, s.utu, XGen.newHashSet(s.rangedBy));
@@ -55,6 +55,7 @@ public class MasuState {
 	this.nariFlag = nariFlag;
 	this.utu = utu;
 	this.rangedBy = rangedBy;
+	this.cacheHash = ((31 + koma.ordinal()) * 31 + player.ordinal()) * 31 + (nariFlag ? 1 : 0);
     }
 
     public int getSuzi() {
@@ -122,7 +123,7 @@ public class MasuState {
 	var base = getTerritory(koma, nariFlag, player);
 	return isLinearRange(koma, nariFlag)
 		? SimpleCacheResolver.getAsPrivate(MasuState.class, 1,
-		    Triple.of(koma, nariFlag, player),
+		    ((31 + koma.ordinal()) * 31 + player.ordinal()) * 31 + (nariFlag ? 1 : 0),
 		    () -> XListGen.immutableOf(base.stream()
 			.flatMap(v -> Arrays.stream(v.decompose()))
 			.toArray(Vector[]::new)))
@@ -146,4 +147,9 @@ public class MasuState {
 	var casted = (MasuState) o;
 	return this.isEqualWithoutRange(casted) && this.rangedBy.equals(casted.rangedBy);
     }
+
+     @Override
+     public int hashCode() {
+	 return cacheHash;
+     }
 }
