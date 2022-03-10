@@ -2,6 +2,8 @@ package begyyal.shogi.object;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import begyyal.commons.object.collection.XList;
 import begyyal.commons.object.collection.XList.XListGen;
@@ -12,16 +14,15 @@ public class BanContext {
 
     private static final AtomicInteger idGen = new AtomicInteger();
     public static final BanContext dummy = new BanContext(XListGen.empty(), XListGen.empty());
-    
-    public final int id = idGen.getAndIncrement();
-    public final int hash;
 
+    public final int id = idGen.getAndIncrement();
     public final XList<ResultRecord> log;
     public final XList<Koma> selfMotigoma;
     public final XList<Koma> opponentMotigoma;
-
     public final Ban ban;
     public final int beforeId;
+
+    public int cacheHash;
 
     public BanContext(
 	XList<Koma> selfMotigoma,
@@ -41,7 +42,6 @@ public class BanContext {
 	this.selfMotigoma = selfMotigoma;
 	this.opponentMotigoma = opponentMotigoma;
 	this.beforeId = beforeId;
-	this.hash = Objects.hash(log.size(), ban, selfMotigoma, opponentMotigoma);
     }
 
     public BanContext branch(
@@ -62,7 +62,16 @@ public class BanContext {
 	    else
 		motigoma.remove(koma);
 
+	newContext.generateCacheHash();
 	return newContext;
+    }
+
+    public void generateCacheHash() {
+	var mhash = Stream.concat(
+	    selfMotigoma.stream().map(k -> k.ordinal()),
+	    opponentMotigoma.stream().map(k -> k.ordinal() + Koma.values().length))
+	    .collect(Collectors.toList());
+	this.cacheHash = Objects.hash(log.size(), ban, mhash);
     }
 
     public BanContext copyOf(Ban ban) {
@@ -88,6 +97,7 @@ public class BanContext {
 
     @Override
     public int hashCode() {
-	return hash;
+	// 合駒を用いた回答の優先順位を下げる
+	return id;
     }
 }
