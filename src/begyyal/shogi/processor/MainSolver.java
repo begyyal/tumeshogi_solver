@@ -16,8 +16,7 @@ public class MainSolver implements Closeable {
 	this.dc = new DerivationCalculator(
 	    args.numOfMoves,
 	    args.initBan,
-	    args.selfMotigoma,
-	    args.opponentMotigoma);
+	    args.motigoma);
     }
 
     public String[] calculate() throws InterruptedException, ExecutionException {

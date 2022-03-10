@@ -36,13 +36,11 @@ public class Entrypoint {
 
 	var numStr = plainArgs[0];
 	var banStr = plainArgs[1];
-	var motigomaPair = ap.parseMotigomaStr(motigomaStr);
 
 	var args = new Args(
 	    ap.parseNumStr(numStr),
 	    ap.parseBanStr(banStr),
-	    motigomaPair.v1,
-	    motigomaPair.v2);
+	    ap.parseMotigomaStr(motigomaStr));
 	
 	new ArgsValidator().validate(args);
 

@@ -1,5 +1,6 @@
 package begyyal.shogi.processor;
 
+import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,7 +23,7 @@ public class SelfProcessor extends PlayerProcessorBase {
     }
 
     public BanContext[] spread(BanContext context) {
-	
+
 	var ban = context.ban == null ? this.initBan : context.ban;
 	var opponentOu = ban.search(MasuState::isOpponentOu).findFirst().get();
 
@@ -84,17 +85,17 @@ public class SelfProcessor extends PlayerProcessorBase {
 		    })));
 
 	// 持ち駒配置による王手
-	var cs3 = context.selfMotigoma.stream()
-	    .distinct()
-	    .flatMap(k -> {
-		var dt = MasuState.getDecomposedTerritory(k, false, playerType);
+	var cs3 = Arrays.stream(context.motigoma)
+	    .filter(m -> m.player == playerType && m.num > 0)
+	    .flatMap(m -> {
+		var dt = MasuState.getDecomposedTerritory(m.koma, false, playerType);
 		return ban
 		    .search(s -> s.koma == Koma.Empty && dt.contains(s.getVectorTo(opponentOu)))
 		    .map(to -> {
 			var newBan = ban.clone();
-			var newState = newBan.deploy(k, to.x, to.y, playerType);
+			var newState = newBan.deploy(m.koma, to.x, to.y, playerType);
 			return newState != MasuState.Invalid && !newBan.checkingSafe()
-				? context.branch(newBan, newState, k, playerType, false)
+				? context.branch(newBan, newState, m.koma, playerType, false)
 				: null;
 		    });
 	    });
