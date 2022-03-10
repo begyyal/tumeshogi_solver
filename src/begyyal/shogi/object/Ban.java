@@ -177,7 +177,7 @@ public class Ban implements Cloneable {
 
     @Override
     public int hashCode() {
-	return Objects.hashCode(this.matrix);
+	return Objects.hash((Object[])matrix);
     }
 
     public static int generateId() {

@@ -7,6 +7,7 @@ import begyyal.commons.object.collection.XGen;
 import begyyal.commons.util.cache.SimpleCacheResolver;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
+import begyyal.shogi.log.TSLogger;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
 import begyyal.shogi.object.MasuState;
@@ -22,19 +23,21 @@ public class SelfProcessor extends PlayerProcessorBase {
     }
 
     public BanContext[] spread(BanContext context) {
-
+	
 	var ban = context.ban == null ? this.initBan : context.ban;
 	var opponentOu = ban.search(MasuState::isOpponentOu).findFirst().get();
 
 	// 駒の移動による王手(開き王手は除く)
 	var cs1 = ban.search(s -> s.player == playerType)
 	    .flatMap(from -> spreadMasuState(from, ban)
-		.filter(to -> SimpleCacheResolver.getAsPrivate(this.getClass(), 1, from, () -> {
-		    var dt = XGen.newHashSet(from.getDecomposedTerritory());
-		    if (!from.nariFlag)
-			dt.addAll(MasuState.getDecomposedTerritory(from.koma, true, playerType));
-		    return dt;
-		}).contains(to.getVectorTo(opponentOu)))
+		.filter(to -> SimpleCacheResolver
+		    .getAsPrivate(this.getClass(), 1, from.cacheHash, () -> {
+			var dt = XGen.newHashSet(from.getDecomposedTerritory());
+			if (!from.nariFlag)
+			    dt.addAll(
+				MasuState.getDecomposedTerritory(from.koma, true, playerType));
+			return dt;
+		    }).contains(to.getVectorTo(opponentOu)))
 		.flatMap(to -> createBranchStream(to.y, from)
 		    .map(tryNari -> {
 			var newBan = ban.clone();
