@@ -66,11 +66,12 @@ public class DerivationCalculator implements Closeable {
 	    var e = i.next();
 	    var k = e.getKey();
 
-	    BanContext selected = SimpleCacheResolver.getAsPublic(PublicCacheKey.context, k.hash);
+	    BanContext selected = SimpleCacheResolver.getAsPublic(
+		PublicCacheKey.context, k.cacheHash);
 	    if (selected == null) {
 		selected = r4spread(k, e.getValue().get(), count + 1);
 		selected = selected == null ? BanContext.dummy : selected;
-		SimpleCacheResolver.putAsPublic(PublicCacheKey.context, k.hash, selected);
+		SimpleCacheResolver.putAsPublic(PublicCacheKey.context, k.cacheHash, selected);
 	    }
 	    if (selected == BanContext.dummy)
 		selected = null;
