@@ -11,6 +11,8 @@ import begyyal.shogi.def.Player;
 public class BanContext {
 
     private static final AtomicInteger idGen = new AtomicInteger();
+    public static final BanContext dummy = new BanContext(XListGen.empty(), XListGen.empty());
+    
     public final int id = idGen.getAndIncrement();
     public final int hash;
 

@@ -9,7 +9,9 @@ import java.util.concurrent.Future;
 
 import begyyal.commons.object.collection.XGen;
 import begyyal.commons.object.collection.XList;
+import begyyal.commons.util.cache.SimpleCacheResolver;
 import begyyal.commons.util.function.XUtils;
+import begyyal.shogi.constant.PublicCacheKey;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
@@ -60,8 +62,19 @@ public class DerivationCalculator implements Closeable {
 	    .iterator();
 
 	while (i.hasNext()) {
+
 	    var e = i.next();
-	    var selected = r4spread(e.getKey(), e.getValue().get(), count + 1);
+	    var k = e.getKey();
+
+	    BanContext selected = SimpleCacheResolver.getAsPublic(PublicCacheKey.context, k.hash);
+	    if (selected == null) {
+		selected = r4spread(k, e.getValue().get(), count + 1);
+		selected = selected == null ? BanContext.dummy : selected;
+		SimpleCacheResolver.putAsPublic(PublicCacheKey.context, k.hash, selected);
+	    }
+	    if (selected == BanContext.dummy)
+		selected = null;
+
 	    if (count % 2 != 0) {
 		if (selected != null && (result == null || result.log.size() > selected.log.size()))
 		    result = selected;
