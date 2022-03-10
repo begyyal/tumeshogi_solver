@@ -16,7 +16,7 @@ public class BanContext {
     public static final BanContext dummy = new BanContext(XListGen.empty(), XListGen.empty());
 
     public final int id = idGen.getAndIncrement();
-    public final XList<ResultRecord> log;
+    public final XList<MasuState> log;
     public final XList<Koma> selfMotigoma;
     public final XList<Koma> opponentMotigoma;
     public final Ban ban;
@@ -31,7 +31,7 @@ public class BanContext {
     }
 
     private BanContext(
-	XList<ResultRecord> log,
+	XList<MasuState> log,
 	Ban ban,
 	XList<Koma> selfMotigoma,
 	XList<Koma> opponentMotigoma,
@@ -52,7 +52,7 @@ public class BanContext {
 	boolean isAddition) {
 
 	var newContext = this.copyOf(latestBan);
-	newContext.log.add(new ResultRecord(latestBan.id, latestState));
+	newContext.log.add(latestState);
 	var motigoma = player == Player.Self ? newContext.selfMotigoma
 		: newContext.opponentMotigoma;
 
@@ -84,7 +84,7 @@ public class BanContext {
     }
 
     public MasuState getLatestState() {
-	return this.log.isEmpty() ? null : this.log.getTip().state;
+	return this.log.isEmpty() ? null : this.log.getTip();
     }
 
     @Override

@@ -101,10 +101,17 @@
     - 〇 : 最遅でも1分以内
     - △ : 難度次第では1分を大幅に超過してしまう
     - ？ : 未検証
-  - [v1.0.4](https://github.com/begyyal/tumeshogi_solver/releases/tag/v1) 時点
+  - [v1.0.5](https://github.com/begyyal/tumeshogi_solver/releases/tag/v1) 時点
     - 7手詰め迄 : ◎
-    - 9手詰め : 〇
+    - 9手詰め : ◎
     - 11手詰め以降 : ？
   - 最遅問題
+    - 7手詰め
+      - `7 55xf43xd21xaz24yh13yc xg1e1ya17b4c3d3e3f1g1`
     - 9手詰め
       - `9 14yb24yc34yc44yc54yc15yh66xg xg1e4ya18b3d4f2`
+
+## その他
+
+- ワークフローで自動化しているテストパターンは[こちら](./bbtdef.json)です。
+  - 最遅/ロジック漏れ検出にかかる問題がございましたらご提供いただけると大変有り難いです。  
