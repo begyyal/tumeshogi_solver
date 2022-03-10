@@ -159,6 +159,21 @@ public class Ban implements Cloneable {
 	return 0 <= x && x < 9 && 0 <= y && y < 9;
     }
 
+    public void fillCacheKey(Object[] key) {
+	int k = 0;
+	long pn = 0;
+	int kai = 0, pnai = 9;
+	for (int i = 0; i < 81; i++) {
+	    var s = this.matrix[i];
+	    k = k * 9 + s.koma.ordinal();
+	    if ((i + 1) % 9 == 0)
+		key[kai++] = k;
+	    pn = pn * 4 + (s.nariFlag ? 2 : 0) + s.player.hashBit;
+	    if ((i + 1) % 27 == 0)
+		key[pnai++] = pn;
+	}
+    }
+
     @Override
     public Ban clone() {
 	var newMatrix = new MasuState[81];
@@ -172,12 +187,15 @@ public class Ban implements Cloneable {
 	if (!(o instanceof Ban))
 	    return false;
 	var casted = (Ban) o;
-	return this.id == casted.id;
+	for (int i = 0; i < 81; i++)
+	    if (!this.matrix[0].isEqualWithoutRange(casted.matrix[i]))
+		return false;
+	return true;
     }
 
     @Override
     public int hashCode() {
-	return Objects.hash((Object[])matrix);
+	return Objects.hash((Object[]) matrix);
     }
 
     public static int generateId() {
