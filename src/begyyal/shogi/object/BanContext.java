@@ -83,6 +83,12 @@ public class BanContext {
 	    this.id);
     }
 
+    public BanContext copyWithModifying(XList<MasuState> log) {
+	var l = this.log.createPartialList(log.size(), this.log.size());
+	l.addAll(0, log);
+	return new BanContext(l, ban, selfMotigoma, opponentMotigoma, id);
+    }
+
     public MasuState getLatestState() {
 	return this.log.isEmpty() ? null : this.log.getTip();
     }
