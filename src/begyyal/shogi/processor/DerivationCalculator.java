@@ -8,13 +8,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import begyyal.commons.object.collection.XGen;
-import begyyal.commons.object.collection.XList;
 import begyyal.commons.util.cache.SimpleCacheResolver;
 import begyyal.commons.util.function.XUtils;
 import begyyal.shogi.constant.PublicCacheKey;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
+import begyyal.shogi.object.MotigomaState;
 
 public class DerivationCalculator implements Closeable {
 
@@ -25,11 +25,10 @@ public class DerivationCalculator implements Closeable {
     public DerivationCalculator(
 	int numOfMoves,
 	Ban initBan,
-	XList<Koma> selfMotigoma,
-	XList<Koma> opponentMotigoma) {
+	MotigomaState[] motigoma) {
 
 	this.numOfMoves = numOfMoves;
-	this.origin = new BanContext(selfMotigoma, opponentMotigoma);
+	this.origin = new BanContext(motigoma);
 	this.tools = new CalculationTools(numOfMoves, initBan);
     }
 

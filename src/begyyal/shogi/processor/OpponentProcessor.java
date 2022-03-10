@@ -96,16 +96,18 @@ public class OpponentProcessor extends PlayerProcessorBase {
 			    : context.branch(newBan, newState, state.koma, playerType, true);
 		}));
 
-	if (context.opponentMotigoma.isEmpty())
+	if (Arrays.stream(context.motigoma)
+	    .filter(m -> m.player == playerType && m.num > 0)
+	    .findAny().isEmpty())
 	    return c1;
 
-	var c2 = context.opponentMotigoma.stream()
-	    .distinct()
-	    .map(k -> {
+	var c2 = Arrays.stream(context.motigoma)
+	    .filter(m -> m.player == playerType && m.num > 0)
+	    .map(m -> {
 		var newBan = ban.clone();
-		var newState = newBan.deploy(k, x, y, playerType);
+		var newState = newBan.deploy(m.koma, x, y, playerType);
 		return newState == MasuState.Invalid ? null
-			: context.branch(newBan, newState, k, playerType, false);
+			: context.branch(newBan, newState, m.koma, playerType, false);
 	    });
 
 	return Stream.concat(c1, c2);

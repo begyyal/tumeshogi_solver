@@ -2,8 +2,6 @@ package begyyal.shogi.object;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import begyyal.commons.object.collection.XList;
 import begyyal.commons.object.collection.XList.XListGen;
@@ -13,34 +11,29 @@ import begyyal.shogi.def.Player;
 public class BanContext {
 
     private static final AtomicInteger idGen = new AtomicInteger();
-    public static final BanContext dummy = new BanContext(XListGen.empty(), XListGen.empty());
+    public static final BanContext dummy = new BanContext(null);
 
     public final int id = idGen.getAndIncrement();
     public final XList<MasuState> log;
-    public final XList<Koma> selfMotigoma;
-    public final XList<Koma> opponentMotigoma;
+    public final MotigomaState[] motigoma;
     public final Ban ban;
     public final int beforeId;
 
     public int cacheHash;
 
-    public BanContext(
-	XList<Koma> selfMotigoma,
-	XList<Koma> opponentMotigoma) {
-	this(XListGen.newi(), null, selfMotigoma, opponentMotigoma, -1);
+    public BanContext(MotigomaState[] motigoma) {
+	this(XListGen.newi(), null, motigoma, -1);
     }
 
     private BanContext(
 	XList<MasuState> log,
 	Ban ban,
-	XList<Koma> selfMotigoma,
-	XList<Koma> opponentMotigoma,
+	MotigomaState[] motigoma,
 	int beforeId) {
 
 	this.log = log;
 	this.ban = ban;
-	this.selfMotigoma = selfMotigoma;
-	this.opponentMotigoma = opponentMotigoma;
+	this.motigoma = motigoma;
 	this.beforeId = beforeId;
     }
 
@@ -53,40 +46,46 @@ public class BanContext {
 
 	var newContext = this.copyOf(latestBan);
 	newContext.log.add(latestState);
-	var motigoma = player == Player.Self ? newContext.selfMotigoma
-		: newContext.opponentMotigoma;
 
 	if (koma != null && koma != Koma.Empty)
 	    if (isAddition)
-		motigoma.add(koma);
+		newContext.getMotigomaState(koma, player).num++;
 	    else
-		motigoma.remove(koma);
+		newContext.getMotigomaState(koma, player).num--;
 
 	newContext.generateCacheHash();
+
 	return newContext;
     }
 
+    private MotigomaState getMotigomaState(Koma koma, Player player) {
+	return this.motigoma[player.ordinal() * 7 + koma.ordinal()];
+    }
+
     public void generateCacheHash() {
-	var mhash = Stream.concat(
-	    selfMotigoma.stream().map(k -> k.ordinal()),
-	    opponentMotigoma.stream().map(k -> k.ordinal() + Koma.values().length))
-	    .collect(Collectors.toList());
+	var mhash = Objects.hash((Object[]) motigoma);
 	this.cacheHash = Objects.hash(log.size(), ban, mhash);
     }
 
     public BanContext copyOf(Ban ban) {
+
+	var newMotigoma = new MotigomaState[14];
+	for (int i = 0; i < 14; i++) {
+	    var ms = this.motigoma[i];
+	    newMotigoma[i] = new MotigomaState(ms.koma, ms.player, ms.num);
+	}
+
 	return new BanContext(
 	    XListGen.of(this.log),
 	    ban,
-	    XListGen.of(this.selfMotigoma),
-	    XListGen.of(this.opponentMotigoma),
+	    newMotigoma,
 	    this.id);
     }
 
     public BanContext copyWithModifying(XList<MasuState> log) {
 	var l = this.log.createPartialList(log.size(), this.log.size());
 	l.addAll(0, log);
-	return new BanContext(l, ban, selfMotigoma, opponentMotigoma, id);
+	return new BanContext(l, ban, motigoma, id);
     }
 
     public MasuState getLatestState() {
