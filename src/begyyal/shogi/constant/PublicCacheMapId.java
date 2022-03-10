@@ -1,5 +1,5 @@
 package begyyal.shogi.constant;
 
-public class PublicCacheKey {
+public class PublicCacheMapId {
     public static final int context = 1;
 }

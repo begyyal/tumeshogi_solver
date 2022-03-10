@@ -6,14 +6,16 @@ import begyyal.commons.util.function.XStrings;
 
 public enum Player {
 
-    Self("x"),
-    Opponent("y"),
-    None("*");
+    Self("x", 0),
+    Opponent("y", 1),
+    None("*", 0);
 
     public final String id;
+    public final int hashBit;
 
-    private Player(String id) {
+    private Player(String id, int hashBit) {
 	this.id = id;
+	this.hashBit = hashBit;
     }
 
     public static Player of(String id) {
