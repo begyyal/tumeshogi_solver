@@ -2,7 +2,6 @@ package begyyal.shogi.processor;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,7 +14,6 @@ import begyyal.shogi.constant.PublicCacheMapId;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
-import begyyal.shogi.object.ContextCacheKey;
 import begyyal.shogi.object.MotigomaState;
 
 public class DerivationCalculator implements Closeable {
@@ -23,8 +21,6 @@ public class DerivationCalculator implements Closeable {
     private final int numOfMoves;
     private final BanContext origin;
     private final CalculationTools tools;
-
-    private Map<ContextCacheKey, BanContext> cache = XGen.newHashMap();
     
     public DerivationCalculator(
 	int numOfMoves,
