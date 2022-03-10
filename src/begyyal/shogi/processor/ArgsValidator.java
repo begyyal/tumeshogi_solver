@@ -17,7 +17,7 @@ public class ArgsValidator {
 
 	validate(args.initBan);
 
-	var tooMany = Stream.concat(args.initBan.serializeMatrix().stream().map(s -> s.koma),
+	var tooMany = Stream.concat(args.initBan.matrixStream().map(s -> s.koma),
 	    Stream.concat(args.selfMotigoma.stream(), args.opponentMotigoma.stream()))
 	    .filter(k -> k != Koma.Empty)
 	    .collect(XMapGen.collect4count(k -> k))
