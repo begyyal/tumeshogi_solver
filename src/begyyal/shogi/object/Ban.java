@@ -28,7 +28,8 @@ public class Ban implements Cloneable {
 	for (int i = 0; i < 81; i++)
 	    if (this.matrix[i] == null)
 		this.matrix[i] = MasuState.emptyOf(i / 9, i % 9, XGen.newHashSet());
-	markRangeAll();
+	for (int i = 0; i < 81; i++)
+	    markRangeBy(i);
     }
 
     public MasuState getState(int x, int y) {
@@ -38,17 +39,12 @@ public class Ban implements Cloneable {
     private void refreshRange() {
 	for (int i = 0; i < 81; i++)
 	    this.matrix[i].rangedBy.clear();
-	markRangeAll();
+	for (int i = 0; i < 81; i++)
+	    markRangeBy(i);
     }
 
-    private void markRangeAll() {
-	for (int x = 0; x < 9; x++)
-	    for (int y = 0; y < 9; y++)
-		markRangeBy(x, y);
-    }
-
-    public void markRangeBy(int x, int y) {
-	var s = this.matrix[x * 9 + y];
+    public void markRangeBy(int i) {
+	var s = this.matrix[i];
 	if (s.koma == Koma.Empty)
 	    return;
 	boolean haveLinearRange = MasuState.isLinearRange(s);
