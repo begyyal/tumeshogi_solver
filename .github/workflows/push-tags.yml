@@ -26,9 +26,9 @@ jobs:
 
     - name: Post tweet
       run: |
-        echo "tumeshogi_solver updated to "${{ github.ref_name }} > ./data_temp
-        echo ${{ github.event.repository.html_url }} >> ./data_temp
-        echo "#Java #将棋 #詰将棋" >> ./data_temp
+        ./.github/workflows/sh/tweet_template.sh \
+        ${{ github.ref_name }} \
+        ${{ github.event.repository.html_url }} > ./data_temp
         ./.github/workflows/sh/tweet.sh \
         ${{ secrets.TW_CONS_KEY }} \
         ${{ secrets.TW_CONS_SECRET }} \

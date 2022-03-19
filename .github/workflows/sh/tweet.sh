@@ -4,7 +4,7 @@ consumer_key=$1
 consumer_secret=$2
 oauth_token=$3
 oauth_secret=$4
-data_file=$5
+data_json_file=$5
 
 timestamp=$(date +%s)
 nonce=$(openssl rand -base64 -hex 16)
@@ -72,4 +72,4 @@ auth_header="${auth_header}oauth_version=\"1.0\""
 curl -X POST $url \
   -H "$auth_header" \
   -H "content-type: application/json" \
-  -d @$data_file
+  -d @$data_json_file
