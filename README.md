@@ -3,8 +3,9 @@
 [![Update tag](https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-tags.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-tags.yml)
 
 - **開発補助**  
-[![Update process of the PR](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr.yml)
-[![Post processing of the PR](https://github.com/begyyal/tumeshogi_solver/actions/workflows/closed-pr.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/closed-pr.yml)  
+[![Save snapshot of PR](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr1.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr1.yml)
+[![Test by sync PR](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr2.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr2.yml)
+[![Post processing of PR](https://github.com/begyyal/tumeshogi_solver/actions/workflows/closed-pr.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/closed-pr.yml)  
 [![Create feature branch](https://github.com/begyyal/tumeshogi_solver/actions/workflows/create-feature.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/create-feature.yml)
 [![Delete feature branch](https://github.com/begyyal/tumeshogi_solver/actions/workflows/delete-feature.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/delete-feature.yml)  
 
