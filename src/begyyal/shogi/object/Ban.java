@@ -164,7 +164,7 @@ public class Ban implements Cloneable {
 	    k = k * 9 + s.koma.ordinal();
 	    if ((i + 1) % 9 == 0)
 		key[kai++] = k;
-	    pn = pn * 4 + (s.nariFlag ? 2 : 0) + s.player.hashBit;
+	    pn = pn * 4 + (s.nariFlag ? 2 : 0) + s.player.hashIndex;
 	    if ((i + 1) % 27 == 0)
 		key[pnai++] = pn;
 	}
