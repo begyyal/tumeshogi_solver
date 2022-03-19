@@ -1,4 +1,4 @@
-name: Post processing of the PR
+name: Post processing of PR
 
 on:
   pull_request:
