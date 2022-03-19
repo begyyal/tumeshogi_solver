@@ -184,7 +184,7 @@
 				}
 			]
 		},
-		{
+        {
 			"name": "7te_1",
 			"command": "java -jar ts_solver.jar 7 55xf43xd21xaz24yh13yc xg1e1ya17b4c3d3e3f1g1",
 			"exitCode": 0,
@@ -199,86 +199,6 @@
 						"Self -> 33KakuNari",
 						"Opponent -> 33Ou",
 						"Self -> 34Kin"
-					]
-				}
-			]
-		},
-		{
-			"name": "7te_2",
-			"command": "java -jar ts_solver.jar 7 11yb22yh31yf41ya33ya24xa25ya15ya35xd xf1d1ya13b3c4d2e4g2",
-			"exitCode": 0,
-			"expected": [
-				{
-					"act": "console-output",
-					"value": [
-						"Self -> 23Gin",
-						"Opponent -> 13Ou",
-						"Self -> 14Gin",
-						"Opponent -> 22Ou",
-						"Self -> 23HuNari",
-						"Opponent -> 21Ou",
-						"Self -> 98Kaku"
-					]
-				}
-			]
-		},
-		{
-			"name": "7te_3",
-			"command": "java -jar ts_solver.jar 7 11ye21yc12yh32yc42yb14ya24xe35xa44xfz xg1a1ya15b3c2d4e2g1f1",
-			"exitCode": 0,
-			"expected": [
-				{
-					"act": "console-output",
-					"value": [
-						"Self -> 13Hu",
-						"Opponent -> 13Keima",
-						"Self -> 23Kin",
-						"Opponent -> 23Ou",
-						"Self -> 22Hisha",
-						"Opponent -> 22Kin",
-						"Self -> 34KakuNari"
-					]
-				}
-			]
-		},
-		{
-			"name": "9te_1",
-			"command": "java -jar ts_solver.jar 9 14yb24yc34yc44yc54yc15yh66xg xg1e4ya18b3d4f2",
-			"exitCode": 0,
-			"expected": [
-				{
-					"act": "console-output",
-					"value": [
-						"Self -> 25Kin",
-						"Opponent -> 25Ou",
-						"Self -> 35Kin",
-						"Opponent -> 35Ou",
-						"Self -> 45Kin",
-						"Opponent -> 45Ou",
-						"Self -> 55Kin",
-						"Opponent -> 55Ou",
-						"Self -> 65Hisha"
-					]
-				}
-			]
-		},
-		{
-			"name": "9te_2",
-			"command": "java -jar ts_solver.jar 9 21xd31xe32xd42xgz22yh13yg24ye xd1ya18b4c4d1e2f2",
-			"exitCode": 0,
-			"expected": [
-				{
-					"act": "console-output",
-					"value": [
-						"Self -> 23Gin",
-						"Opponent -> 23Kin",
-						"Self -> 41GinNari",
-						"Opponent -> 11Ou",
-						"Self -> 12Gin",
-						"Opponent -> 12Hisha",
-						"Self -> 21Kin",
-						"Opponent -> 21Ou",
-						"Self -> 31HishaNari"
 					]
 				}
 			]

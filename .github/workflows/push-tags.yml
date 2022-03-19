@@ -23,3 +23,16 @@ jobs:
       run: |
         git tag -a v1 -m "BY-CI"
         git push origin v1 -f
+
+    - name: Post tweet
+      run: |
+        echo "tumeshogi_solver updated to "${{ github.ref_name }} > ./data_temp
+        echo ${{ github.event.repository.html_url }} >> ./data_temp
+        echo "#Java #将棋 #詰将棋" >> ./data_temp
+        ./.github/workflows/sh/tweet.sh \
+        ${{ secrets.TW_CONS_KEY }} \
+        ${{ secrets.TW_CONS_SECRET }} \
+        ${{ secrets.TW_OAUTH_TOKEN }} \
+        ${{ secrets.TW_OAUTH_SECRET }} \
+        ./data_temp
+

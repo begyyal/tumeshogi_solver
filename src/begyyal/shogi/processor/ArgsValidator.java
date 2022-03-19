@@ -1,7 +1,5 @@
 package begyyal.shogi.processor;
 
-import java.util.Arrays;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import begyyal.commons.object.collection.XMap.XMapGen;
@@ -19,9 +17,8 @@ public class ArgsValidator {
 
 	validate(args.initBan);
 
-	var ms = Arrays.stream(args.motigoma)
-	    .flatMap(m -> IntStream.range(0, m.num).mapToObj(i -> m.koma));
-	var tooMany = Stream.concat(args.initBan.matrixStream().map(s -> s.koma), ms)
+	var tooMany = Stream.concat(args.initBan.serializeMatrix().stream().map(s -> s.koma),
+	    Stream.concat(args.selfMotigoma.stream(), args.opponentMotigoma.stream()))
 	    .filter(k -> k != Koma.Empty)
 	    .collect(XMapGen.collect4count(k -> k))
 	    .entrySet().stream()

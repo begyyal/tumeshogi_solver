@@ -3,8 +3,7 @@ package begyyal.shogi.processor;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import begyyal.commons.object.collection.XList;
-import begyyal.commons.object.collection.XList.XListGen;
+import begyyal.commons.object.collection.XMap.XMapGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.object.Ban;
@@ -58,28 +57,22 @@ public class OpponentProcessor extends PlayerProcessorBase {
 			    : null;
 		}));
 
-	// 合駒(持ち駒を貼る+駒を移動する)
+	// 王手妨害(持ち駒を貼る+駒を移動する)
 	var outeVector = ou.getVectorTo(outeState);
 	Stream<BanContext> cs3 = Math.abs(outeVector.x) == 1 || Math.abs(outeVector.y) == 1
 		? Stream.empty()
 		: Arrays.stream(outeVector.decompose())
-		    .filter(v -> !outeVector.equals(v)
-			    && checkMudaai(ban, ban.getState(ou.x + v.x, ou.y + v.y), outeState))
+		    .filter(v -> !outeVector.equals(v) &&
+			    ban.getState(ou.x + v.x, ou.y + v.y).rangedBy.stream()
+				.map(p -> ban.getState(p.v1, p.v2))
+				.collect(XMapGen.collect4count(s -> s.player))
+				.entrySet().stream()
+				.sorted((e1, e2) -> e1.getKey() == playerType ? -1 : 1)
+				.sorted((e1, e2) -> e2.getValue() - e1.getValue())
+				.findFirst().get().getKey() == playerType)
 		    .flatMap(v -> getOuteObstructionCS(ou.x + v.x, ou.y + v.y, context, ban));
 
 	return executeCS(context, Stream.concat(Stream.concat(cs1, cs2), cs3));
-    }
-
-    private static boolean checkMudaai(Ban ban, MasuState state, MasuState outeState) {
-	XList<MasuState> rangedBy = state.rangedBy.stream()
-	    .map(p -> ban.getState(p.v1, p.v2))
-	    .collect(XListGen.collect());
-	rangedBy.remove(outeState);
-	boolean ouYoko = false;
-	for (var s : rangedBy)
-	    if (s.player == playerType && !(ouYoko |= s.koma == Koma.Ou))
-		return true;
-	return ouYoko && rangedBy.allMatch(s -> s.player == playerType);
     }
 
     private Stream<BanContext> getOuteObstructionCS(int x, int y, BanContext context, Ban ban) {
@@ -96,18 +89,16 @@ public class OpponentProcessor extends PlayerProcessorBase {
 			    : context.branch(newBan, newState, state.koma, playerType, true);
 		}));
 
-	if (Arrays.stream(context.motigoma)
-	    .filter(m -> m.player == playerType && m.num > 0)
-	    .findAny().isEmpty())
+	if (context.opponentMotigoma.isEmpty())
 	    return c1;
 
-	var c2 = Arrays.stream(context.motigoma)
-	    .filter(m -> m.player == playerType && m.num > 0)
-	    .map(m -> {
+	var c2 = context.opponentMotigoma.stream()
+	    .distinct()
+	    .map(k -> {
 		var newBan = ban.clone();
-		var newState = newBan.deploy(m.koma, x, y, playerType);
+		var newState = newBan.deploy(k, x, y, playerType);
 		return newState == MasuState.Invalid ? null
-			: context.branch(newBan, newState, m.koma, playerType, false);
+			: context.branch(newBan, newState, k, playerType, false);
 	    });
 
 	return Stream.concat(c1, c2);
