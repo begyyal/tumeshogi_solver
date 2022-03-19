@@ -79,13 +79,13 @@ public class BanContext implements Comparable<BanContext> {
 	this.ban.fillCacheKey(key);
 
 	int mf = this.log.size();
-	long m = 0;
+	long m = 1;
 	for (int i = 0; i < 14; i++) {
 	    var s = this.motigoma[i];
 	    if (i % 7 == 0)
-		mf = mf * 18 + s.num;
+		mf = mf * 19 + s.num;
 	    else
-		m = m * s.koma.numLimit + s.num;
+		m = m * (s.koma.numLimit + 1) + s.num;
 	}
 
 	key[12] = m;

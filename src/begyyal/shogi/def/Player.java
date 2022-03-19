@@ -11,11 +11,11 @@ public enum Player {
     None("*", 0);
 
     public final String id;
-    public final int hashBit;
+    public final int hashIndex;
 
-    private Player(String id, int hashBit) {
+    private Player(String id, int hashIndex) {
 	this.id = id;
-	this.hashBit = hashBit;
+	this.hashIndex = hashIndex;
     }
 
     public static Player of(String id) {
