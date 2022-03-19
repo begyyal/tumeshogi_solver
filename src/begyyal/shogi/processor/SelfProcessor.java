@@ -1,5 +1,6 @@
 package begyyal.shogi.processor;
 
+import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,12 +30,14 @@ public class SelfProcessor extends PlayerProcessorBase {
 	// 駒の移動による王手(開き王手は除く)
 	var cs1 = ban.search(s -> s.player == playerType)
 	    .flatMap(from -> spreadMasuState(from, ban)
-		.filter(to -> SimpleCacheResolver.getAsPrivate(this.getClass(), 1, from, () -> {
-		    var dt = XGen.newHashSet(from.getDecomposedTerritory());
-		    if (!from.nariFlag)
-			dt.addAll(MasuState.getDecomposedTerritory(from.koma, true, playerType));
-		    return dt;
-		}).contains(to.getVectorTo(opponentOu)))
+		.filter(to -> SimpleCacheResolver
+		    .getAsPrivate(this.getClass(), 1, from.cacheHash, () -> {
+			var dt = XGen.newHashSet(from.getDecomposedTerritory());
+			if (!from.nariFlag)
+			    dt.addAll(
+				MasuState.getDecomposedTerritory(from.koma, true, playerType));
+			return dt;
+		    }).contains(to.getVectorTo(opponentOu)))
 		.flatMap(to -> createBranchStream(to.y, from)
 		    .map(tryNari -> {
 			var newBan = ban.clone();
@@ -82,17 +85,17 @@ public class SelfProcessor extends PlayerProcessorBase {
 		    })));
 
 	// 持ち駒配置による王手
-	var cs3 = context.selfMotigoma.stream()
-	    .distinct()
-	    .flatMap(k -> {
-		var dt = MasuState.getDecomposedTerritory(k, false, playerType);
+	var cs3 = Arrays.stream(context.motigoma)
+	    .filter(m -> m.player == playerType && m.num > 0)
+	    .flatMap(m -> {
+		var dt = MasuState.getDecomposedTerritory(m.koma, false, playerType);
 		return ban
 		    .search(s -> s.koma == Koma.Empty && dt.contains(s.getVectorTo(opponentOu)))
 		    .map(to -> {
 			var newBan = ban.clone();
-			var newState = newBan.deploy(k, to.x, to.y, playerType);
+			var newState = newBan.deploy(m.koma, to.x, to.y, playerType);
 			return newState != MasuState.Invalid && !newBan.checkingSafe()
-				? context.branch(newBan, newState, k, playerType, false)
+				? context.branch(newBan, newState, m.koma, playerType, false)
 				: null;
 		    });
 	    });

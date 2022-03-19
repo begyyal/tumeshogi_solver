@@ -16,8 +16,7 @@ public class MainSolver implements Closeable {
 	this.dc = new DerivationCalculator(
 	    args.numOfMoves,
 	    args.initBan,
-	    args.selfMotigoma,
-	    args.opponentMotigoma);
+	    args.motigoma);
     }
 
     public String[] calculate() throws InterruptedException, ExecutionException {
@@ -32,7 +31,7 @@ public class MainSolver implements Closeable {
     }
 
     private String[] summarize(BanContext result) {
-	return result.log.stream().map(r -> writeItte(r.state)).toArray(String[]::new);
+	return result.log.stream().map(s -> writeItte(s)).toArray(String[]::new);
     }
 
     private String writeItte(MasuState state) {

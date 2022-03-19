@@ -6,7 +6,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import begyyal.commons.object.Pair;
-import begyyal.commons.object.Triple;
 import begyyal.commons.object.Vector;
 import begyyal.commons.object.collection.XGen;
 import begyyal.commons.object.collection.XList.ImmutableXList;
@@ -24,6 +23,7 @@ public class MasuState {
 	-1,
 	-1,
 	false,
+	false,
 	Collections.emptySet());
 
     public final Player player;
@@ -31,10 +31,12 @@ public class MasuState {
     public final int x;
     public final int y;
     public final boolean nariFlag;
+    public final boolean utu;
     public final Set<Pair<Integer, Integer>> rangedBy; // left=X,right=Y
+    public final int cacheHash;
 
     public MasuState(MasuState s) {
-	this(s.player, s.koma, s.x, s.y, s.nariFlag, XGen.newHashSet(s.rangedBy));
+	this(s.player, s.koma, s.x, s.y, s.nariFlag, s.utu, XGen.newHashSet(s.rangedBy));
     }
 
     public MasuState(
@@ -43,6 +45,7 @@ public class MasuState {
 	int x,
 	int y,
 	boolean nariFlag,
+	boolean utu,
 	Set<Pair<Integer, Integer>> rangedBy) {
 
 	this.player = player;
@@ -50,7 +53,9 @@ public class MasuState {
 	this.x = x;
 	this.y = y;
 	this.nariFlag = nariFlag;
+	this.utu = utu;
 	this.rangedBy = rangedBy;
+	this.cacheHash = ((31 + koma.ordinal()) * 31 + player.ordinal()) * 31 + (nariFlag ? 1 : 0);
     }
 
     public int getSuzi() {
@@ -88,13 +93,14 @@ public class MasuState {
 	return player == Player.Opponent && koma == Koma.Ou;
     }
 
-    public static MasuState emptyOf(int suzi, int dan, Set<Pair<Integer, Integer>> rangedBy) {
+    public static MasuState emptyOf(int x, int y, Set<Pair<Integer, Integer>> rangedBy) {
 	Objects.requireNonNull(rangedBy);
 	return new MasuState(
 	    Player.None,
 	    Koma.Empty,
-	    suzi,
-	    dan,
+	    x,
+	    y,
+	    false,
 	    false,
 	    rangedBy);
     }
@@ -117,9 +123,10 @@ public class MasuState {
 	var base = getTerritory(koma, nariFlag, player);
 	return isLinearRange(koma, nariFlag)
 		? SimpleCacheResolver.getAsPrivate(MasuState.class, 1,
-		    Triple.of(koma, nariFlag, player),
+		    ((31 + koma.ordinal()) * 31 + player.ordinal()) * 31 + (nariFlag ? 1 : 0),
 		    () -> XListGen.immutableOf(base.stream()
-			.flatMap(v -> Arrays.stream(v.decompose())).toArray(Vector[]::new)))
+			.flatMap(v -> Arrays.stream(v.decompose()))
+			.toArray(Vector[]::new)))
 		: base;
     }
 
@@ -140,4 +147,9 @@ public class MasuState {
 	var casted = (MasuState) o;
 	return this.isEqualWithoutRange(casted) && this.rangedBy.equals(casted.rangedBy);
     }
+
+     @Override
+     public int hashCode() {
+	 return cacheHash;
+     }
 }

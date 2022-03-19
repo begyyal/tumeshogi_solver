@@ -8,26 +8,27 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import begyyal.commons.object.collection.XGen;
-import begyyal.commons.object.collection.XList;
+import begyyal.commons.util.cache.SimpleCacheResolver;
 import begyyal.commons.util.function.XUtils;
+import begyyal.shogi.constant.PublicCacheMapId;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
+import begyyal.shogi.object.MotigomaState;
 
 public class DerivationCalculator implements Closeable {
 
     private final int numOfMoves;
     private final BanContext origin;
     private final CalculationTools tools;
-
+    
     public DerivationCalculator(
 	int numOfMoves,
 	Ban initBan,
-	XList<Koma> selfMotigoma,
-	XList<Koma> opponentMotigoma) {
+	MotigomaState[] motigoma) {
 
 	this.numOfMoves = numOfMoves;
-	this.origin = new BanContext(selfMotigoma, opponentMotigoma);
+	this.origin = new BanContext(motigoma);
 	this.tools = new CalculationTools(numOfMoves, initBan);
     }
 
@@ -38,15 +39,20 @@ public class DerivationCalculator implements Closeable {
     private BanContext r4spread(BanContext context, BanContext[] branches, int count)
 	throws InterruptedException, ExecutionException {
 
-	if (branches == null || branches.length == 0)
-	    return count % 2 == 0 ? context : null;
+	if (branches == null || branches.length == 0) {
+	    if (count % 2 == 0) {
+		var s = context.getLatestState();
+		return s.koma == Koma.Hu && s.utu ? null : context;
+	    } else
+		return null;
+	} else if (count > numOfMoves)
+	    return null;
 
 	var futureMap = XGen.<BanContext, Future<BanContext[]>>newHashMap();
-	if (count <= numOfMoves)
-	    for (var b : branches)
-		futureMap.put(b, this.tools.exe.submit(count % 2 == 0
-			? () -> this.tools.selfProcessor.spread(b)
-			: () -> this.tools.opponentProcessor.spread(b)));
+	for (var b : branches)
+	    futureMap.put(b, this.tools.exe.submit(count % 2 == 0
+		    ? () -> this.tools.selfProcessor.spread(b)
+		    : () -> this.tools.opponentProcessor.spread(b)));
 
 	BanContext result = null;
 	int depth = 0;
@@ -55,8 +61,21 @@ public class DerivationCalculator implements Closeable {
 	    .iterator();
 
 	while (i.hasNext()) {
+
 	    var e = i.next();
-	    var selected = r4spread(e.getKey(), e.getValue().get(), count + 1);
+	    var k = e.getKey();
+	    var ck = k.generateCasheKey();
+
+	    BanContext selected = SimpleCacheResolver.getAsPublic(PublicCacheMapId.context, ck);
+	    if (selected == null) {
+		selected = r4spread(k, e.getValue().get(), count + 1);
+		selected = selected == null ? BanContext.dummy : selected;
+		SimpleCacheResolver.putAsPublic(PublicCacheMapId.context, ck, selected);
+	    } else if (selected != BanContext.dummy)
+		selected = selected.copyWithModifying(k.log);
+	    if (selected == BanContext.dummy)
+		selected = null;
+
 	    if (count % 2 != 0) {
 		if (selected != null && (result == null || result.log.size() > selected.log.size()))
 		    result = selected;
