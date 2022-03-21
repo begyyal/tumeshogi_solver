@@ -6,11 +6,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import begyyal.commons.object.Pair;
 import begyyal.commons.object.Vector;
 import begyyal.commons.object.collection.XGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
+import begyyal.shogi.def.TryNari;
+import begyyal.shogi.object.MasuState.SmartMasuState;
 
 public class Ban implements Cloneable {
 
@@ -45,25 +46,25 @@ public class Ban implements Cloneable {
 
     public void markRangeBy(int i) {
 	var s = this.matrix[i];
-	if (s.koma == Koma.Empty)
+	if (s.ss.koma == Koma.Empty)
 	    return;
 	boolean haveLinearRange = MasuState.isLinearRange(s);
 	for (var v : s.getTerritory())
 	    if (haveLinearRange) {
 		for (var miniV : v.decompose())
-		    if (!markRange(miniV, s.x, s.y))
+		    if (!markRange(miniV, s.ss))
 			break;
 	    } else
-		markRange(v, s.x, s.y);
+		markRange(v, s.ss);
     }
 
-    private boolean markRange(Vector v, int x, int y) {
-	int vx = x + v.x;
-	int vy = y + v.y;
+    private boolean markRange(Vector v, SmartMasuState ss) {
+	int vx = ss.x + v.x;
+	int vy = ss.y + v.y;
 	if (!validateCoordinate(vx, vy))
 	    return false;
-	this.matrix[vx * 9 + vy].rangedBy.add(Pair.of(x, y));
-	return this.matrix[vx * 9 + vy].koma == Koma.Empty;
+	this.matrix[vx * 9 + vy].rangedBy.add(ss);
+	return this.matrix[vx * 9 + vy].ss.koma == Koma.Empty;
     }
 
     public Stream<MasuState> search(Predicate<MasuState> filter) {
@@ -80,54 +81,60 @@ public class Ban implements Cloneable {
     }
 
     public MasuState exploration(MasuState state, Vector v) {
-	int x = state.x, y = state.y;
+	int x = state.ss.x, y = state.ss.y;
 	int vx = x + v.x, vy = y + v.y;
 	return validateCoordinate(vx, vy) ? this.matrix[vx * 9 + vy] : MasuState.Invalid;
     }
 
-    public MasuState advance(int fromX, int fromY, int toX, int toY, boolean tryNari) {
+    public KihuRecord advance(int fromX, int fromY, int toX, int toY, TryNari tn) {
 
 	var from = this.matrix[fromX * 9 + fromY];
+	var fss = from.ss;
 	var to = this.matrix[toX * 9 + toY];
 
-	if (!from.nariFlag && !tryNari && !validateState(from.koma, toX, toY, from.player))
-	    return MasuState.Invalid;
+	boolean naru = tn == TryNari.Ru;
+	if (!fss.nari && !naru && !validateState(fss.koma, toX, toY, fss.player))
+	    return null;
+
+	var te = KihuRecord.resolveAdvance(to, fss.player, fss.koma, fss.nari, fromX, fromY, tn);
 
 	emptyMasu(fromX, fromY);
 
 	var newState = new MasuState(
-	    from.player,
-	    from.koma,
+	    fss.player,
+	    fss.koma,
 	    toX,
 	    toY,
-	    from.nariFlag || tryNari && (from.player == Player.Self ? to.y > 5 : to.y < 3),
-	    false,
+	    fss.nari || naru,
 	    to.rangedBy);
 	this.matrix[toX * 9 + toY] = newState;
 
 	refreshRange();
 
-	return newState;
+	return te;
     }
 
-    public MasuState deploy(Koma k, int x, int y, Player p) {
+    public KihuRecord deploy(Koma k, int x, int y, Player p) {
 
 	if (!validateState(k, x, y, p) || k == Koma.Hu && !checkNihu(p, x))
-	    return MasuState.Invalid;
+	    return null;
 
-	var state = new MasuState(p, k, x, y, false, true, this.matrix[x * 9 + y].rangedBy);
-	this.matrix[x * 9 + y] = state;
+	var state = this.matrix[x * 9 + y];
+	var te = KihuRecord.resolveDeploy(state, p, k);
+
+	var newState = new MasuState(p, k, x, y, false, state.rangedBy);
+	this.matrix[x * 9 + y] = newState;
 
 	refreshRange();
 
-	return state;
+	return te;
     }
 
     public boolean checkNihu(Player player, int x) {
-	return search(s -> s.x == x
-		&& s.koma == Koma.Hu
-		&& !s.nariFlag
-		&& s.player == player)
+	return search(s -> s.ss.x == x
+		&& s.ss.koma == Koma.Hu
+		&& !s.ss.nari
+		&& s.ss.player == player)
 		    .findAny().isEmpty();
     }
 
@@ -135,14 +142,8 @@ public class Ban implements Cloneable {
 	this.matrix[x * 9 + y] = MasuState.emptyOf(x, y, this.matrix[x * 9 + y].rangedBy);
     }
 
-    public boolean checkingSafe() {
-	return checkingSafe(search(MasuState::isOpponentOu).findFirst().get());
-    }
-
-    public boolean checkingSafe(MasuState ouState) {
-	return ouState.rangedBy.stream()
-	    .map(r -> getState(r.v1, r.v2))
-	    .allMatch(s -> s.player == Player.Opponent);
+    public boolean checkOute() {
+	return !search(MasuState::isOpponentOu).findFirst().get().checkSafe(Player.Opponent);
     }
 
     public static boolean validateState(Koma koma, int x, int y, Player p) {
@@ -161,10 +162,10 @@ public class Ban implements Cloneable {
 	int kai = 0, pnai = 9;
 	for (int i = 0; i < 81; i++) {
 	    var s = this.matrix[i];
-	    k = k * 9 + s.koma.ordinal();
+	    k = k * 9 + s.ss.koma.ordinal();
 	    if ((i + 1) % 9 == 0)
 		key[kai++] = k;
-	    pn = pn * 4 + (s.nariFlag ? 2 : 0) + s.player.hashIndex;
+	    pn = pn * 4 + (s.ss.nari ? 2 : 0) + s.ss.player.hashIndex;
 	    if ((i + 1) % 27 == 0)
 		key[pnai++] = pn;
 	}
@@ -184,7 +185,7 @@ public class Ban implements Cloneable {
 	    return false;
 	var casted = (Ban) o;
 	for (int i = 0; i < 81; i++)
-	    if (!this.matrix[0].isEqualWithoutRange(casted.matrix[i]))
+	    if (this.matrix[0].ss.hash != casted.matrix[i].ss.hash)
 		return false;
 	return true;
     }

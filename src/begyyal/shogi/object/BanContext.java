@@ -13,7 +13,7 @@ public class BanContext implements Comparable<BanContext> {
     public static final BanContext dummy = new BanContext(null);
 
     public final int id = idGen.getAndIncrement();
-    public final XList<MasuState> log;
+    public final XList<KihuRecord> log;
     public final MotigomaState[] motigoma;
     public final Ban ban;
     public final int beforeId;
@@ -23,7 +23,7 @@ public class BanContext implements Comparable<BanContext> {
     }
 
     private BanContext(
-	XList<MasuState> log,
+	XList<KihuRecord> log,
 	Ban ban,
 	MotigomaState[] motigoma,
 	int beforeId) {
@@ -36,13 +36,13 @@ public class BanContext implements Comparable<BanContext> {
 
     public BanContext branch(
 	Ban latestBan,
-	MasuState latestState,
+	KihuRecord kihuRecord,
 	Koma koma,
 	Player player,
 	boolean isAddition) {
 
 	var newContext = this.copyOf(latestBan);
-	newContext.log.add(latestState);
+	newContext.log.add(kihuRecord);
 
 	if (koma != null && koma != Koma.Empty)
 	    if (isAddition)
@@ -94,13 +94,13 @@ public class BanContext implements Comparable<BanContext> {
 	return new ContextCacheKey(key);
     }
 
-    public BanContext copyWithModifying(XList<MasuState> log) {
+    public BanContext copyWithModifying(XList<KihuRecord> log) {
 	var l = this.log.createPartialList(log.size(), this.log.size());
 	l.addAll(0, log);
 	return new BanContext(l, ban, motigoma, id);
     }
 
-    public MasuState getLatestState() {
+    public KihuRecord getLatestRecord() {
 	return this.log.isEmpty() ? null : this.log.getTip();
     }
 

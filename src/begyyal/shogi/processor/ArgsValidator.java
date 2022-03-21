@@ -21,7 +21,7 @@ public class ArgsValidator {
 
 	var ms = Arrays.stream(args.motigoma)
 	    .flatMap(m -> IntStream.range(0, m.num).mapToObj(i -> m.koma));
-	var tooMany = Stream.concat(args.initBan.matrixStream().map(s -> s.koma), ms)
+	var tooMany = Stream.concat(args.initBan.matrixStream().map(s -> s.ss.koma), ms)
 	    .filter(k -> k != Koma.Empty)
 	    .collect(XMapGen.collect4count(k -> k))
 	    .entrySet().stream()
@@ -38,14 +38,14 @@ public class ArgsValidator {
 	for (int x = 0; x < 9; x++) {
 	    int huCountX = 0, huCountY = 0;
 	    for (int y = 0; y < 9; y++) {
-		var state = ban.getState(x, y);
+		var state = ban.getState(x, y).ss;
 		if (state.koma == Koma.Empty)
 		    continue;
 		existOu = existOu || state.koma == Koma.Ou && state.player == Player.Opponent;
-		if (state.koma == Koma.Hu && !state.nariFlag
+		if (state.koma == Koma.Hu && !state.nari
 			&& (state.player == Player.Self ? ++huCountX == 2 : ++huCountY == 2))
 		    throw new IllegalArgumentException("It's 2hu.");
-		if (!state.nariFlag && !Ban.validateState(state.koma, x, y, state.player))
+		if (!state.nari && !Ban.validateState(state.koma, x, y, state.player))
 		    throw new IllegalArgumentException("There is invalid arrangement.");
 	    }
 	}
