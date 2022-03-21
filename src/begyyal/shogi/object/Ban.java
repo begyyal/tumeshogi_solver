@@ -17,7 +17,7 @@ public class Ban implements Cloneable {
     private static final AtomicInteger idGen = new AtomicInteger();
     public final int id = idGen.getAndIncrement();
 
-    // インデックスの振り順は将棋盤の読み方に倣わない。x/y座標で見る。
+    // インデックスの振り順は将棋盤の読み方に倣わない。x/y座標で見る。a
     private MasuState[] matrix;
 
     public Ban(MasuState[] matrix) {
