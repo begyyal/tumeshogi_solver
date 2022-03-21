@@ -75,7 +75,7 @@ public class ArgParser {
 
 	boolean nari = value.length() > 2 && XStrings.equals(value.substring(2, 3), "z");
 
-	return new MasuState(p, k, x, y, nari, false, XGen.newHashSet());
+	return new MasuState(p, k, x, y, nari, XGen.newHashSet());
     }
 
     public MotigomaState[] parseMotigomaStr(String arg) {
@@ -96,11 +96,11 @@ public class ArgParser {
 	    }
 	}
 
-	int si = arg.indexOf(Player.Self.id),oi = arg.indexOf(Player.Opponent.id);
-	int mi = si > oi ? si : oi; 
+	int si = arg.indexOf(Player.Self.id), oi = arg.indexOf(Player.Opponent.id);
+	int mi = si > oi ? si : oi;
 	i = 1;
-	Player p = Player.of(arg.substring(0,1));
-	
+	Player p = Player.of(arg.substring(0, 1));
+
 	while (i < arg.length()) {
 	    String str = arg.substring(i, i + 1);
 	    if (i == mi) {

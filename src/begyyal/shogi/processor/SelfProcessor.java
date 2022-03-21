@@ -28,27 +28,27 @@ public class SelfProcessor extends PlayerProcessorBase {
 	var opponentOu = ban.search(MasuState::isOpponentOu).findFirst().get();
 
 	// 駒の移動による王手(開き王手は除く)
-	var cs1 = ban.search(s -> s.player == playerType)
+	var cs1 = ban.search(s -> s.ss.player == playerType)
 	    .flatMap(from -> spreadMasuState(from, ban)
 		.filter(to -> SimpleCacheResolver
-		    .getAsPrivate(this.getClass(), 1, from.cacheHash, () -> {
+		    .getAsPrivate(this.getClass(), 1, from.ss.hash, () -> {
 			var dt = XGen.newHashSet(from.getDecomposedTerritory());
-			if (!from.nariFlag)
+			if (!from.ss.nari)
 			    dt.addAll(
-				MasuState.getDecomposedTerritory(from.koma, true, playerType));
+				MasuState.getDecomposedTerritory(from.ss.koma, true, playerType));
 			return dt;
 		    }).contains(to.getVectorTo(opponentOu)))
-		.flatMap(to -> createBranchStream(to.y, from)
-		    .map(tryNari -> {
+		.flatMap(to -> createBranchStream(to.ss.y, from.ss)
+		    .map(tn -> {
 			var newBan = ban.clone();
-			var newState = newBan.advance(from.x, from.y, to.x, to.y, tryNari);
-			return newState != MasuState.Invalid && !newBan.checkingSafe()
-				? context.branch(newBan, newState, to.koma, playerType, true)
+			var te = newBan.advance(from.ss.x, from.ss.y, to.ss.x, to.ss.y, tn);
+			return te != null && newBan.checkOute()
+				? context.branch(newBan, te, to.ss.koma, playerType, true)
 				: null;
 		    })));
 
 	// 開き王手
-	var cs2 = ban.search(s -> s.player == playerType && MasuState.isLinearRange(s))
+	var cs2 = ban.search(s -> s.ss.player == playerType && MasuState.isLinearRange(s))
 	    .map(s -> {
 		var v = s.getVectorTo(opponentOu);
 		if (Math.abs(v.x) <= 1 && Math.abs(v.y) <= 1
@@ -60,27 +60,28 @@ public class SelfProcessor extends PlayerProcessorBase {
 		    var result = ban.exploration(s, miniV);
 		    if (result == MasuState.Invalid)
 			break;
-		    if (result.koma != Koma.Empty)
-			if (obstruction == null) {
-			    if (result.player == playerType) {
-				obstruction = result;
-			    } else
-				break;
-			} else if (result.isOpponentOu()) {
-			    return obstruction;
+		    if (result.ss.koma == Koma.Empty)
+			continue;
+		    if (obstruction == null) {
+			if (result.ss.player == playerType) {
+			    obstruction = result;
 			} else
 			    break;
+		    } else if (result.isOpponentOu()) {
+			return obstruction;
+		    } else
+			break;
 		}
 		return null;
 	    })
 	    .filter(s -> s != null)
 	    .flatMap(obs -> spreadMasuState(obs, ban)
-		.flatMap(to -> createBranchStream(to.y, obs)
-		    .map(tryNari -> {
+		.flatMap(to -> createBranchStream(to.ss.y, obs.ss)
+		    .map(tn -> {
 			var newBan = ban.clone();
-			var newState = newBan.advance(obs.x, obs.y, to.x, to.y, tryNari);
-			return newState != MasuState.Invalid && !newBan.checkingSafe()
-				? context.branch(newBan, newState, to.koma, playerType, true)
+			var te = newBan.advance(obs.ss.x, obs.ss.y, to.ss.x, to.ss.y, tn);
+			return te != null && newBan.checkOute()
+				? context.branch(newBan, te, to.ss.koma, playerType, true)
 				: null;
 		    })));
 
@@ -90,12 +91,12 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .flatMap(m -> {
 		var dt = MasuState.getDecomposedTerritory(m.koma, false, playerType);
 		return ban
-		    .search(s -> s.koma == Koma.Empty && dt.contains(s.getVectorTo(opponentOu)))
+		    .search(s -> s.ss.koma == Koma.Empty && dt.contains(s.getVectorTo(opponentOu)))
 		    .map(to -> {
 			var newBan = ban.clone();
-			var newState = newBan.deploy(m.koma, to.x, to.y, playerType);
-			return newState != MasuState.Invalid && !newBan.checkingSafe()
-				? context.branch(newBan, newState, m.koma, playerType, false)
+			var te = newBan.deploy(m.koma, to.ss.x, to.ss.y, playerType);
+			return te != null && newBan.checkOute()
+				? context.branch(newBan, te, m.koma, playerType, false)
 				: null;
 		    });
 	    });
@@ -103,7 +104,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	// 駒移動系は空き王手と他で重複し得るのでdistinctする
 	var cs4 = Stream.concat(cs1, cs2)
 	    .filter(c -> c != null)
-	    .collect(Collectors.toMap(c -> c.getLatestState(), c -> c, (c1, c2) -> c1))
+	    .collect(Collectors.toMap(c -> c.getLatestRecord(), c -> c, (c1, c2) -> c1))
 	    .values()
 	    .stream();
 	return Stream.concat(cs4, cs3).filter(c -> c != null).toArray(BanContext[]::new);

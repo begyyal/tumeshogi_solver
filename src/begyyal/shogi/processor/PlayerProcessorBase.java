@@ -2,11 +2,12 @@ package begyyal.shogi.processor;
 
 import java.util.stream.Stream;
 
-import begyyal.commons.object.Pair;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
+import begyyal.shogi.def.TryNari;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.MasuState;
+import begyyal.shogi.object.MasuState.SmartMasuState;
 
 public abstract class PlayerProcessorBase {
 
@@ -17,22 +18,21 @@ public abstract class PlayerProcessorBase {
     }
 
     protected Stream<MasuState> spreadMasuState(MasuState from, Ban ban) {
-	return ban.search(s -> s.rangedBy.contains(Pair.of(from.x, from.y)))
-	    .filter(s -> this.canAdvanceTo(s));
+	return ban.search(s -> s.rangedBy.contains(from.ss)).filter(s -> this.canAdvanceTo(s));
     }
 
     protected boolean canAdvanceTo(MasuState state) {
 	return state != MasuState.Invalid
-		&& (state.koma == Koma.Empty || state.player != getPlayerType());
+		&& (state.ss.koma == Koma.Empty || state.ss.player != getPlayerType());
     }
 
     // 成ってもいいし成らなくてもいい
-    protected Stream<Boolean> createBranchStream(int y, MasuState from) {
-	return !from.nariFlag
+    protected Stream<TryNari> createBranchStream(int y, SmartMasuState from) {
+	return !from.nari
 		&& (getPlayerType() == Player.Self ? y > 5 : y < 3)
 		&& from.koma.canNari()
-			? Stream.of(false, true)
-			: Stream.of(false);
+			? Stream.of(TryNari.Razu, TryNari.Ru)
+			: Stream.of(TryNari.Rezu);
     }
 
     protected abstract Player getPlayerType();

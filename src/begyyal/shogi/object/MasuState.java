@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
-import begyyal.commons.object.Pair;
 import begyyal.commons.object.Vector;
 import begyyal.commons.object.collection.XGen;
 import begyyal.commons.object.collection.XList.ImmutableXList;
@@ -23,20 +22,14 @@ public class MasuState {
 	-1,
 	-1,
 	false,
-	false,
 	Collections.emptySet());
 
-    public final Player player;
-    public final Koma koma;
-    public final int x;
-    public final int y;
-    public final boolean nariFlag;
-    public final boolean utu;
-    public final Set<Pair<Integer, Integer>> rangedBy; // left=X,right=Y
-    public final int cacheHash;
+    public final SmartMasuState ss;
+    public final Set<SmartMasuState> rangedBy;
 
     public MasuState(MasuState s) {
-	this(s.player, s.koma, s.x, s.y, s.nariFlag, s.utu, XGen.newHashSet(s.rangedBy));
+	this.ss = s.ss;
+	this.rangedBy = XGen.newHashSet(s.rangedBy);
     }
 
     public MasuState(
@@ -45,62 +38,39 @@ public class MasuState {
 	int x,
 	int y,
 	boolean nariFlag,
-	boolean utu,
-	Set<Pair<Integer, Integer>> rangedBy) {
+	Set<SmartMasuState> rangedBy) {
 
-	this.player = player;
-	this.koma = koma;
-	this.x = x;
-	this.y = y;
-	this.nariFlag = nariFlag;
-	this.utu = utu;
+	this.ss = new SmartMasuState(player, koma, x, y, nariFlag);
 	this.rangedBy = rangedBy;
-	this.cacheHash = ((31 + koma.ordinal()) * 31 + player.ordinal()) * 31 + (nariFlag ? 1 : 0);
-    }
-
-    public int getSuzi() {
-	return 9 - x;
-    }
-
-    public int getDan() {
-	return 9 - y;
     }
 
     public ImmutableXList<Vector> getTerritory() {
-	return getTerritory(this.koma, this.nariFlag, this.player);
+	return getTerritory(this.ss.koma, this.ss.nari, this.ss.player);
     }
 
     public ImmutableXList<Vector> getDecomposedTerritory() {
-	return getDecomposedTerritory(this.koma, this.nariFlag, this.player);
+	return getDecomposedTerritory(this.ss.koma, this.ss.nari, this.ss.player);
     }
 
     public Vector getVectorTo(MasuState s) {
-	return new Vector(s.x - this.x, s.y - this.y);
-    }
-
-    public boolean isEqualXY(MasuState s) {
-	return s.x == this.x && s.y == this.y;
-    }
-
-    public boolean isEqualWithoutRange(MasuState s) {
-	return this.isEqualXY(s)
-		&& this.koma == s.koma
-		&& this.player == s.player
-		&& this.nariFlag == s.nariFlag;
+	return new Vector(s.ss.x - this.ss.x, s.ss.y - this.ss.y);
     }
 
     public boolean isOpponentOu() {
-	return player == Player.Opponent && koma == Koma.Ou;
+	return ss.player == Player.Opponent && ss.koma == Koma.Ou;
     }
 
-    public static MasuState emptyOf(int x, int y, Set<Pair<Integer, Integer>> rangedBy) {
+    public boolean checkSafe(Player p) {
+	return this.rangedBy.stream().allMatch(s -> s.player == p);
+    }
+
+    public static MasuState emptyOf(int x, int y, Set<SmartMasuState> rangedBy) {
 	Objects.requireNonNull(rangedBy);
 	return new MasuState(
 	    Player.None,
 	    Koma.Empty,
 	    x,
 	    y,
-	    false,
 	    false,
 	    rangedBy);
     }
@@ -131,7 +101,7 @@ public class MasuState {
     }
 
     public static boolean isLinearRange(MasuState s) {
-	return isLinearRange(s.koma, s.nariFlag);
+	return isLinearRange(s.ss.koma, s.ss.nari);
     }
 
     public static boolean isLinearRange(Koma koma, boolean nariFlag) {
@@ -145,11 +115,61 @@ public class MasuState {
 	if (!(o instanceof MasuState))
 	    return false;
 	var casted = (MasuState) o;
-	return this.isEqualWithoutRange(casted) && this.rangedBy.equals(casted.rangedBy);
+	return this.ss.hash == casted.ss.hash && this.rangedBy.equals(casted.rangedBy);
     }
 
-     @Override
-     public int hashCode() {
-	 return cacheHash;
-     }
+    @Override
+    public int hashCode() {
+	return ss.hash;
+    }
+
+    public class SmartMasuState {
+
+	public final Player player;
+	public final Koma koma;
+	public final int x;
+	public final int y;
+	public final boolean nari;
+	public final int hash;
+
+	private SmartMasuState(SmartMasuState s) {
+	    this(s.player, s.koma, s.x, s.y, s.nari);
+	}
+
+	private SmartMasuState(
+	    Player player,
+	    Koma koma,
+	    int x,
+	    int y,
+	    boolean nariFlag) {
+
+	    this.player = player;
+	    this.koma = koma;
+	    this.x = x;
+	    this.y = y;
+	    this.nari = nariFlag;
+	    this.hash = ((((9 + x)
+		    * 9 + y)
+		    * 9 + koma.ordinal())
+		    * 3 + player.ordinal())
+		    * 2 + (nariFlag ? 1 : 0);
+	}
+
+	public boolean isEqualXY(SmartMasuState s) {
+	    return s.x == this.x && s.y == this.y;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+	    if (!(o instanceof SmartMasuState))
+		return false;
+	    var casted = (SmartMasuState) o;
+	    return this.hash == casted.hash;
+	}
+
+	@Override
+	public int hashCode() {
+	    return hash;
+	}
+    }
 }
