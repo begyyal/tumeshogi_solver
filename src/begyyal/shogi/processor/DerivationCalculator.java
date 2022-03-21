@@ -11,7 +11,6 @@ import begyyal.commons.object.collection.XGen;
 import begyyal.commons.util.cache.SimpleCacheResolver;
 import begyyal.commons.util.function.XUtils;
 import begyyal.shogi.constant.PublicCacheMapId;
-import begyyal.shogi.def.KihuOpt;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.BanContext;
@@ -22,7 +21,7 @@ public class DerivationCalculator implements Closeable {
     private final int numOfMoves;
     private final BanContext origin;
     private final CalculationTools tools;
-    
+
     public DerivationCalculator(
 	int numOfMoves,
 	Ban initBan,
@@ -43,7 +42,7 @@ public class DerivationCalculator implements Closeable {
 	if (branches == null || branches.length == 0) {
 	    if (count % 2 == 0) {
 		var r = context.getLatestRecord();
-		return r.koma == Koma.Hu && r.opt == KihuOpt.Utu ? null : context;
+		return r.koma == Koma.Hu && r.deploy ? null : context;
 	    } else
 		return null;
 	} else if (count > numOfMoves)
