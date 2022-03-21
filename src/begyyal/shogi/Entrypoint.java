@@ -1,7 +1,6 @@
 package begyyal.shogi;
 
 import begyyal.shogi.log.TSLogger;
-import begyyal.shogi.object.Args;
 import begyyal.shogi.processor.ArgParser;
 import begyyal.shogi.processor.ArgsValidator;
 import begyyal.shogi.processor.MainSolver;
@@ -27,23 +26,8 @@ public class Entrypoint {
     }
 
     private static MainSolver preProcess(String[] plainArgs) {
-
-	if (plainArgs.length < 2)
-	    throw new IllegalArgumentException("Arguments lack.");
-
-	var ap = new ArgParser();
-	var motigomaStr = ap.parseTailArguments(plainArgs, 2);
-
-	var numStr = plainArgs[0];
-	var banStr = plainArgs[1];
-
-	var args = new Args(
-	    ap.parseNumStr(numStr),
-	    ap.parseBanStr(banStr),
-	    ap.parseMotigomaStr(motigomaStr));
-
+	var args = new ArgParser().exe(plainArgs);
 	new ArgsValidator().validate(args);
-
 	return new MainSolver(args);
     }
 }
