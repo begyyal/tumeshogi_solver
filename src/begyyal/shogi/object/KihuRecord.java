@@ -16,6 +16,7 @@ public class KihuRecord {
     public final KihuRel rel;
     public final KihuAct act;
     public final KihuOpt opt;
+    public final boolean deploy;
     public final int hash;
 
     private KihuRecord(
@@ -24,7 +25,8 @@ public class KihuRecord {
 	boolean nari,
 	KihuRel rel,
 	KihuAct act,
-	KihuOpt opt) {
+	KihuOpt opt,
+	boolean deploy) {
 
 	this.suzi = 9 - x;
 	this.dan = 9 - y;
@@ -33,6 +35,7 @@ public class KihuRecord {
 	this.rel = rel;
 	this.act = act;
 	this.opt = opt;
+	this.deploy = deploy;
 	this.hash = (((((9 + x)
 		* 9 + y)
 		* 9 + koma.ordinal())
@@ -55,10 +58,10 @@ public class KihuRecord {
 		    && ss.nari == nari
 		    && ss.player == player
 		    && (ss.x != fromX || ss.y != fromY)))
-	    return new KihuRecord(s.ss.x, s.ss.y, koma, nari, null, null, tn.kihu);
+	    return new KihuRecord(s.ss.x, s.ss.y, koma, nari, null, null, tn.kihu, false);
 
 	if (fromY - s.ss.y < 0 && fromX == s.ss.x && koma != Koma.Hisha && koma != Koma.Kaku)
-	    return new KihuRecord(s.ss.x, s.ss.y, koma, nari, null, KihuAct.Sugu, tn.kihu);
+	    return new KihuRecord(s.ss.x, s.ss.y, koma, nari, null, KihuAct.Sugu, tn.kihu, false);
 
 	var ite = s.rangedBy.stream()
 	    .filter(ss -> ss.koma == koma
@@ -82,7 +85,7 @@ public class KihuRecord {
 	    act = fromY - s.ss.y < 0 ? KihuAct.Agaru
 		    : fromY - s.ss.y > 0 ? KihuAct.Hiku : KihuAct.Yoru;
 
-	return new KihuRecord(s.ss.x, s.ss.y, koma, nari, rel, act, tn.kihu);
+	return new KihuRecord(s.ss.x, s.ss.y, koma, nari, rel, act, tn.kihu, false);
     }
 
     public static KihuRecord resolveDeploy(
@@ -91,8 +94,8 @@ public class KihuRecord {
 	Koma koma) {
 	return s.rangedBy.stream()
 	    .anyMatch(ss -> ss.koma == koma && ss.player == player && !ss.nari)
-		    ? new KihuRecord(s.ss.x, s.ss.y, koma, false, null, null, KihuOpt.Utu)
-		    : new KihuRecord(s.ss.x, s.ss.y, koma, false, null, null, null);
+		    ? new KihuRecord(s.ss.x, s.ss.y, koma, false, null, null, KihuOpt.Utu, true)
+		    : new KihuRecord(s.ss.x, s.ss.y, koma, false, null, null, null, true);
     }
 
     @Override
