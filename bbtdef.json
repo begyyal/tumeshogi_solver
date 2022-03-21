@@ -5,17 +5,6 @@
 	"resource": "resources/cmdbbt/",
 	"operations": [
 		{
-			"name": "1te_1",
-			"command": "java -jar ts_solver.jar 1 31xfz11yb12yh xe1ya18b3c4d4e3f1g2",
-			"exitCode": 0,
-			"expected": [
-				{
-					"act": "console-output",
-					"value": "Self -> 13Kin"
-				}
-			]
-		},
-		{
 			"name": "1te_2",
 			"command": "java -jar ts_solver.jar 1 31xfz11ye12yh23ya xd1ya17b4c4d3e3f1g2",
 			"exitCode": 0,
