@@ -41,7 +41,7 @@ public class Entrypoint {
 	    ap.parseNumStr(numStr),
 	    ap.parseBanStr(banStr),
 	    ap.parseMotigomaStr(motigomaStr));
-	
+
 	new ArgsValidator().validate(args);
 
 	return new MainSolver(args);
