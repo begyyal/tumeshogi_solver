@@ -6,279 +6,279 @@
 	"operations": [
 		{
 			"name": "1te_1",
-			"command": "java -jar ts_solver.jar 1 31xfz11yb12yh xe1ya18b3c4d4e3f1g2",
+			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 1 31xfz11yb12yh xe1ya18b3c4d4e3f1g2",
 			"exitCode": 0,
 			"expected": [
 				{
 					"act": "console-output",
-					"value": "Self -> 13Kin"
+					"value": "先手：１３金"
 				}
 			]
 		},
 		{
 			"name": "1te_2",
-			"command": "java -jar ts_solver.jar 1 31xfz11ye12yh23ya xd1ya17b4c4d3e3f1g2",
+			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 1 31xfz11ye12yh23ya xd1ya17b4c4d3e3f1g2",
 			"exitCode": 0,
 			"expected": [
 				{
 					"act": "console-output",
-					"value": "Self -> 13Gin"
+					"value": "先手：１３銀"
 				}
 			]
 		},
 		{
 			"name": "1te_3",
-			"command": "java -jar ts_solver.jar 1 31xfz11yb12yh23yf xc1ya18b3c3d4e4g2",
+			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 1 31xfz11yb12yh23yf xc1ya18b3c3d4e4g2",
 			"exitCode": 0,
 			"expected": [
 				{
 					"act": "console-output",
-					"value": "Self -> 24Keima"
+					"value": "先手：２４桂"
 				}
 			]
 		},
 		{
 			"name": "3te_1",
-			"command": "java -jar ts_solver.jar 3 31xfz11yb12yh34ya14ya xd1ya16b3c4d3e4f1g2",
+			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 3 31xfz11yb12yh34ya14ya xd1ya16b3c4d3e4f1g2",
 			"exitCode": 0,
 			"expected": [
 				{
 					"act": "console-output",
 					"value": [
-						"Self -> 13Gin",
-						"Opponent -> 23Ou",
-						"Self -> 22KakuNari"
+						"先手：１３銀",
+						"後手：２３玉",
+						"先手：２２馬"
 					]
 				}
 			]
 		},
 		{
 			"name": "3te_2",
-			"command": "java -jar ts_solver.jar 3 31xfz11yb12yh13ya24ya34ya xd1ya15b3c4d3e4f1g2",
+			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 3 31xfz11yb12yh13ya24ya34ya xd1ya15b3c4d3e4f1g2",
 			"exitCode": 0,
 			"expected": [
 				{
 					"act": "console-output",
 					"value": [
-						"Self -> 21Gin",
-						"Opponent -> 23Ou",
-						"Self -> 32KakuNari"
+						"先手：２１銀",
+						"後手：２３玉",
+						"先手：３２馬"
 					]
 				}
 			]
 		},
 		{
 			"name": "3te_3",
-			"command": "java -jar ts_solver.jar 3 31xfz11yb12yh33yg44ya xe1f1ya17b3c4d4e3g1",
+			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 3 31xfz11yb12yh33yg44ya xe1f1ya17b3c4d4e3g1",
 			"exitCode": 0,
 			"expected": [
 				{
 					"act": "console-output",
 					"value": [
-						"Self -> 34Kaku",
-						"Opponent -> 34Hisha",
-						"Self -> 13Kin"
+						"先手：３４角",
+						"後手：同飛",
+						"先手：１３金"
 					]
 				}
 			]
 		},
 		{
 			"name": "5te_1",
-			"command": "java -jar ts_solver.jar 5 33xgz23xd32ya13yh15yfz xc1ya17b4c3d3e4f1g1",
+			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 5 33xgz23xd32ya13yh15yfz xc1ya17b4c3d3e4f1g1",
 			"exitCode": 0,
 			"expected": [
 				{
 					"act": "console-output",
 					"value": [
-						"Self -> 25Keima",
-						"Opponent -> 25KakuNari",
-						"Self -> 22Gin",
-						"Opponent -> 14Ou",
-						"Self -> 13HishaNari"
+						"先手：２５桂",
+						"後手：同馬",
+						"先手：２２銀不成",
+						"後手：１４玉",
+						"先手：１３龍"
 					]
 				}
 			]
 		},
 		{
 			"name": "5te_2",
-			"command": "java -jar ts_solver.jar 5 41xg31xfz33yd23ya11yb12yh15xa25xa ya15b3c4d3e4f1g1",
+			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 5 41xg31xfz33yd23ya11yb12yh15xa25xa ya15b3c4d3e4f1g1",
 			"exitCode": 0,
 			"expected": [
 				{
 					"act": "console-output",
 					"value": [
-						"Self -> 13KakuNari",
-						"Opponent -> 13Ou",
-						"Self -> 11HishaNari",
-						"Opponent -> 12Hu",
-						"Self -> 14Kyousha"
+						"先手：１３馬",
+						"後手：同玉",
+						"先手：１１飛成",
+						"後手：１２歩",
+						"先手：１４香"
 					]
 				}
 			]
 		},
 		{
 			"name": "5te_3",
-			"command": "java -jar ts_solver.jar 5 33xd23yh34ya14ya12yf xb1c1g1ya16b3c3d3e4f1g1",
+			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 5 33xd23yh34ya14ya12yf xb1c1g1ya16b3c3d3e4f1g1",
 			"exitCode": 0,
 			"expected": [
 				{
 					"act": "console-output",
 					"value": [
-						"Self -> 13Hisha",
-						"Opponent -> 13Ou",
-						"Self -> 25Keima",
-						"Opponent -> 23Ou",
-						"Self -> 24Kyousha"
+						"先手：１３飛",
+						"後手：同玉",
+						"先手：２５桂",
+						"後手：２３玉",
+						"先手：２４香"
 					]
 				}
 			]
 		},
 		{
 			"name": "5te_4",
-			"command": "java -jar ts_solver.jar 5 55xfz44xgz11xaz52ygz34ya22yh xc1ya16b4c3d4e4f1",
+			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 5 55xfz44xgz11xaz52ygz34ya22yh xc1ya16b4c3d4e4f1",
 			"exitCode": 0,
 			"expected": [
 				{
 					"act": "console-output",
 					"value": [
-						"Self -> 33HishaNari",
-						"Opponent -> 11Ou",
-						"Self -> 32HishaNari",
-						"Opponent -> 55HishaNari",
-						"Self -> 23Keima"
+						"先手：３３龍",
+						"後手：１１玉",
+						"先手：３２龍",
+						"後手：５５龍",
+						"先手：２３桂"
 					]
 				}
 			]
 		},
 		{
 			"name": "5te_5",
-			"command": "java -jar ts_solver.jar 5 24xd41yf43ya31yb32yh xd1g1ya17b3c4d2e4f1g1",
+			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 5 24xd41yf43ya31yb32yh xd1g1ya17b3c4d2e4f1g1",
 			"exitCode": 0,
 			"expected": [
 				{
 					"act": "console-output",
 					"value": [
-						"Self -> 12Hisha",
-						"Opponent -> 21Ou",
-						"Self -> 22Gin",
-						"Opponent -> 32Ou",
-						"Self -> 33GinNari"
+						"先手：１２飛",
+						"後手：２１玉",
+						"先手：２２銀",
+						"後手：３２玉",
+						"先手：３３銀上成"
 					]
 				}
 			]
 		},
 		{
 			"name": "5te_6",
-			"command": "java -jar ts_solver.jar 5 54xf11yd21yh31ya12ya32ye xe1c1g1ya16b4c3d3e1f1g1",
+			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 5 54xf11yd21yh31ya12ya32ye xe1c1g1ya16b4c3d3e1f1g1",
 			"exitCode": 0,
 			"expected": [
 				{
 					"act": "console-output",
 					"value": [
-						"Self -> 23Hisha",
-						"Opponent -> 22Gin",
-						"Self -> 33Keima",
-						"Opponent -> 11Ou",
-						"Self -> 21Kin"
+						"先手：２３飛",
+						"後手：２２銀",
+						"先手：３３桂",
+						"後手：１１玉",
+						"先手：２１金"
 					]
 				}
 			]
 		},
 		{
 			"name": "7te_1",
-			"command": "java -jar ts_solver.jar 7 55xf43xd21xaz24yh13yc xg1e1ya17b4c3d3e3f1g1",
+			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 7 55xf43xd21xaz24yh13yc xg1e1ya17b4c3d3e3f1g1",
 			"exitCode": 0,
 			"expected": [
 				{
 					"act": "console-output",
 					"value": [
-						"Self -> 22Hisha",
-						"Opponent -> 14Ou",
-						"Self -> 23HishaNari",
-						"Opponent -> 23Ou",
-						"Self -> 33KakuNari",
-						"Opponent -> 33Ou",
-						"Self -> 34Kin"
+						"先手：２２飛",
+						"後手：１４玉",
+						"先手：２３飛成",
+						"後手：同玉",
+						"先手：３３角成",
+						"後手：同玉",
+						"先手：３４金"
 					]
 				}
 			]
 		},
 		{
 			"name": "7te_2",
-			"command": "java -jar ts_solver.jar 7 11yb22yh31yf41ya33ya24xa25ya15ya35xd xf1d1ya13b3c4d2e4g2",
+			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 7 11yb22yh31yf41ya33ya24xa25ya15ya35xd xf1d1ya13b3c4d2e4g2",
 			"exitCode": 0,
 			"expected": [
 				{
 					"act": "console-output",
 					"value": [
-						"Self -> 23Gin",
-						"Opponent -> 13Ou",
-						"Self -> 14Gin",
-						"Opponent -> 22Ou",
-						"Self -> 23HuNari",
-						"Opponent -> 21Ou",
-						"Self -> 98Kaku"
+						"先手：２３銀",
+						"後手：１３玉",
+						"先手：１４銀",
+						"後手：２２玉",
+						"先手：２３歩成",
+						"後手：２１玉",
+						"先手：９８角"
 					]
 				}
 			]
 		},
 		{
 			"name": "7te_3",
-			"command": "java -jar ts_solver.jar 7 11ye21yc12yh32yc42yb14ya24xe35xa44xfz xg1a1ya15b3c2d4e2g1f1",
+			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 7 11ye21yc12yh32yc42yb14ya24xe35xa44xfz xg1a1ya15b3c2d4e2g1f1",
 			"exitCode": 0,
 			"expected": [
 				{
 					"act": "console-output",
 					"value": [
-						"Self -> 13Hu",
-						"Opponent -> 13Keima",
-						"Self -> 23Kin",
-						"Opponent -> 23Ou",
-						"Self -> 22Hisha",
-						"Opponent -> 22Kin",
-						"Self -> 34KakuNari"
+						"先手：１３歩",
+						"後手：同桂",
+						"先手：２３金",
+						"後手：同玉",
+						"先手：２２飛",
+						"後手：同金",
+						"先手：３４馬"
 					]
 				}
 			]
 		},
 		{
 			"name": "9te_1",
-			"command": "java -jar ts_solver.jar 9 14yb24yc34yc44yc54yc15yh66xg xg1e4ya18b3d4f2",
+			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 9 14yb24yc34yc44yc54yc15yh66xg xg1e4ya18b3d4f2",
 			"exitCode": 0,
 			"expected": [
 				{
 					"act": "console-output",
 					"value": [
-						"Self -> 25Kin",
-						"Opponent -> 25Ou",
-						"Self -> 35Kin",
-						"Opponent -> 35Ou",
-						"Self -> 45Kin",
-						"Opponent -> 45Ou",
-						"Self -> 55Kin",
-						"Opponent -> 55Ou",
-						"Self -> 65Hisha"
+						"先手：２５金",
+						"後手：同玉",
+						"先手：３５金",
+						"後手：同玉",
+						"先手：４５金",
+						"後手：同玉",
+						"先手：５５金",
+						"後手：同玉",
+						"先手：６５飛打"
 					]
 				}
 			]
 		},
 		{
 			"name": "9te_2",
-			"command": "java -jar ts_solver.jar 9 21xd31xe32xd42xgz22yh13yg24ye xd1ya18b4c4d1e2f2",
+			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 9 21xd31xe32xd42xgz22yh13yg24ye xd1ya18b4c4d1e2f2",
 			"exitCode": 0,
 			"expected": [
 				{
 					"act": "console-output",
 					"value": [
-						"Self -> 23Gin",
-						"Opponent -> 23Kin",
-						"Self -> 41GinNari",
-						"Opponent -> 11Ou",
-						"Self -> 12Gin",
-						"Opponent -> 12Hisha",
-						"Self -> 21Kin",
-						"Opponent -> 21Ou",
-						"Self -> 31HishaNari"
+						"先手：２３銀打",
+						"後手：同金",
+						"先手：４１銀成",
+						"後手：１１玉",
+						"先手：１２銀",
+						"後手：同飛",
+						"先手：２１金",
+						"後手：同玉",
+						"先手：３１龍"
 					]
 				}
 			]
