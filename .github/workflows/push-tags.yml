@@ -2,7 +2,7 @@ name: Update tag
 
 on:
   push:
-    tags: [ v1.* ]
+    tags: [ v2.* ]
 
 jobs:
 
@@ -21,8 +21,8 @@ jobs:
 
     - name: Update tag
       run: |
-        git tag -a v1 -m "BY-CI"
-        git push origin v1 -f
+        git tag -a v2 -m "BY-CI"
+        git push origin v2 -f
 
     - name: Post tweet
       run: |
