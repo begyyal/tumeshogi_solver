@@ -1,13 +1,13 @@
 - **品質担保**  
-[![Java CI with Gradle](https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-develop.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-develop.yml)
-[![Update tag](https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-tags.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-tags.yml)
+[![Java CI with Gradle](https://github.com/begyyal/tumeshogi_solver_exe/actions/workflows/push-develop.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver_exe/actions/workflows/push-develop.yml)
+[![Update tag](https://github.com/begyyal/tumeshogi_solver_exe/actions/workflows/push-tags.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver_exe/actions/workflows/push-tags.yml)
 
 - **開発補助**  
-[![Save snapshot of PR](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr1.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr1.yml)
-[![Test by sync PR](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr2.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr2.yml)
-[![Post processing of PR](https://github.com/begyyal/tumeshogi_solver/actions/workflows/closed-pr.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/closed-pr.yml)  
-[![Create feature branch](https://github.com/begyyal/tumeshogi_solver/actions/workflows/create-feature.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/create-feature.yml)
-[![Delete feature branch](https://github.com/begyyal/tumeshogi_solver/actions/workflows/delete-feature.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/delete-feature.yml)  
+[![Save snapshot of PR](https://github.com/begyyal/tumeshogi_solver_exe/actions/workflows/sync-pr1.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver_exe/actions/workflows/sync-pr1.yml)
+[![Test by sync PR](https://github.com/begyyal/tumeshogi_solver_exe/actions/workflows/sync-pr2.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver_exe/actions/workflows/sync-pr2.yml)
+[![Post processing of PR](https://github.com/begyyal/tumeshogi_solver_exe/actions/workflows/closed-pr.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver_exe/actions/workflows/closed-pr.yml)  
+[![Create feature branch](https://github.com/begyyal/tumeshogi_solver_exe/actions/workflows/create-feature.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver_exe/actions/workflows/create-feature.yml)
+[![Delete feature branch](https://github.com/begyyal/tumeshogi_solver_exe/actions/workflows/delete-feature.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver_exe/actions/workflows/delete-feature.yml)  
 
 # 概要
 
@@ -187,7 +187,7 @@ x4231-gz---
     - 〇 : 最遅でも1分以内
     - △ : 難度次第では1分を大幅に超過してしまう
     - ？ : 未検証
-  - [v2.0.0](https://github.com/begyyal/tumeshogi_solver/releases/tag/v1) 時点
+  - [v2.0.0](https://github.com/begyyal/tumeshogi_solver_exe/releases/tag/v1) 時点
     - 7手詰め迄 : ◎
     - 9手詰め : ◎
     - 11手詰め以降 : ？
