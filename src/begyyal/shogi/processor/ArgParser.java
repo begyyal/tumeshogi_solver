@@ -1,12 +1,15 @@
 package begyyal.shogi.processor;
 
 import begyyal.commons.constant.Strs;
+import begyyal.commons.object.XBool;
 import begyyal.commons.object.collection.XGen;
+import begyyal.commons.object.collection.XList.XListGen;
 import begyyal.commons.util.function.XIntegers;
 import begyyal.commons.util.function.XStrings;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
 import begyyal.shogi.log.TSLogger;
+import begyyal.shogi.object.Args;
 import begyyal.shogi.object.Ban;
 import begyyal.shogi.object.MasuState;
 import begyyal.shogi.object.MotigomaState;
@@ -19,7 +22,36 @@ public class ArgParser {
     public ArgParser() {
     }
 
-    public int parseNumStr(String arg) {
+    public Args exe(String[] plainArgs) {
+
+	var translate = XBool.newi();
+	var argStrs = XListGen.of(plainArgs).stream()
+	    .filter(a -> {
+		boolean opt = false;
+		if (opt = a.startsWith(Strs.hyphen))
+		    for (int i = 0; i < a.length() - 1; i++) {
+			var c = a.charAt(i);
+			if (c == 't')
+			    translate.set(true);
+			else if (c == 'd')
+			    TSLogger.availability = true;
+		    }
+		return !opt;
+	    }).toArray(String[]::new);
+
+	if (argStrs.length < 2)
+	    throw new IllegalArgumentException("Arguments lack.");
+
+	var num = this.parseNumStr(argStrs[0]);
+	var ban = this.parseBanStr(argStrs[1]);
+	var motigoma = argStrs.length == 2
+		? new MotigomaState[14]
+		: this.parseMotigomaStr(argStrs[2]);
+
+	return new Args(num, ban, motigoma, translate.get());
+    }
+
+    private int parseNumStr(String arg) {
 
 	if (!XIntegers.checkIfParsable(arg))
 	    throw new IllegalArgumentException(
@@ -33,7 +65,7 @@ public class ArgParser {
 	return numOfMoves;
     }
 
-    public Ban parseBanStr(String arg) {
+    private Ban parseBanStr(String arg) {
 
 	if (!arg.matches(banArgRegex))
 	    throw new IllegalArgumentException("Ban argument format is invalid.");
@@ -53,7 +85,7 @@ public class ArgParser {
 	    int y = 9 - Integer.valueOf(masu.substring(1, 2));
 	    if (matrix[x * 9 + y] != null)
 		throw new IllegalArgumentException(
-		    "The masu states of [" + (9 - x) + "-" + (9 - y) + "] are duplicated.");
+		    "The masu states of [" + (9 - x) + Strs.hyphen + (9 - y) + "] are duplicated.");
 	    matrix[x * 9 + y] = parseMasuStateStr(masu.substring(2), x, y);
 	}
 
@@ -78,7 +110,7 @@ public class ArgParser {
 	return new MasuState(p, k, x, y, nari, XGen.newHashSet());
     }
 
-    public MotigomaState[] parseMotigomaStr(String arg) {
+    private MotigomaState[] parseMotigomaStr(String arg) {
 
 	if (!arg.matches(motigomaArgRegex))
 	    throw new IllegalArgumentException("Motigoma argument format is invalid.");
@@ -120,18 +152,5 @@ public class ArgParser {
 	}
 
 	return motigoma;
-    }
-
-    public String parseTailArguments(String[] args, int offset) {
-	if (args.length == offset)
-	    return null;
-	int idx = -1;
-	for (int count = offset; count < args.length; count++)
-	    if ("debug".equals(args[count]))
-		idx = count;
-	if (idx < 0)
-	    return args[offset];
-	TSLogger.availability = true;
-	return idx == offset ? null : args[offset];
     }
 }
