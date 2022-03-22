@@ -29,7 +29,7 @@ public class ArgParser {
 	    .filter(a -> {
 		boolean opt = false;
 		if (opt = a.startsWith(Strs.hyphen))
-		    for (int i = 0; i < a.length() - 1; i++) {
+		    for (int i = 1; i < a.length(); i++) {
 			var c = a.charAt(i);
 			if (c == 't')
 			    translate.set(true);

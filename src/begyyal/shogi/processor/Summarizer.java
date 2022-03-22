@@ -1,7 +1,5 @@
 package begyyal.shogi.processor;
 
-import java.util.stream.IntStream;
-
 import begyyal.commons.constant.Strs;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.Player;
