@@ -108,7 +108,7 @@ public enum Koma {
 	XListGen.empty(),
 	81);
 
-    private final String id;
+    public final String id;
     public final String desc1;
     public final String desc2;
     public final ImmutableXList<Vector> territory;

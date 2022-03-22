@@ -22,12 +22,8 @@ public class MainSolver implements Closeable {
     public String[] calculate() throws InterruptedException, ExecutionException {
 	var result = this.dc.ignite();
 	return result == null
-		? createFailureLabel()
+		? this.srz.createFailure()
 		: this.srz.exe(result);
-    }
-
-    private String[] createFailureLabel() {
-	return new String[] { "詰めませんでした。" };
     }
 
     @Override
