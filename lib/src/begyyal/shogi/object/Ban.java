@@ -148,21 +148,22 @@ public class Ban implements Cloneable {
     public void fillCacheKey(Object[] key) {
 	long k = 1;
 	long pn = 1;
-	int kai = 0, pnai = 9;
-	for (int i = 0; i < 81; i++) {
-	    var s = this.matrix[i];
+	int ki = 0;
+	for (int i = 1; i <= 81; i++) {
+	    var s = this.matrix[i - 1];
 	    k = k * 15 + s.ss.koma.ordinal();
 	    if (i % 12 == 0) {
-		key[kai++] = k;
+		key[ki++] = k;
 		k = 1;
 	    }
-	    pn = pn * 2 + s.ss.player.ordinal();
-	    if (i % 40 == 0) {
-		key[pnai++] = pn;
+	    pn = pn * 3 + (s.ss.player == null ? 2 : s.ss.player.ordinal());
+	    if (i % 41 == 0) {
+		key[ki++] = pn;
 		pn = 1;
 	    }
 	}
-	key[kai] = k;
+	key[ki++] = k;
+	key[ki] = pn;
     }
 
     @Override

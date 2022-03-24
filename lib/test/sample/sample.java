@@ -1,6 +1,8 @@
-package ts_solver;
+package sample;
 
 import java.util.List;
+
+import org.junit.jupiter.api.Test;
 
 import begyyal.commons.object.collection.XGen;
 import begyyal.shogi.TsSolver;
@@ -12,7 +14,8 @@ import begyyal.shogi.entity.TsMotigomaState;
 
 public class sample {
 
-    public static void main(String args[]) {
+    @Test
+    public void hoge() {
 
 	// 詰み手数(5手詰め)
 	int numOfMoves = 5;
@@ -51,6 +54,7 @@ public class sample {
 
 	// 結果は打ち順の棋譜のリスト(1手目~5手目)
 	for (var kihuRecord : kihu) {
+	    // kihuRecordの持つ情報は以下の通りです。
 
 	    // public class TsKihuRecord {
 	    //

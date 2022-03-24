@@ -37,11 +37,11 @@ public class ArgConverter {
 		.filter(s -> s != null && s.suzi == 9 - x && s.dan == 9 - y)
 		.toArray(TsMasuState[]::new);
 	    if (sArray.length == 1) {
-		var state = sArray[0];
-		matrix[i] = state == null
-			? MasuState.emptyOf(x, y, XGen.newHashSet())
-			: new MasuState(state.player, Koma.of(state.koma), x, y, XGen.newHashSet());
-	    } else if (sArray.length > 1)
+		var s = sArray[0];
+		matrix[i] = new MasuState(s.player, Koma.of(s.koma), x, y, XGen.newHashSet());
+	    } else if (sArray.length == 0)
+		matrix[i] = MasuState.emptyOf(x, y, XGen.newHashSet());
+	    else if (sArray.length > 1)
 		throw new IllegalArgumentException(
 		    "The masu states of [" + (9 - x) + Strs.hyphen + (9 - y) + "] are duplicated.");
 	}

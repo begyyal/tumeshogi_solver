@@ -135,7 +135,7 @@ public class MasuState {
 	    this.hash = ((((9 + x)
 		    * 9 + y)
 		    * 16 + koma.ordinal())
-		    * 3 + player.ordinal());
+		    * 3 + (player == null ? 2 : player.ordinal()));
 	}
 
 	public boolean isEqualXY(SmartMasuState s) {
