@@ -40,11 +40,16 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build with Gradle
-      run: ./gradlew build
+      run: |
+        ./gradlew build -b ./lib/build.gradle
+        ./gradlew build -b ./cmd/build.gradle
 
     - name: Test
       run: ./test.sh
-      
+
+    - name: Push if needed
+      run: diff --exit-code || (git add . && git commit -m "BY-CI" && git push origin HEAD)
+
     - name: Push to master
       if: success()
       run: |

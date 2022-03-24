@@ -5,8 +5,10 @@ on:
     branches: [ develop ]
     types: [ opened, synchronize ]
     paths:
-      - 'src/**'
-      - 'jar/**'
+      - 'cmd/src/**'
+      - 'cmd/jar/**'
+      - 'lib/src/**'
+      - 'lib/jar/**'
       - 'bbtdef.json'
 
 jobs:
@@ -39,7 +41,9 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build with Gradle
-      run: ./gradlew build
+      run: |
+        ./gradlew build -b ./lib/build.gradle
+        ./gradlew build -b ./cmd/build.gradle
 
     - name: Test
       run: ./test.sh

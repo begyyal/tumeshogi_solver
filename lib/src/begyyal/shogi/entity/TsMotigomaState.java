@@ -8,17 +8,17 @@ import begyyal.shogi.def.common.TsKoma;
 
 public class TsMotigomaState {
 
-    public final TsKoma koma;
     public final Player player;
+    public final TsKoma koma;
     public final int num;
 
     public TsMotigomaState(
-	TsKoma koma,
 	Player player,
+	TsKoma koma,
 	int num) {
 	
-	this.koma = koma;
 	this.player = player;
+	this.koma = koma;
 	this.num = num;
 	preValidate();
     }

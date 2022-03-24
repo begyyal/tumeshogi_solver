@@ -8,15 +8,26 @@ import begyyal.shogi.def.common.TsKoma;
 
 public class TsKihuRecord {
 
+    /** 先手/後手 */
     public final Player player;
+    /** 移動元の筋(持駒からの場合は-1) */
     public final int fromSuzi;
+    /** 移動元の段(持駒からの場合は-1) */
     public final int fromDan;
+    
+    /** 筋 */
     public final int suzi;
+    /** 段 */
     public final int dan;
+    /** 「同」フラグ */
     public final boolean dou;
+    /**　駒種別(成駒含む/玉含まず/14種) */
     public final TsKoma koma;
+    /** 相対位置(右/左)　*/
     public final KihuRel rel;
+    /** 動作(上/寄/引/直) */
     public final KihuAct act;
+    /** その他(成/不成/打) */
     public final KihuOpt opt;
 
     public TsKihuRecord(
@@ -41,6 +52,7 @@ public class TsKihuRecord {
 	this.opt = opt;
     }
 
+    /** 全角棋譜表記 */
     @Override
     public String toString() {
 	var sb = new StringBuilder();

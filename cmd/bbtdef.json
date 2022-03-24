@@ -1,6 +1,6 @@
 {
 	"need": [
-		"cmd/build/libs/ts_solver.jar"
+		"build_exe/libs/ts_solver.jar"
 	],
 	"resource": "resources/cmdbbt/",
 	"operations": [
