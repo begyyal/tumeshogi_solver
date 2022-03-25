@@ -31,7 +31,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 		    .getAsPrivate(this.getClass(), 1, from.ss.hash, () -> {
 			var dt = XGen.newHashSet(from.getDecomposedTerritory());
 			var k = from.ss.koma;
-			if (!k.nari)
+			if (k.canNari())
 			    dt.addAll(MasuState.getDecomposedTerritory(k.naru(), playerType));
 			return dt;
 		    }).contains(to.getVectorTo(opponentOu)))
@@ -55,7 +55,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 		MasuState obstruction = null;
 		for (var miniV : dv) {
 		    var result = ban.exploration(s, miniV);
-		    if (result == MasuState.Invalid)
+		    if (result == null)
 			break;
 		    if (result.ss.koma == Koma.Empty)
 			continue;

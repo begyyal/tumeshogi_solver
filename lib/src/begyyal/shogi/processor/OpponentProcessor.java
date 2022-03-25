@@ -86,7 +86,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 		.map(tn -> {
 		    var newBan = ban.clone();
 		    var te = newBan.advance(from.x, from.y, x, y, tn);
-		    return te == null ? null
+		    return te == null || newBan.checkOute() ? null
 			    : context.branch(newBan, te, state.ss.koma, playerType, true);
 		}));
 
