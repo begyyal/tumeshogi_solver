@@ -168,7 +168,7 @@
 			]
 		},
 		{
-			"name": "5te_6",
+			"name": "5te_6_issue161",
 			"command": "java -Dfile.encoding=UTF-8 -jar ts_solver.jar 5 54xf11yd21yh31ya12ya32ye xe1c1g1ya16b4c3d3e1f1g1 -t",
 			"exitCode": 0,
 			"expected": [
