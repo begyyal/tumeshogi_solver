@@ -1,6 +1,8 @@
 package sample;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.jupiter.api.Test;
 
@@ -42,10 +44,10 @@ public class sample {
 	List<TsKihuRecord> kihu;
 	try (var solver = new TsSolver()) {
 
-	    // 計算実行
+	    // 計算実行 - nullセーフ(詰めない場合は空のリスト)
 	    kihu = solver.calculate(numOfMoves, ban, motigoma);
 
-	} catch (Exception e) {
+	} catch (ExecutionException | InterruptedException | IOException e) {
 	    System.out.println(e.getMessage());
 	    for (var st : e.getStackTrace())
 		System.out.println(st);

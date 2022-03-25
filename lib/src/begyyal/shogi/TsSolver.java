@@ -2,6 +2,7 @@ package begyyal.shogi;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -35,7 +36,7 @@ public class TsSolver implements Closeable {
 	Set<TsMotigomaState> motigoma)
 	throws InterruptedException, ExecutionException {
 	var context = this.preProcess(numOfMoves, ban, motigoma).ignite();
-	return convertKihu(context.log);
+	return context == null ? Collections.emptyList() : convertKihu(context.log);
     }
 
     private DerivationCalculator preProcess(
