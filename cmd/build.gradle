@@ -33,6 +33,11 @@ tasks.withType(JavaCompile){
 }
 
 delete('resources/META-INF/')
+copy {
+	from 'LICENSE'
+	into 'resources/META-INF/'
+}
+
 jar {
 	archivesBaseName = 'ts_solver'
 	manifest {
