@@ -1,3 +1,5 @@
+[![Test [lib] by sync PR](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr2.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr2.yml)
+
 # 概要
 
 Javaライブラリ形式です。  
@@ -7,15 +9,12 @@ Mavenリポジトリのような公開はしていないため、ご利用に際
 
 1. Javaのバージョンは15以上が必要になります。  
     - https://www.oracle.com/java/technologies/downloads/  
-2. 以下の要領でgradleビルドを実行してください。
-    1. `cd {repository_root}/lib/`
-    2. `./gradlew build`
-3. `{repository_root}/lib/build/libs/`配下にjarが生成されます。
+2. jarファイルは[こちら](../cmd/jar/ts_solver.jar)になります。
 
 # API
 
 `begyyal.shogi.TsSolver#calculate()`が計算処理となります。  
-[サンプル](./test/sample/sample.java)があるのでご覧ください。
+簡単な[サンプル](./test/sample/sample.java)があるのでご覧ください。
 
 ## 各種Enumのキー文字
 

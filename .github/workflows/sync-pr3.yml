@@ -1,12 +1,15 @@
-name: Test [lib] by sync PR
+name: Test [cmd] by sync PR
 
 on:
   pull_request:
     branches: [ develop ]
     types: [ opened, synchronize ]
     paths:
-      - 'lib/src/**'
-      - 'lib/jar/**'
+      - 'cmd/src/**'
+      - 'cmd/jar/**'
+      - 'bbtdef.json'
+    paths-ignore:
+      - 'cmd/jar/ts_solver.jar'
 
 jobs:
   build-and-test:
@@ -35,7 +38,10 @@ jobs:
         distribution: 'adopt'
 
     - name: Grant execute permission for gradlew
-      run: chmod +x ./lib/gradlew
+      run: chmod +x ./cmd/gradlew
+
+    - name: Build with Gradle
+      run: ./cmd/gradlew build -b ./cmd/build.gradle
 
     - name: Test
-      run: ./lib/gradlew test -b ./lib/build.gradle
+      run: ./test.sh
