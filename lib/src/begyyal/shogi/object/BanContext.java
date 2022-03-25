@@ -54,7 +54,7 @@ public class BanContext implements Comparable<BanContext> {
     }
 
     private MotigomaState getMotigomaState(Koma koma, Player player) {
-	return this.motigoma[player.ordinal() * 7 + koma.ordinal()];
+	return this.motigoma[player.ordinal() * 7 + koma.midx];
     }
 
     public BanContext copyOf(Ban ban) {
