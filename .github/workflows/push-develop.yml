@@ -48,7 +48,7 @@ jobs:
       run: ./test.sh
 
     - name: Push if needed
-      run: diff --exit-code || (git add . && git commit -m "BY-CI" && git push origin HEAD)
+      run: git diff --exit-code || (git add . && git commit -m "BY-CI" && git push origin HEAD)
 
     - name: Push to master
       if: success()
