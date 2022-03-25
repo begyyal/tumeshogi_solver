@@ -8,8 +8,7 @@ on:
       - 'cmd/src/**'
       - 'cmd/jar/**'
       - 'bbtdef.json'
-    paths-ignore:
-      - 'cmd/jar/ts_solver.jar'
+      - '!cmd/jar/ts_solver.jar'
 
 jobs:
   build-and-test:
