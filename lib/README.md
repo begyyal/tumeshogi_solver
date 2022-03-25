@@ -10,6 +10,7 @@ Mavenリポジトリのような公開はしていないため、ご利用に際
 1. Javaのバージョンは15以上が必要になります。  
     - https://www.oracle.com/java/technologies/downloads/  
 2. jarファイルは[こちら](../cmd/jar/ts_solver.jar)になります。
+    - `tumeshogi_solver/cmd/jar/ts_solver.jar`
 
 # API
 

@@ -111,7 +111,7 @@ public class CmdArgParser {
 		if (XIntegers.checkIfParsable(count2dig) && ++i > 0)
 		    count = count2dig;
 	    }
-	    motigoma.add(new TsMotigomaState(koma, p, Integer.parseInt(count)));
+	    motigoma.add(new TsMotigomaState(p, koma, Integer.parseInt(count)));
 	    i += 2;
 	}
 
