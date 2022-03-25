@@ -1,40 +1,41 @@
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'java-library'
+plugins {
+	id 'java'
+	id 'eclipse'
+	id 'java-library'
+}
 
-
-// repositories {
-// 	mavenCentral()
-// }
+repositories {
+ 	mavenCentral()
+}
 
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(15)
 	}
+   	modularity.inferModulePath.set(true)
 }
 
-compileJava {
-    doFirst {
-        options.compilerArgs = [
-            '--module-path', classpath.asPath,
-        ]
-        classpath = files()  
-    }
+test {
+    useJUnitPlatform()
 }
 
 dependencies {
 	implementation files('jar/xj_commons.jar')
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
 sourceSets {
-	main {
-		java {
-			srcDirs 'src'
-		}
-		resources {
-			srcDir 'resources'
-		}
-	}
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+    test {
+        java {
+            srcDir 'test'
+        }
+    }
  }
 
 tasks.withType(JavaCompile){
@@ -50,6 +51,14 @@ jar {
 copy {
 	from 'build/libs/ts_solver.jar'
 	into '../cmd/jar/'
+}
+
+eclipse.classpath.file {
+     whenMerged { classpath ->
+		classpath.entries.findAll{ it.kind == 'lib' }.each{ 
+			it.entryAttributes['module'] = true 
+		}
+	}
 }
 
 FileTree zipTreeByCustom(File f){

@@ -15,7 +15,7 @@ Mavenリポジトリのような公開はしていないため、ご利用に際
 # API
 
 `begyyal.shogi.TsSolver#calculate()`が計算処理となります。  
-[サンプル](./resources/ts_solver/sample.java)があるのでご覧ください。
+[サンプル](./test/sample/sample.java)があるのでご覧ください。
 
 ## 各種Enumのキー文字
 
