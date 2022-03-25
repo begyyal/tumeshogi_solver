@@ -1,7 +1,6 @@
 package begyyal.shogi.object;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
@@ -14,13 +13,6 @@ import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.common.Player;
 
 public class MasuState {
-
-    public static final MasuState Invalid = new MasuState(
-	null,
-	Koma.Empty,
-	-1,
-	-1,
-	Collections.emptySet());
 
     public final SmartMasuState ss;
     public final Set<SmartMasuState> rangedBy;

@@ -22,8 +22,7 @@ public abstract class PlayerProcessorBase {
     }
 
     protected boolean canAdvanceTo(MasuState state) {
-	return state != MasuState.Invalid
-		&& (state.ss.koma == Koma.Empty || state.ss.player != getPlayerType());
+	return state != null && (state.ss.koma == Koma.Empty || state.ss.player != getPlayerType());
     }
 
     protected Stream<TryNari> createBranchStream(int y, SmartMasuState from) {
