@@ -1,3 +1,5 @@
+[![Test [cmd] by sync PR](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr3.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr3.yml)
+
 # 概要
 
 jarファイルによるコマンド実行形式です。
