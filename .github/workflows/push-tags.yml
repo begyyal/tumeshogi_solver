@@ -2,7 +2,7 @@ name: Update tag
 
 on:
   push:
-    tags: [ v2.* ]
+    tags: [ v* ]
 
 jobs:
 
@@ -21,8 +21,9 @@ jobs:
 
     - name: Update tag
       run: |
-        git tag -a v2 -m "BY-CI"
-        git push origin v2 -f
+        version=${{ github.ref_name }}
+        git tag -a ${version%%.*} -m "BY-CI"
+        git push origin ${version%%.*} -f
 
     - name: Post tweet
       run: |
