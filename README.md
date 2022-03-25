@@ -46,12 +46,13 @@ Javaライブラリ版と、コマンド実行形式版があります。
   - 条件
     - ヒープサイズ : 4G
     - プロセッサ : intel core i7-8650U
+    - コマンド実行形式
   - 指標
     - ◎ : 最遅でも10秒以内
     - 〇 : 最遅でも1分以内
     - △ : 難度次第では1分を大幅に超過してしまう
     - ？ : 未検証
-  - [v2.0.0](https://github.com/begyyal/tumeshogi_solver/releases/tag/v1) 時点
+  - [v3.0.0](https://github.com/begyyal/tumeshogi_solver/releases/tag/v1) 時点
     - 7手詰め迄 : ◎
     - 9手詰め : ◎
     - 11手詰め以降 : ？
