@@ -59,7 +59,7 @@ public class ArgConverter {
 	int i = 0;
 	for (var p : Player.values()) {
 	    for (var k : Koma.values()) {
-		if (k.nari || k == Koma.Ou || k == Koma.Empty)
+		if (k.nari || k.midx < 0)
 		    continue;
 		var state = stateSet.stream()
 		    .filter(s -> s != null && Koma.of(s.koma) == k && s.player == p)
