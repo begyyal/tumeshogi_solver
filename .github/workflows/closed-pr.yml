@@ -50,7 +50,7 @@ jobs:
       with:
         workflowName: 'Update process of the PR'
 
-    - uses: begyyal/act_revise_comments@v1
+    - uses: begyyal/act_revise_comments@v1.0.1
       with:
         prefix: "#${{ steps.ready.outputs.issue-no }}"
         branch: ${{ github.base_ref }}
