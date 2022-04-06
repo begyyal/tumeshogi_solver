@@ -48,7 +48,7 @@ jobs:
 
     - uses: begyyal/act_await_wf_execution@v0.1
       with:
-        workflowName: 'Update process of the PR'
+        workflowName: 'Save snapshot of PR'
 
     - uses: begyyal/act_revise_comments@v1.0.1
       with:
