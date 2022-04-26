@@ -1,4 +1,4 @@
-package main;
+package it;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -21,7 +21,6 @@ public class te5 {
     @Test
     public void p6_issue161() {
 
-	long start = System.currentTimeMillis();
 	int numOfMoves = 5;
 
 	var ban = XGen.<TsMasuState>newHashSet();
@@ -60,8 +59,5 @@ public class te5 {
 	assertEquals(rec.get(2).toString(), "３３桂");
 	assertEquals(rec.get(3).toString(), "１１玉");
 	assertEquals(rec.get(4).toString(), "２１金");
-
-	System.out.println("te5_6 - " + (System.currentTimeMillis() - start) + "msec");
     }
-
 }

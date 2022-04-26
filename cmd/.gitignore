@@ -1,6 +1,6 @@
 bin/
 build/
-test/
+test/src/draft
 .settings/
 
 .classpath
