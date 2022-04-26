@@ -13,17 +13,17 @@ java {
 }
 
 dependencies {
-	implementation files('jar/xj_commons.jar')
+	implementation files('../jar/xj_commons.jar')
 	implementation files('jar/ts_solver.jar')
 }
 
 sourceSets {
 	main {
 		java {
-			srcDirs 'src'
+			srcDir 'main/src'
 		}
 		resources {
-			srcDir 'resources'
+			srcDir 'main/resources'
 		}
 	}
  }
@@ -32,10 +32,10 @@ tasks.withType(JavaCompile){
 	options.encoding = 'UTF-8'
 }
 
-delete('resources/META-INF/')
+delete('META-INF/')
 copy {
-	from 'LICENSE'
-	into 'resources/META-INF/'
+	from '../LICENSE'
+	into 'META-INF/'
 }
 
 jar {
@@ -63,7 +63,7 @@ FileTree zipTreeByCustom(File f){
 	def pjdirLayerLength = getLayerArr(getProjectDir().toString()).length
 	def metainfLayers = Arrays.copyOfRange(getLayerArr(meta.iterator().next().toString()), pjdirLayerLength, pjdirLayerLength + 5)
 	def metainfRelPath = String.join('/', metainfLayers)
-	def newMetainfRelPath =  'resources/META-INF/' + keyStr
+	def newMetainfRelPath =  'META-INF/' + keyStr
 	
 	copy {
 		into newMetainfRelPath
