@@ -26,9 +26,11 @@ jobs:
       with:
         fetch-depth: 0
         submodules: true
+        ref: master
 
     - name: Setup git condition
       run: |
+        git fetch
         git checkout develop
         git submodule update --remote
 
@@ -50,7 +52,9 @@ jobs:
       run: ./test.sh
 
     - name: Push if needed
-      run: git diff --exit-code || (git add . && git commit -m "BY-CI" && git push origin HEAD)
+      run: |
+        git diff --exit-code --ignore-cr-at-eol --ignore-space-at-eol \
+        || (git add . && git commit -m "BY-CI" && git push origin HEAD)
 
     - name: Push to master
       if: success()
