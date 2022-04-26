@@ -26,9 +26,7 @@ jobs:
       with:
         fetch-depth: 0
         submodules: true
-        
-    - name: debug
-      run: git branch
+        ref: master
 
     - name: Setup git condition
       run: |
