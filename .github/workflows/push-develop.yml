@@ -26,9 +26,13 @@ jobs:
       with:
         fetch-depth: 0
         submodules: true
+        
+    - name: debug
+      run: git branch
 
     - name: Setup git condition
       run: |
+        git branch -D develop
         git checkout develop
         git submodule update --remote
 
@@ -48,11 +52,6 @@ jobs:
 
     - name: Test
       run: ./test.sh
-
-    - name: debug
-      run: |
-        git log --oneline | head -n 10
-        git show HEAD
 
     - name: Push if needed
       run: |
