@@ -49,8 +49,15 @@ jobs:
     - name: Test
       run: ./test.sh
 
+    - name: debug
+      run: |
+        git log --oneline | head -n 10
+        git show HEAD
+
     - name: Push if needed
-      run: git diff --exit-code || (git add . && git commit -m "BY-CI" && git push origin HEAD)
+      run: |
+        git diff --exit-code --ignore-cr-at-eol --ignore-space-at-eol \
+        || (git add . && git commit -m "BY-CI" && git push origin HEAD)
 
     - name: Push to master
       if: success()
