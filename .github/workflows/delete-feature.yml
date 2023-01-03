@@ -1,4 +1,4 @@
-name: Delete feature branch
+name: delete-feature
 
 on:
   workflow_dispatch: 
@@ -6,8 +6,8 @@ on:
     - cron: '0 0 * * *'
 
 jobs:
-  main:
 
+  main:
     runs-on: ubuntu-latest
 
     steps:

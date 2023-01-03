@@ -1,5 +1,3 @@
-[![Test [lib] by sync PR](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr2.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr2.yml)
-
 # 概要
 
 Javaライブラリ形式です。  

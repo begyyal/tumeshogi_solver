@@ -1,0 +1,78 @@
+name: push-stg
+
+on:
+  push:
+    branches: [ stg ]
+
+jobs:
+
+  dev-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        submodules: true
+        token: ${{ secrets.PAT_REPO }}
+
+    - name: Prepare conditions
+      run: |
+        git config --global user.email "begyyal@gmail.com"
+        git config --global user.name "begyyal-ghost"
+        fb=$(./.github/workflows/sh/find_pr_branch.sh feature ${{ github.event_path }})
+        echo "issue-no=${fb#feature/}" >> $GITHUB_ENV
+
+    - name: Set up JDK 15
+      uses: actions/setup-java@v2
+      with:
+        java-version: '15'
+        distribution: 'adopt'
+
+    - name: Build with Gradle
+      run: |
+        chmod +x ./cmd/gradlew
+        ./cmd/gradlew build -b ./lib/build.gradle
+        ./cmd/gradlew build -b ./cmd/build.gradle
+
+    - name: Test
+      run: ./test.sh
+
+    - name: Await sequentially
+      uses: begyyal/act_await_workflow_runs@v1
+      with:
+        workflowName: push-stg
+
+    - name: Revise and merge
+      run: |
+        echo "dev-before=$(git log origin/dev --pretty=%H | head -n1)" >> $GITHUB_ENV
+        ./.github/workflows/sh/merge_stg.sh \
+          "#${{ env.issue-no }}" \
+          ${{ github.event_path }} \
+          "$(pwd)/.git/" \
+          ${{ github.repository }} \
+          ${{ github.token }}
+
+    - name: Prepare to close issue
+      run: |
+        git clone https://github.com/begyyal/act_access_ghra.git
+        issue_url_base=${{ github.event.repository.issues_url }}
+        echo "issue-url=${issue_url_base%\{*}/${{ env.issue-no }}" >> $GITHUB_ENV
+
+    - name: Close issue
+      uses: ./act_access_ghra
+      with:
+        url: ${{ env.issue-url }}
+        method: 'PATCH'
+        args: '{"state":"closed"}'
+
+    - name: Rollback
+      if: failure()
+      run: |
+        ./.github/workflows/sh/rollback.sh \
+          ${{ github.event_path }} \
+          "$(pwd)/.git/" \
+          ${{ github.repository }} \
+          ${{ env.dev-before }} \
+          stg

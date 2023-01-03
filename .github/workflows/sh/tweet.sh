@@ -10,7 +10,7 @@ timestamp=$(date +%s)
 nonce=$(openssl rand -base64 -hex 16)
 url="https://api.twitter.com/2/tweets"
 
-function parcentEncoding(){
+function percentEncoding(){
     str=$1
     str=${str//"%"/"%25"}
     str=${str//":"/"%3A"}
@@ -35,8 +35,8 @@ function parcentEncoding(){
     echo -n $str
 }
 
-enc_consumer_key=$(parcentEncoding $consumer_key)
-enc_oauth_token=$(parcentEncoding $oauth_token)
+enc_consumer_key=$(percentEncoding $consumer_key)
+enc_oauth_token=$(percentEncoding $oauth_token)
 
 param_str="oauth_consumer_key=${enc_consumer_key}&"
 param_str="${param_str}oauth_nonce=${nonce}&"
@@ -45,20 +45,20 @@ param_str="${param_str}oauth_timestamp=${timestamp}&"
 param_str="${param_str}oauth_token=${enc_oauth_token}&"
 param_str="${param_str}oauth_version=1.0"
 
-enc_url=$(parcentEncoding $url)
-enc_param_str=$(parcentEncoding $param_str)
+enc_url=$(percentEncoding $url)
+enc_param_str=$(percentEncoding $param_str)
 
 sig_base_str="POST&"
 sig_base_str="${sig_base_str}${enc_url}&"
 sig_base_str="${sig_base_str}${enc_param_str}"
 
-enc_consumer_secret=$(parcentEncoding $consumer_secret)
-enc_oauth_secret=$(parcentEncoding $oauth_secret)
+enc_consumer_secret=$(percentEncoding $consumer_secret)
+enc_oauth_secret=$(percentEncoding $oauth_secret)
 
 sig_key="${enc_consumer_secret}&${enc_oauth_secret}"
 
 sig=$(echo -n $sig_base_str | openssl sha1 -binary -hmac $sig_key | base64)
-sig=$(parcentEncoding $sig)
+sig=$(percentEncoding $sig)
 
 auth_header='authorization: OAuth '
 auth_header="${auth_header}oauth_consumer_key=\"${consumer_key}\","
