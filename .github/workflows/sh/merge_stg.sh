@@ -79,6 +79,7 @@ function checkDiff(){
   diff -q ${tmp}dev_head_refs_bk ${git_dir}refs/remotes/origin/dev 1>/dev/null
 }
 
+git reset --hard HEAD
 git checkout dev # set upstream
 git checkout stg
 
