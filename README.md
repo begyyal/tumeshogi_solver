@@ -1,8 +1,9 @@
 - **品質担保**  
+[![sync-pr](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr.yml)
 [![push-stg](https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-stg.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-stg.yml)  
 
 - **開発補助**  
-[![create-feature](https://github.com/begyyal/tumeshogi_solver/actions/workflows/create-feature.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solve/actions/workflows/create-feature.yml)  
+[![create-feature](https://github.com/begyyal/tumeshogi_solver/actions/workflows/create-feature.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solve/actions/workflows/create-feature.yml)
 [![delete-feature](https://github.com/begyyal/tumeshogi_solver/actions/workflows/delete-feature.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/delete-feature.yml)   
 
 - **その他**  
