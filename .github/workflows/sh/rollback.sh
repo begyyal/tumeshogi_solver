@@ -1,16 +1,7 @@
 #!/bin/bash
 
-tmp_dir='/tmp/'$(date +%Y%m%d%H%M%S)
-mkdir -p $tmp_dir
-tmp=${tmp_dir}'/'$$'_'
-
 cmd_dir=`dirname $0`
-shjp=${cmd_dir}/shjp
-
-function end(){
-  rm -f ${tmp}*
-  exit $1
-}
+source ${cmd_dir}/commons.sh
 
 event_path=$1
 git_dir=$2
@@ -22,24 +13,50 @@ head_refs="${git_dir}refs/heads/$target"
 $shjp "$event_path" -t commits | 
 $shjp -t tree_id > ${tmp}target_trees
 [ $? != 0 ] && end 1 || : 
-before=$($shjp "$event_path" -t before)
-[ $? != 0 ] && end 1 || : 
+first_tree=$(cat ${tmp}target_trees | head -n 1)
+tt_str="$(cat ${tmp}target_trees | awk '{a=a$0" "}END{print a}')"
 
 function main(){
 
-  remains="$(git log --pretty="%T %H" | 
-  awk '{if($2=="'$before'"){flag=1};if(flag!=1){print $0};}' |
-  tac |
-  while read tree commit; do
-    [ -z "$(cat ${tmp}target_trees | grep -o $tree)" ] && printf "${commit} " || :
-  done )"
-  [ $? != 0 ] && end 1 || :
-
-  git reset --hard $before
-  if [ -n "$remains" ] && git cherry-pick "$remains"; then
-    echo "Cherry-pick failed, it seems succeeding commits depend on this rollback target." >&2
+  parent=$(git log --pretty="%T %H" | 
+  awk '{
+    if((lim=="" || lim>=NR) && !match("'"$tt_str"'", $1)){print $0};
+    if($1=="'$first_tree'"){lim=NR+1};
+  }' | 
+  tac | tee ${tmp}diff | head -n 1 | cut -d " " -f 2)
+  if [ -z "$parent" ]; then
+    echo "The first tree of push commits is not found in the latest target branch." >&2
     end 1
   fi
+
+  tip="$(cat ${tmp}diff | tail -n 1 | cut -d " " -f 2)"
+  if [ "$tip" == "$parent" ]; then
+    pp="$(git cat-file -p $tip | grep ^parent -m 1 | cut -d " " -f 2)"
+    git reset --hard $pp
+    tree=$(git cat-file -p $tip | grep ^tree -m 1 | cut -d " " -f 2)
+    author=$(git cat-file -p $tip | grep ^author -m 1 | cut -d " " -f 2-)
+    git cat-file -p $tip | awk '{if(flag==1){print $0}else if($0==""){flag=1}}' > ${tmp}comments
+    if [ "$(cat ${tmp}comments | tail -n 1)" != "[skip ci]" ]; then
+      echo "[skip ci]" >> ${tmp}comments 
+    fi
+    git commit-tree $tree -p $pp -m "$(cat ${tmp}comments)" > $head_refs
+    git reset --hard HEAD
+    git commit --amend --author="$author" -C HEAD --allow-empty
+  else
+    cat ${tmp}diff | sed 1d |
+    while read tree commit; do
+      author=$(git cat-file -p $commit | grep ^author -m 1 | cut -d " " -f 2-)
+      git cat-file -p $commit | awk '{if(flag==1){print $0}else if($0==""){flag=1}}' > ${tmp}comments
+      if [ "$commit" == "$tip" -a "$(cat ${tmp}comments | tail -n 1)" != "[skip ci]" ]; then
+        echo "[skip ci]" >> ${tmp}comments 
+      fi
+      git commit-tree $tree -p $parent -m "$(cat ${tmp}comments)" > $head_refs
+      git reset --hard HEAD
+      git commit --amend --author="$author" -C HEAD --allow-empty
+      parent=$(cat $head_refs)
+    done
+  fi
+  [ $? != 0 ] && end 1 || :
 }
 
 function checkDiff(){

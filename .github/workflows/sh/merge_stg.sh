@@ -1,16 +1,7 @@
 #!/bin/bash
 
-tmp_dir='/tmp/'$(date +%Y%m%d%H%M%S)
-mkdir -p $tmp_dir
-tmp=${tmp_dir}'/'$$'_'
-
 cmd_dir=`dirname $0`
-shjp=${cmd_dir}/shjp
-
-function end(){
-  rm -f ${tmp}*
-  exit $1
-}
+source ${cmd_dir}/commons.sh
 
 prefix="$1"
 event_path=$2
@@ -26,9 +17,7 @@ $shjp -t tree_id |
 tee ${tmp}target_trees |
 tail -n 1)"
 [ $? != 0 ] && end 1 || :  
-
-before_commit=$($shjp "$event_path" -t before)
-before_tree=$(git log --pretty=%T "$before_commit" | head -n 1)
+first_tree=$(cat ${tmp}target_trees | head -n 1)
 
 function main(){
 
@@ -37,14 +26,17 @@ function main(){
   [ $? != 0 ] && end 1 || :
 
   parent="$(git log --pretty="%T %H" | 
-  awk '{if(flag!=1){print $0};if($1=="'$before_tree'"){flag=1};}' |
+  awk '{if(lim=="" || lim>=NR){print $0};if($1=="'$first_tree'"){lim=NR+1};}' |
   tac | tee ${tmp}diff | head -n 1 | cut -d " " -f 2)"
+  if [ -z "$parent" ]; then
+    echo "The first tree of push commits is not found in the latest target branch." >&2
+    end 1
+  fi
 
   cat ${tmp}diff | sed 1d |
   while read tree commit; do
 
-    props=$(git cat-file -p $commit | awk '{if($0==""){flag=1}else if(flag!=1){print $0}}')
-    author=$(echo "$props" | grep ^author | cut -d " " -f 2-)
+    author=$(git cat-file -p $commit | grep ^author -m 1 | cut -d " " -f 2-)
     git cat-file -p $commit | awk '{if(flag==1){print $0}else if($0==""){flag=1}}' > ${tmp}comments
     if [ -z $started ]; then
       started=$(cat ${tmp}comments | awk '{if(NR==1 && $0 !~ /^('$prefix').*$/){print "1"}}')
