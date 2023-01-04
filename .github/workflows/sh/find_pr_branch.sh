@@ -1,16 +1,7 @@
 #!/bin/bash
 
-tmp_dir='/tmp/act_'$(date +%Y%m%d%H%M%S)
-mkdir -p $tmp_dir
-tmp=${tmp_dir}'/'$$'_'
-
 cmd_dir=`dirname $0`
-shjp=${cmd_dir}/shjp
-
-function end(){
-  rm -f ${tmp}*
-  exit $1
-}
+source ${cmd_dir}/commons.sh
 
 prefix=$1
 head_tree=$($shjp $2 -t head_commit.tree_id)
