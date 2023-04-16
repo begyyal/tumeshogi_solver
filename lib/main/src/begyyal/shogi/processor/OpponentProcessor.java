@@ -57,7 +57,7 @@ public class OpponentProcessor extends PlayerProcessorBase {
 
 	// 合駒(持ち駒を貼る+駒を移動する)
 	var outeVector = ou.getVectorTo(oute);
-	Stream<BanContext> cs3 = Math.abs(outeVector.x) == 1 || Math.abs(outeVector.y) == 1
+	Stream<BanContext> cs3 = Math.abs(outeVector.x) == 1 && Math.abs(outeVector.y) == 1
 		? Stream.empty()
 		: Arrays.stream(outeVector.decompose())
 		    .filter(v -> !outeVector.equals(v)
@@ -72,9 +72,11 @@ public class OpponentProcessor extends PlayerProcessorBase {
 	for (var s : state.rangedBy)
 	    if (s.player == playerType && !(ouYoko |= s.koma == Koma.Ou))
 		return true;
-	return ouYoko && state.rangedBy.stream()
-	    .filter(s -> s.hash != outeState.ss.hash)
-	    .allMatch(s -> s.player == playerType);
+	if (!ouYoko)
+	    return false;
+	long gc = state.rangedBy.stream().filter(s -> s.player == playerType).count();
+	long sc = state.rangedBy.stream().filter(s -> s.player != playerType).count();
+	return gc >= sc;
     }
 
     private Stream<BanContext> getOuteObstructionCS(int x, int y, BanContext context, Ban ban) {

@@ -63,14 +63,6 @@ jar {
 	from configurations.compileClasspath.collect{ it.isDirectory() ? it : zipTreeByCustom(it) }
 }
 
-eclipse.classpath.file {
-     whenMerged { classpath ->
-		classpath.entries.findAll{ it.kind == 'lib' }.each{ 
-			it.entryAttributes['module'] = true 
-		}
-	}
-}
-
 FileTree zipTreeByCustom(File f){
 	
 	def layerArr = getLayerArr(f.toString())
