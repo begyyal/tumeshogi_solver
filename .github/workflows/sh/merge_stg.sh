@@ -132,6 +132,10 @@ if [ -f ${tmp}remains ]; then
   [ $? != 0 ] && end 1 || :
   git push origin mst
   [ $? != 0 ] && end 1 || :
+  git push origin release -d 2>/dev/null || :
+  git checkout -b release
+  git commit --allow-empty -m "Branch from mst."
+  git push origin release
 fi
 
 end 0

@@ -7,7 +7,6 @@ on:
 jobs:
 
   update-tag:
-
     runs-on: ubuntu-latest
 
     steps:
