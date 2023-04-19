@@ -11,12 +11,12 @@ import begyyal.shogi.object.BanContext;
 import begyyal.shogi.object.MasuState;
 import begyyal.shogi.object.MasuState.SmartMasuState;
 
-public class OpponentProcessor extends PlayerProcessorBase {
+public class GoteProcessor extends PlayerProcessorBase {
 
     public static final Player playerType = Player.Gote;
     private static final BanContext[] dummyResult = new BanContext[] { null };
 
-    public OpponentProcessor(int numOfMoves) {
+    public GoteProcessor(int numOfMoves) {
 	super(numOfMoves);
     }
 
@@ -56,27 +56,55 @@ public class OpponentProcessor extends PlayerProcessorBase {
 		}));
 
 	// 合駒(持ち駒を貼る+駒を移動する)
-	var outeVector = ou.getVectorTo(oute);
+	var outeVector = ou.getVectorTo(oute.ss);
 	Stream<BanContext> cs3 = Math.abs(outeVector.x) == 1 && Math.abs(outeVector.y) == 1
 		? Stream.empty()
 		: Arrays.stream(outeVector.decompose())
 		    .filter(v -> !outeVector.equals(v)
-			    && checkMudaai(ban, ban.getState(ou.ss.x + v.x, ou.ss.y + v.y), oute))
+			    && checkMudaai(ban, ban.getState(ou.ss.x + v.x, ou.ss.y + v.y)))
 		    .flatMap(v -> getOuteObstructionCS(ou.ss.x + v.x, ou.ss.y + v.y, context, ban));
 
 	return executeCS(context, Stream.concat(Stream.concat(cs1, cs2), cs3));
     }
 
-    private static boolean checkMudaai(Ban ban, MasuState state, MasuState outeState) {
-	boolean ouYoko = false;
-	for (var s : state.rangedBy)
-	    if (s.player == playerType && !(ouYoko |= s.koma == Koma.Ou))
-		return true;
-	if (!ouYoko)
+    private boolean checkMudaai(Ban ban, MasuState state) {
+
+	var grb = state.rangedBy.stream().filter(s -> s.player == playerType)
+	    .toArray(SmartMasuState[]::new);
+	if (grb.length == 0)
 	    return false;
-	long gc = state.rangedBy.stream().filter(s -> s.player == playerType).count();
-	long sc = state.rangedBy.stream().filter(s -> s.player != playerType).count();
-	return gc >= sc;
+
+	var ou = Arrays.stream(grb).filter(s -> s.koma == Koma.Ou)
+	    .findFirst().orElse(null);
+	if (ou == null)
+	    return true;
+
+	var preOute = state.rangedBy.stream()
+	    .filter(s -> s.player != playerType
+		    && this.getTerritoryAfterMoved(state.ss.y, s, Player.Sente)
+			.contains(state.getVectorTo(ou)))
+	    .toArray(SmartMasuState[]::new);
+	if (grb.length >= preOute.length)
+	    return true;
+
+	long nowSkc = this.getSkCount(ban, state, ou);
+	long minSkc = Arrays.stream(preOute)
+	    .map(ss -> this.createBranchStream(state.ss.y, ss, Player.Sente).map(tn -> {
+		var newBan = ban.clone();
+		var te = newBan.advance(ss.x, ss.y, state.ss.x, state.ss.y, tn);
+		return te != null && newBan.checkOute() ? this.getSkCount(newBan, state, ou) : 8;
+	    }).reduce((a, b) -> a < b ? b : a).get())
+	    .reduce((a, b) -> a < b ? b : a).get();
+	return minSkc < nowSkc;
+    }
+
+    private long getSkCount(Ban ban, MasuState ignore, SmartMasuState ou) {
+	return ban.search(s -> {
+	    var v = s.getVectorTo(ou);
+	    return Math.abs(v.x) <= 1 && Math.abs(v.y) <= 1
+		    && (s.ss.x != ignore.ss.x || s.ss.y != ignore.ss.y)
+		    && s.rangedBy.stream().anyMatch(s2 -> s2.player == Player.Sente);
+	}).count();
     }
 
     private Stream<BanContext> getOuteObstructionCS(int x, int y, BanContext context, Ban ban) {

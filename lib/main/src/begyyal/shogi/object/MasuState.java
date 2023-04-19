@@ -41,8 +41,8 @@ public class MasuState {
 	return getDecomposedTerritory(this.ss.koma, this.ss.player);
     }
 
-    public Vector getVectorTo(MasuState s) {
-	return new Vector(s.ss.x - this.ss.x, s.ss.y - this.ss.y);
+    public Vector getVectorTo(SmartMasuState s) {
+	return new Vector(s.x - this.ss.x, s.y - this.ss.y);
     }
 
     public boolean isOpponentOu() {
