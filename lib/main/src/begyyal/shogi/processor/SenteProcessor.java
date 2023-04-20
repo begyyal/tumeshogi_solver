@@ -37,7 +37,7 @@ public class SenteProcessor extends PlayerProcessorBase {
 		    })));
 
 	// 開き王手
-	var cs2 = ban.search(s -> s.ss.player == playerType && s.isLinearRange())
+	var cs2 = ban.search(s -> s.ss.player == playerType && s.ss.koma.isLinearRange())
 	    .map(s -> {
 		var v = s.getVectorTo(opponentOu.ss);
 		if (Math.abs(v.x) <= 1 && Math.abs(v.y) <= 1
@@ -46,7 +46,7 @@ public class SenteProcessor extends PlayerProcessorBase {
 		var dv = v.decompose();
 		MasuState obstruction = null;
 		for (var miniV : dv) {
-		    var result = ban.exploration(s, miniV);
+		    var result = ban.exploration(s.ss, miniV);
 		    if (result == null)
 			break;
 		    if (result.ss.koma == Koma.Empty)
