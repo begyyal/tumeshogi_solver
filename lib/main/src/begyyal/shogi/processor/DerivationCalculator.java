@@ -16,15 +16,15 @@ public class DerivationCalculator {
 
     private final int numOfMoves;
     private final BanContext origin;
-    private final SelfProcessor selfProcessor;
-    private final OpponentProcessor opponentProcessor;
+    private final SenteProcessor selfProcessor;
+    private final GoteProcessor opponentProcessor;
     private final ExecutorService exe;
 
     public DerivationCalculator(Args args, ExecutorService exe) {
 	this.numOfMoves = args.numOfMoves;
 	this.origin = new BanContext(args.initBan, args.motigoma);
-	this.selfProcessor = new SelfProcessor(numOfMoves);
-	this.opponentProcessor = new OpponentProcessor(numOfMoves);
+	this.selfProcessor = new SenteProcessor(numOfMoves);
+	this.opponentProcessor = new GoteProcessor(numOfMoves);
 	this.exe = exe;
     }
 

@@ -4,18 +4,16 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import begyyal.commons.object.collection.XGen;
-import begyyal.commons.util.cache.SimpleCacheResolver;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.common.Player;
 import begyyal.shogi.object.BanContext;
 import begyyal.shogi.object.MasuState;
 
-public class SelfProcessor extends PlayerProcessorBase {
+public class SenteProcessor extends PlayerProcessorBase {
 
     public static final Player playerType = Player.Sente;
 
-    public SelfProcessor(int numOfMoves) {
+    public SenteProcessor(int numOfMoves) {
 	super(numOfMoves);
     }
 
@@ -27,14 +25,8 @@ public class SelfProcessor extends PlayerProcessorBase {
 	// 駒の移動による王手(開き王手は除く)
 	var cs1 = ban.search(s -> s.ss.player == playerType)
 	    .flatMap(from -> spreadMasuState(from, ban)
-		.filter(to -> SimpleCacheResolver
-		    .getAsPrivate(this.getClass(), 1, from.ss.hash, () -> {
-			var dt = XGen.newHashSet(from.getDecomposedTerritory());
-			var k = from.ss.koma;
-			if (k.canNari())
-			    dt.addAll(MasuState.getDecomposedTerritory(k.naru(), playerType));
-			return dt;
-		    }).contains(to.getVectorTo(opponentOu)))
+		.filter(to -> this.getTerritoryAfterMoved(to.ss.y, from.ss)
+		    .contains(to.getVectorTo(opponentOu.ss)))
 		.flatMap(to -> createBranchStream(to.ss.y, from.ss)
 		    .map(tn -> {
 			var newBan = ban.clone();
@@ -47,7 +39,7 @@ public class SelfProcessor extends PlayerProcessorBase {
 	// 開き王手
 	var cs2 = ban.search(s -> s.ss.player == playerType && s.isLinearRange())
 	    .map(s -> {
-		var v = s.getVectorTo(opponentOu);
+		var v = s.getVectorTo(opponentOu.ss);
 		if (Math.abs(v.x) <= 1 && Math.abs(v.y) <= 1
 			|| !s.getDecomposedTerritory().contains(v))
 		    return null;
@@ -88,7 +80,8 @@ public class SelfProcessor extends PlayerProcessorBase {
 	    .flatMap(m -> {
 		var dt = MasuState.getDecomposedTerritory(m.koma, playerType);
 		return ban
-		    .search(s -> s.ss.koma == Koma.Empty && dt.contains(s.getVectorTo(opponentOu)))
+		    .search(
+			s -> s.ss.koma == Koma.Empty && dt.contains(s.getVectorTo(opponentOu.ss)))
 		    .map(to -> {
 			var newBan = ban.clone();
 			var te = newBan.deploy(m.koma, to.ss.x, to.ss.y, playerType);

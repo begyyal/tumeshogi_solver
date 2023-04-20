@@ -93,7 +93,7 @@ public class te5 {
 	    fail("Error occured.");
 	}
 
-	Objects.requireNonNull(rec);
+	Objects.requireNonNull(rec);	
 	assertEquals(rec.size(), numOfMoves);
 
 	assertEquals(rec.get(0).toString(), "３４銀");
