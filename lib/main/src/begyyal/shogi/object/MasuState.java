@@ -70,23 +70,13 @@ public class MasuState {
 
     public static ImmutableXList<Vector> getDecomposedTerritory(Koma koma, Player player) {
 	var base = getTerritory(koma, player);
-	return isLinearRange(koma)
+	return koma.isLinearRange()
 		? SimpleCacheResolver.getAsPrivate(MasuState.class, 1,
 		    (16 + koma.ordinal()) * 2 + player.ordinal(),
 		    () -> XListGen.immutableOf(base.stream()
 			.flatMap(v -> Arrays.stream(v.decompose()))
 			.toArray(Vector[]::new)))
 		: base;
-    }
-
-    public boolean isLinearRange() {
-	return isLinearRange(this.ss.koma);
-    }
-
-    public static boolean isLinearRange(Koma koma) {
-	return koma == Koma.Kyousya ||
-		koma == Koma.Hisya || koma == Koma.Ryuu ||
-		koma == Koma.Kaku || koma == Koma.Uma;
     }
 
     @Override
@@ -132,6 +122,15 @@ public class MasuState {
 
 	public boolean isEqualXY(SmartMasuState s) {
 	    return s.x == this.x && s.y == this.y;
+	}
+
+	public boolean haveLinearWithSameSlope(Vector v) {
+	    if (!this.koma.isLinearRange())
+		return false;
+	    var k = this.koma;
+	    if (k.nari)
+		k = k == Koma.Ryuu ? Koma.Hisya : Koma.Kaku;
+	    return MasuState.getTerritory(k, this.player).anyMatch(v2 -> v2.sameSlope(v));
 	}
 
 	@Override

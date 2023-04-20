@@ -36,6 +36,7 @@ public class GoteProcessor extends PlayerProcessorBase {
 			: null;
 	    });
 
+	// 両王手はここで終了
 	var outeArray = ou.rangedBy.stream()
 	    .filter(s -> s.player != playerType)
 	    .toArray(SmartMasuState[]::new);
@@ -57,19 +58,18 @@ public class GoteProcessor extends PlayerProcessorBase {
 
 	// 合駒(持ち駒を貼る+駒を移動する)
 	var outeVector = ou.getVectorTo(oute.ss);
-	Stream<BanContext> cs3 = Math.abs(outeVector.x) == 1 && Math.abs(outeVector.y) == 1
+	Stream<BanContext> cs3 = !oute.ss.koma.isLinearRange()
 		? Stream.empty()
 		: Arrays.stream(outeVector.decompose())
 		    .filter(v -> !outeVector.equals(v)
-			    && checkMudaai(ban, ban.getState(ou.ss.x + v.x, ou.ss.y + v.y)))
+			    && checkMudaai(ban, ban.getState(ou.ss.x + v.x, ou.ss.y + v.y), oute))
 		    .flatMap(v -> getOuteObstructionCS(ou.ss.x + v.x, ou.ss.y + v.y, context, ban));
-
 	return executeCS(context, Stream.concat(Stream.concat(cs1, cs2), cs3));
     }
 
-    private boolean checkMudaai(Ban ban, MasuState state) {
+    private boolean checkMudaai(Ban ban, MasuState fs, MasuState oute) {
 
-	var grb = state.rangedBy.stream().filter(s -> s.player == playerType)
+	var grb = fs.rangedBy.stream().filter(s -> s.player == playerType)
 	    .toArray(SmartMasuState[]::new);
 	if (grb.length == 0)
 	    return false;
@@ -79,31 +79,36 @@ public class GoteProcessor extends PlayerProcessorBase {
 	if (ou == null)
 	    return true;
 
-	var preOute = state.rangedBy.stream()
-	    .filter(s -> s.player != playerType
-		    && this.getTerritoryAfterMoved(state.ss.y, s, Player.Sente)
-			.contains(state.getVectorTo(ou)))
+	var preOute = fs.rangedBy.stream()
+	    .filter(s -> s.player != playerType &&
+		    this.getTerritoryAfterMoved(fs.ss.y, s, Player.Sente)
+			.contains(fs.getVectorTo(ou)))
 	    .toArray(SmartMasuState[]::new);
 	if (grb.length >= preOute.length)
 	    return true;
 
-	long nowSkc = this.getSkCount(ban, state, ou);
-	long minSkc = Arrays.stream(preOute)
-	    .map(ss -> this.createBranchStream(state.ss.y, ss, Player.Sente).map(tn -> {
+	var outeSlope = fs.getVectorTo(ou);
+	var isPierce = ban.exploration(ou, outeSlope) != null;
+	int offset = Math.max(grb.length - 1, 0);
+	long nowScore = this.getSmCount(ban, ou) * 10 - (isPierce ? 5 : 0);
+	long estScore = Arrays.stream(preOute)
+	    .map(ss -> this.createBranchStream(fs.ss.y, ss, Player.Sente).map(tn -> {
 		var newBan = ban.clone();
-		var te = newBan.advance(ss.x, ss.y, state.ss.x, state.ss.y, tn);
-		return te != null && newBan.checkOute() ? this.getSkCount(newBan, state, ou) : 8;
-	    }).reduce((a, b) -> a < b ? b : a).get())
-	    .reduce((a, b) -> a < b ? b : a).get();
-	return minSkc < nowSkc;
+		var te = newBan.advance(ss.x, ss.y, fs.ss.x, fs.ss.y, tn);
+		long smc = te != null && newBan.checkOute() ? this.getSmCount(newBan, ou) : 9;
+		return smc * 10 - (ss.haveLinearWithSameSlope(outeSlope) ? 5 : 0);
+	    }).reduce((a, b) -> a < b ? a : b).get())
+	    .sorted().skip(offset).findFirst().get();
+
+	return estScore > nowScore;
     }
 
-    private long getSkCount(Ban ban, MasuState ignore, SmartMasuState ou) {
+    private long getSmCount(Ban ban, SmartMasuState ou) {
 	return ban.search(s -> {
 	    var v = s.getVectorTo(ou);
 	    return Math.abs(v.x) <= 1 && Math.abs(v.y) <= 1
-		    && (s.ss.x != ignore.ss.x || s.ss.y != ignore.ss.y)
-		    && s.rangedBy.stream().anyMatch(s2 -> s2.player == Player.Sente);
+		    && s.ss.koma == Koma.Empty
+		    && s.rangedBy.stream().allMatch(s2 -> s2.player != Player.Sente);
 	}).count();
     }
 

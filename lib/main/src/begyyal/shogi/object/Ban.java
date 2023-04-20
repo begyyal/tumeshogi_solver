@@ -39,7 +39,7 @@ public class Ban implements Cloneable {
 	var s = this.matrix[i];
 	if (s.ss.koma == Koma.Empty)
 	    return;
-	boolean haveLinearRange = s.isLinearRange();
+	boolean haveLinearRange = s.ss.koma.isLinearRange();
 	for (var v : s.getTerritory())
 	    if (haveLinearRange) {
 		for (var miniV : v.decompose())
@@ -71,8 +71,8 @@ public class Ban implements Cloneable {
 	return Arrays.stream(this.matrix);
     }
 
-    public MasuState exploration(MasuState state, Vector v) {
-	int x = state.ss.x, y = state.ss.y;
+    public MasuState exploration(SmartMasuState ss, Vector v) {
+	int x = ss.x, y = ss.y;
 	int vx = x + v.x, vy = y + v.y;
 	return validateCoordinate(vx, vy) ? this.matrix[vx * 9 + vy] : null;
     }

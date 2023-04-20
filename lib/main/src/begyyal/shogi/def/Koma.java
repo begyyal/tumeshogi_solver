@@ -173,6 +173,12 @@ public enum Koma {
     public boolean canNari() {
 	return !this.nari && this != Ou && this != Kin && this != Empty;
     }
+    
+    public boolean isLinearRange() {
+	return this == Koma.Hisya || this == Koma.Ryuu ||
+		this == Koma.Kaku || this == Koma.Uma ||
+		this == Koma.Kyousya;
+    }
 
     public Koma naru() {
 	return Arrays.stream(Koma.values())
