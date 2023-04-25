@@ -45,7 +45,7 @@ public class MasuState {
 	return new Vector(s.x - this.ss.x, s.y - this.ss.y);
     }
 
-    public boolean isOpponentOu() {
+    public boolean isGyoku() {
 	return ss.player == Player.Gote && ss.koma == Koma.Ou;
     }
 

@@ -20,13 +20,13 @@ public class SenteProcessor extends PlayerProcessorBase {
     public BanContext[] spread(BanContext context) {
 
 	var ban = context.ban;
-	var opponentOu = ban.search(MasuState::isOpponentOu).findFirst().get();
+	var gyoku = ban.search(MasuState::isGyoku).findFirst().get();
 
 	// 駒の移動による王手(開き王手は除く)
 	var cs1 = ban.search(s -> s.ss.player == playerType)
 	    .flatMap(from -> spreadMasuState(from, ban)
 		.filter(to -> this.getTerritoryAfterMoved(to.ss.y, from.ss)
-		    .contains(to.getVectorTo(opponentOu.ss)))
+		    .contains(to.getVectorTo(gyoku.ss)))
 		.flatMap(to -> createBranchStream(to.ss.y, from.ss)
 		    .map(tn -> {
 			var newBan = ban.clone();
@@ -39,7 +39,7 @@ public class SenteProcessor extends PlayerProcessorBase {
 	// 開き王手
 	var cs2 = ban.search(s -> s.ss.player == playerType && s.ss.koma.isLinearRange())
 	    .map(s -> {
-		var v = s.getVectorTo(opponentOu.ss);
+		var v = s.getVectorTo(gyoku.ss);
 		if (Math.abs(v.x) <= 1 && Math.abs(v.y) <= 1
 			|| !s.getDecomposedTerritory().contains(v))
 		    return null;
@@ -56,7 +56,7 @@ public class SenteProcessor extends PlayerProcessorBase {
 			    obstruction = result;
 			} else
 			    break;
-		    } else if (result.isOpponentOu()) {
+		    } else if (result.isGyoku()) {
 			return obstruction;
 		    } else
 			break;
@@ -79,9 +79,10 @@ public class SenteProcessor extends PlayerProcessorBase {
 	    .filter(m -> m.player == playerType && m.num > 0)
 	    .flatMap(m -> {
 		var dt = MasuState.getDecomposedTerritory(m.koma, playerType);
-		return ban
-		    .search(
-			s -> s.ss.koma == Koma.Empty && dt.contains(s.getVectorTo(opponentOu.ss)))
+		return ban.search(
+		    s -> s.ss.koma == Koma.Empty && dt.contains(s.getVectorTo(gyoku.ss)))
+		    .sorted( // 無駄合いの余地を極力無くすため、玉に近い手の優先度を上げる
+			(s1, s2) -> s1.getVectorTo(gyoku.ss).compareTo(s2.getVectorTo(gyoku.ss)))
 		    .map(to -> {
 			var newBan = ban.clone();
 			var te = newBan.deploy(m.koma, to.ss.x, to.ss.y, playerType);

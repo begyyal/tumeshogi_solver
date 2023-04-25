@@ -132,7 +132,7 @@ public class Ban implements Cloneable {
     }
 
     public boolean checkOute() {
-	return !search(MasuState::isOpponentOu).findFirst().get().checkSafe(Player.Gote);
+	return !search(MasuState::isGyoku).findFirst().get().checkSafe(Player.Gote);
     }
 
     public static boolean validateState(Koma koma, int x, int y, Player p) {
