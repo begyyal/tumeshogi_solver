@@ -109,4 +109,47 @@ public class te7 {
 	assertEquals(rec.get(5).toString(), "２１玉");
 	assertEquals(rec.get(6).toString(), "３２角");
     }
+    
+    @Test
+    public void p4() {
+
+	int numOfMoves = 7;
+
+	var ban = XGen.<TsMasuState>newHashSet();
+	ban.add(new TsMasuState(Player.Gote, TsKoma.Keima, 1, 3));
+	ban.add(new TsMasuState(Player.Gote, TsKoma.Ou, 2, 4));
+	ban.add(new TsMasuState(Player.Sente, TsKoma.Kaku, 5, 5));
+	ban.add(new TsMasuState(Player.Sente, TsKoma.Gin, 4, 3));
+	ban.add(new TsMasuState(Player.Sente, TsKoma.Tokin, 2, 1));
+
+	var motigoma = XGen.<TsMotigomaState>newHashSet();
+	motigoma.add(new TsMotigomaState(Player.Sente, TsKoma.Hisya, 1));
+	motigoma.add(new TsMotigomaState(Player.Sente, TsKoma.Kin, 1));
+	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Hu, 17));
+	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Kyousya, 4));
+	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Keima, 3));
+	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Gin, 3));
+	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Kin, 3));
+	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Hisya, 1));
+	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Kaku, 1));
+
+	List<TsKihuRecord> rec = null;
+	try (var solver = new TsSolver()) {
+	    rec = solver.calculate(numOfMoves, ban, motigoma);
+	} catch (Exception e) {
+	    e.printStackTrace();
+	    fail("Error occured.");
+	}
+
+	Objects.requireNonNull(rec);
+	assertEquals(rec.size(), numOfMoves);
+
+	assertEquals(rec.get(0).toString(), "２２飛");
+	assertEquals(rec.get(1).toString(), "１４玉");
+	assertEquals(rec.get(2).toString(), "２３飛成");
+	assertEquals(rec.get(3).toString(), "同玉");
+	assertEquals(rec.get(4).toString(), "３３角成");
+	assertEquals(rec.get(5).toString(), "同玉");
+	assertEquals(rec.get(6).toString(), "３４金");
+    }
 }

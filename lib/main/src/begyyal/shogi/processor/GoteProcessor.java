@@ -96,7 +96,7 @@ public class GoteProcessor extends PlayerProcessorBase {
 		var newBan = ban.clone();
 		var te = newBan.advance(ss.x, ss.y, fs.ss.x, fs.ss.y, tn);
 		long smc = te != null && newBan.checkOute() ? this.getSmCount(newBan, ou) : 9;
-		return smc * 10 - (ss.haveLinearWithSameSlope(outeSlope) ? 5 : 0);
+		return smc * 10 - (isPierce && ss.haveLinearWithSameSlope(outeSlope) ? 5 : 0);
 	    }).reduce((a, b) -> a < b ? a : b).get())
 	    .sorted().skip(offset).findFirst().get();
 
