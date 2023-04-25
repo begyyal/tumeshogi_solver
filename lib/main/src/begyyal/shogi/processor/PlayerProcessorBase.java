@@ -50,7 +50,7 @@ public abstract class PlayerProcessorBase {
     }
 
     protected Set<Vector> getTerritoryAfterMoved(int y, SmartMasuState from, Player ply) {
-	int key = ((9 + y) * 16 + from.koma.ordinal()) * 2 + ply.ordinal();
+	int key = (((9 + from.y) * 9 + y) * 16 + from.koma.ordinal()) * 2 + ply.ordinal();
 	return SimpleCacheResolver.getAsPrivate(PlayerProcessorBase.class, 1, key, () -> {
 	    var dt = XGen.newHashSet(MasuState.getDecomposedTerritory(from.koma, ply));
 	    if ((this.isNariArea(y, ply) || this.isNariArea(from.y, ply)) && from.koma.canNari())
