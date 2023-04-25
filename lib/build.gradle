@@ -49,6 +49,7 @@ tasks.withType(JavaCompile){
 }
 
 delete('main/resources/META-INF/')
+delete('../cmd/jar/ts_solver.jar')
 copy {
 	from '../LICENSE'
 	into 'main/resources/META-INF/'
