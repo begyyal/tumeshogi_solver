@@ -49,19 +49,21 @@ tasks.withType(JavaCompile){
 }
 
 delete('main/resources/META-INF/')
-delete('../cmd/jar/ts_solver.jar')
 copy {
 	from '../LICENSE'
 	into 'main/resources/META-INF/'
-}
-copy {
-	from 'build/libs/ts_solver.jar'
-	into '../cmd/jar/'
 }
 
 jar {
 	archivesBaseName = 'ts_solver'
 	from configurations.compileClasspath.collect{ it.isDirectory() ? it : zipTreeByCustom(it) }
+	doLast {
+		delete('../cmd/jar/ts_solver.jar')
+		copy {
+			from 'build/libs/ts_solver.jar'
+			into '../cmd/jar/'
+		}
+	}
 }
 
 FileTree zipTreeByCustom(File f){
