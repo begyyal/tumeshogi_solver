@@ -107,6 +107,6 @@ public class te7 {
 	assertEquals(rec.get(3).toString(), "２２玉");
 	assertEquals(rec.get(4).toString(), "２３歩成");
 	assertEquals(rec.get(5).toString(), "２１玉");
-	assertEquals(rec.get(6).toString(), "９８角");
+	assertEquals(rec.get(6).toString(), "３２角");
     }
 }

@@ -23,7 +23,7 @@ public class GoteProcessor extends PlayerProcessorBase {
     public BanContext[] spread(BanContext context) {
 
 	var ban = context.ban;
-	var ou = ban.search(MasuState::isOpponentOu).findFirst().get();
+	var ou = ban.search(MasuState::isGyoku).findFirst().get();
 
 	// 王手範囲から避ける(王による王手駒の取得含む)
 	Stream<BanContext> cs1 = spreadMasuState(ou, ban)
