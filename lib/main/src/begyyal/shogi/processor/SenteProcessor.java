@@ -22,24 +22,31 @@ public class SenteProcessor extends PlayerProcessorBase {
     public BanContext[] spread(BanContext context) {
 
 	var ban = context.ban;
+	var senteStates = ban.search(s -> s.ss.player == playerType).toArray(MasuState[]::new);
+	if (senteStates.length == 0)
+	    return null;
+	boolean one = senteStates.length == 1;
 	var gyoku = ban.search(MasuState::isGyoku).findFirst().get();
 
 	// 駒の移動による王手(開き王手は除く)
-	var cs1 = ban.search(s -> s.ss.player == playerType)
-	    .flatMap(from -> spreadMasuState(from, ban)
-		.filter(to -> this.getTerritoryAfterMoved(to.ss.y, from.ss)
-		    .contains(to.getVectorTo(gyoku.ss)))
-		.flatMap(to -> createBranchStream(to.ss.y, from.ss)
-		    .map(tn -> {
-			var newBan = ban.clone();
-			var te = newBan.advance(from.ss.x, from.ss.y, to.ss.x, to.ss.y, tn);
-			return te != null && newBan.checkOute()
-				? context.branch(newBan, te, to.ss.koma, playerType, true)
-				: null;
-		    })));
+	var cs1 = one && !senteStates[0].ss.koma.isLinearRange()
+		? Stream.<BanContext>empty()
+		: Arrays.stream(senteStates)
+		    .flatMap(from -> spreadMasuState(from, ban)
+			.filter(to -> this.getTerritoryAfterMoved(to.ss.y, from.ss)
+			    .contains(to.getVectorTo(gyoku.ss)))
+			.flatMap(to -> createBranchStream(to.ss.y, from.ss)
+			    .map(tn -> {
+				var newBan = ban.clone();
+				var te = newBan.advance(from.ss.x, from.ss.y, to.ss.x, to.ss.y, tn);
+				return te != null && newBan.checkOute()
+					? context.branch(newBan, te, to.ss.koma, playerType, true)
+					: null;
+			    })));
 
 	// 開き王手
-	var cs2 = ban.search(s -> s.ss.player == playerType && s.ss.koma.isLinearRange())
+	var cs2 = one ? Stream.<BanContext>empty() : Arrays.stream(senteStates)
+	    .filter(s -> s.ss.koma.isLinearRange())
 	    .map(s -> {
 		var v = s.getVectorTo(gyoku.ss);
 		if (Math.abs(v.x) <= 1 && Math.abs(v.y) <= 1
