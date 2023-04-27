@@ -1,6 +1,8 @@
 package begyyal.shogi.processor;
 
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -79,17 +81,36 @@ public class SenteProcessor extends PlayerProcessorBase {
 	    .filter(m -> m.player == playerType && m.num > 0)
 	    .flatMap(m -> {
 		var dt = MasuState.getDecomposedTerritory(m.koma, playerType);
-		return ban.search(
-		    s -> s.ss.koma == Koma.Empty && dt.contains(s.getVectorTo(gyoku.ss)))
-		    .sorted( // 無駄合いの余地を極力無くすため、玉に近い手の優先度を上げる
-			(s1, s2) -> s1.getVectorTo(gyoku.ss).compareTo(s2.getVectorTo(gyoku.ss)))
-		    .map(to -> {
-			var newBan = ban.clone();
-			var te = newBan.deploy(m.koma, to.ss.x, to.ss.y, playerType);
-			return te != null && newBan.checkOute()
-				? context.branch(newBan, te, m.koma, playerType, false)
-				: null;
-		    });
+		boolean isLinear = m.koma.isLinearRange();
+		Predicate<MasuState> prd = isLinear ? s -> {
+		    if (s.ss.koma != Koma.Empty)
+			return false;
+		    var oute = s.getVectorTo(gyoku.ss);
+		    if (!dt.contains(oute))
+			return false;
+		    var dv = oute.decompose();
+		    if (dv.length == 1)
+			return true;
+		    Arrays.sort(dv, Comparator.reverseOrder());
+		    boolean unObs = true;
+		    MasuState s2 = null;
+		    for (var miniV : dv)
+			if (!miniV.equals(oute)
+				&& (s2 = ban.exploration(s.ss, miniV)).ss.koma != Koma.Empty)
+			    unObs = false;
+		    return unObs && !s2.rangedBy.isEmpty();
+		} : s -> s.ss.koma == Koma.Empty && dt.contains(s.getVectorTo(gyoku.ss));
+		var ds = ban.search(prd);
+		if (isLinear)
+		    ds = ds.sorted(
+			(s1, s2) -> s1.getVectorTo(gyoku.ss).compareTo(s2.getVectorTo(gyoku.ss)));
+		return ds.map(to -> {
+		    var newBan = ban.clone();
+		    var te = newBan.deploy(m.koma, to.ss.x, to.ss.y, playerType);
+		    return te != null
+			    ? context.branch(newBan, te, m.koma, playerType, false)
+			    : null;
+		});
 	    });
 
 	// 駒移動系は空き王手と他で重複し得るのでdistinctする
