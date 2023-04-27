@@ -125,11 +125,6 @@ public class GoteProcessor extends PlayerProcessorBase {
 			    : context.branch(newBan, te, state.ss.koma, playerType, true);
 		}));
 
-	if (Arrays.stream(context.motigoma)
-	    .filter(m -> m.player == playerType && m.num > 0)
-	    .findAny().isEmpty())
-	    return c1;
-
 	var c2 = Arrays.stream(context.motigoma)
 	    .filter(m -> m.player == playerType && m.num > 0)
 	    .map(m -> {
