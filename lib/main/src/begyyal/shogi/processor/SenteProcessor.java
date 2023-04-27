@@ -34,7 +34,9 @@ public class SenteProcessor extends PlayerProcessorBase {
 		: Arrays.stream(senteStates)
 		    .flatMap(from -> spreadMasuState(from, ban)
 			.filter(to -> this.getTerritoryAfterMoved(to.ss.y, from.ss)
-			    .contains(to.getVectorTo(gyoku.ss)))
+			    .contains(to.getVectorTo(gyoku.ss))
+				&& (!one || to.rangedBy.stream()
+				    .allMatch(s -> s.player != Player.Gote)))
 			.flatMap(to -> createBranchStream(to.ss.y, from.ss)
 			    .map(tn -> {
 				var newBan = ban.clone();
