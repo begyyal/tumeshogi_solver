@@ -85,11 +85,12 @@ public class BanContext implements Comparable<BanContext> {
 	return new ContextCacheKey(key);
     }
 
-    public ContextCache createCache(int offset) {
+    public ContextCache createCache(int offset, int depth) {
 	return new ContextCache(
 	    this.log.createPartialList(offset, this.log.size()),
 	    this.motigoma,
-	    this.ban);
+	    this.ban,
+	    depth);
     }
 
     public KihuRecord getLatestRecord() {

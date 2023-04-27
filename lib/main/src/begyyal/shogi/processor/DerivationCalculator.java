@@ -57,6 +57,7 @@ public class DerivationCalculator {
 	    .sorted((e1, e2) -> XUtils.compare(e1.getKey(), e2.getKey()))
 	    .iterator();
 
+	int cd = this.numOfMoves - count;
 	while (i.hasNext()) {
 
 	    var e = i.next();
@@ -65,12 +66,17 @@ public class DerivationCalculator {
 
 	    BanContext selected = null;
 	    ContextCache cache = SimpleCacheResolver.getAsPublic(PublicCacheMapId.context, ck);
-	    if (cache == null) {
+	    if (cache == null || cache.depth < cd) {
 		selected = r4spread(k, e.getValue().get(), count + 1);
-		cache = selected == null ? ContextCache.dummy : selected.createCache(count);
+		cache = selected == null
+			? ContextCache.createFailure(cd)
+			: selected.createCache(count, cd);
 		SimpleCacheResolver.putAsPublic(PublicCacheMapId.context, ck, cache);
-	    } else if (cache != ContextCache.dummy)
+	    } else if (cache.success) {
 		selected = cache.restoreContext(k.log);
+		if (selected.log.size() > numOfMoves)
+		    selected = null;
+	    }
 
 	    if (count % 2 != 0) {
 		if (selected != null && (result == null || result.log.size() > selected.log.size()))
