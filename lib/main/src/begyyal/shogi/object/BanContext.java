@@ -6,32 +6,29 @@ import begyyal.commons.object.collection.XList;
 import begyyal.commons.object.collection.XList.XListGen;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.def.common.Player;
+import begyyal.shogi.object.cache.ContextCache;
+import begyyal.shogi.object.cache.ContextCacheKey;
 
 public class BanContext implements Comparable<BanContext> {
 
     private static final AtomicInteger idGen = new AtomicInteger();
-    public static final BanContext dummy = new BanContext(null, null);
 
     public final int id = idGen.getAndIncrement();
     public final XList<KihuRecord> log;
     public final MotigomaState[] motigoma;
     public final Ban ban;
-    public final int beforeId;
 
     public BanContext(Ban initBan, MotigomaState[] motigoma) {
-	this(XListGen.newi(), initBan, motigoma, -1);
+	this(XListGen.newi(), initBan, motigoma);
     }
 
-    private BanContext(
+    public BanContext(
 	XList<KihuRecord> log,
 	Ban ban,
-	MotigomaState[] motigoma,
-	int beforeId) {
-
+	MotigomaState[] motigoma) {
 	this.log = log;
 	this.ban = ban;
 	this.motigoma = motigoma;
-	this.beforeId = beforeId;
     }
 
     public BanContext branch(
@@ -68,36 +65,31 @@ public class BanContext implements Comparable<BanContext> {
 	return new BanContext(
 	    XListGen.of(this.log),
 	    ban,
-	    newMotigoma,
-	    this.id);
+	    newMotigoma);
     }
 
     public ContextCacheKey generateCasheKey() {
-
-	// koma*7,player*2,motigoma*1,(motigoma+logSize)*1
+	// koma*7,player*2,motigoma*2
 	var key = new Object[11];
 	this.ban.fillCacheKey(key);
-
-	int mf = this.log.size();
 	long m = 1;
-	for (int i = 0; i < 14; i++) {
-	    var s = this.motigoma[i];
-	    if (i % 7 == 0)
-		mf = mf * 19 + s.num;
-	    else
-		m = m * (s.koma.numLimit + 1) + s.num;
+	int ki = 9;
+	for (int i = 1; i <= 14; i++) {
+	    var s = this.motigoma[i - 1];
+	    m = m * (s.koma.numLimit + 1) + s.num;
+	    if (i % 7 == 0) {
+		key[ki++] = m;
+		m = 1;
+	    }
 	}
-
-	key[9] = m;
-	key[10] = mf;
-
 	return new ContextCacheKey(key);
     }
 
-    public BanContext copyWithModifying(XList<KihuRecord> log) {
-	var l = this.log.createPartialList(log.size(), this.log.size());
-	l.addAll(0, log);
-	return new BanContext(l, ban, motigoma, id);
+    public ContextCache createCache(int offset) {
+	return new ContextCache(
+	    this.log.createPartialList(offset, this.log.size()),
+	    this.motigoma,
+	    this.ban);
     }
 
     public KihuRecord getLatestRecord() {

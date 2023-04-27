@@ -1,4 +1,4 @@
-package begyyal.shogi.object;
+package begyyal.shogi.object.cache;
 
 import java.util.Arrays;
 import java.util.Objects;

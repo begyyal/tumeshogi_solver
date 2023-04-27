@@ -11,6 +11,7 @@ import begyyal.shogi.constant.PublicCacheMapId;
 import begyyal.shogi.def.Koma;
 import begyyal.shogi.object.Args;
 import begyyal.shogi.object.BanContext;
+import begyyal.shogi.object.cache.ContextCache;
 
 public class DerivationCalculator {
 
@@ -62,15 +63,14 @@ public class DerivationCalculator {
 	    var k = e.getKey();
 	    var ck = k.generateCasheKey();
 
-	    BanContext selected = SimpleCacheResolver.getAsPublic(PublicCacheMapId.context, ck);
-	    if (selected == null) {
+	    BanContext selected = null;
+	    ContextCache cache = SimpleCacheResolver.getAsPublic(PublicCacheMapId.context, ck);
+	    if (cache == null) {
 		selected = r4spread(k, e.getValue().get(), count + 1);
-		selected = selected == null ? BanContext.dummy : selected;
-		SimpleCacheResolver.putAsPublic(PublicCacheMapId.context, ck, selected);
-	    } else if (selected != BanContext.dummy)
-		selected = selected.copyWithModifying(k.log);
-	    if (selected == BanContext.dummy)
-		selected = null;
+		cache = selected == null ? ContextCache.dummy : selected.createCache(count);
+		SimpleCacheResolver.putAsPublic(PublicCacheMapId.context, ck, cache);
+	    } else if (cache != ContextCache.dummy)
+		selected = cache.restoreContext(k.log);
 
 	    if (count % 2 != 0) {
 		if (selected != null && (result == null || result.log.size() > selected.log.size()))
