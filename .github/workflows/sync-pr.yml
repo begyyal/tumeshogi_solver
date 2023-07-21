@@ -36,11 +36,11 @@ jobs:
         do_test=$(./.github/workflows/sh/check_if_need_test.sh ${{ github.event.before }} ${{ github.event.after }})
         echo "do-test=${do_test:-false}" >> $GITHUB_OUTPUT
 
-    - name: Set up JDK 15
+    - name: Set up JDK 17
       if: ${{ steps.cond1.outputs.do-test == 'true' || steps.cond2.outputs.do-test == 'true' }}
       uses: actions/setup-java@v2
       with:
-        java-version: '15'
+        java-version: '17'
         distribution: 'adopt'
 
     - name: Change DNS to Cloudflare
