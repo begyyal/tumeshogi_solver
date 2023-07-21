@@ -26,7 +26,7 @@ public class TsSolver implements Closeable {
 
     private final ExecutorService exe;
 
-    public TsSolver() { // aaaa
+    public TsSolver() {
 	this.exe = Executors.newCachedThreadPool();
     }
 
