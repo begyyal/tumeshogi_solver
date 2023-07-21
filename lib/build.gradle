@@ -55,6 +55,7 @@ copy {
 }
 
 jar {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	archivesBaseName = 'ts_solver'
 	from configurations.compileClasspath.collect{ it.isDirectory() ? it : zipTreeByCustom(it) }
 	doLast {

@@ -39,11 +39,20 @@ copy {
 }
 
 jar {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	archivesBaseName = 'ts_solver'
 	manifest {
 		attributes("Main-Class": 'begyyal.shogi.cmd.CmdEntrypoint')
 	}
 	from configurations.compileClasspath.collect{ it.isDirectory() ? it : zipTreeByCustom(it) }
+}
+
+distTar {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+distZip {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 FileTree zipTreeByCustom(File f){
