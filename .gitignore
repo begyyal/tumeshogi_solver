@@ -6,3 +6,5 @@ build_exe/
 .classpath
 .gradle
 .project
+
+**/.LCKgradle-wrapper.properties~
