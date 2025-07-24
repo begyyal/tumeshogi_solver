@@ -20,7 +20,7 @@ jobs:
       uses: actions/setup-java@v2
       with:
         java-version: '23'
-        distribution: 'adopt'
+        distribution: 'oracle'
     - name: Build with Gradle
       run: |
         chmod +x ./cmd/gradlew
