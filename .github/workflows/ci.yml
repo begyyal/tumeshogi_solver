@@ -1,0 +1,32 @@
+name: ci
+
+on:
+  workflow_dispatch: 
+  push:
+    paths-ignore:
+      - "README.md"
+      - ".gitignore"
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        submodules: true
+    - name: Set up JDK 15
+      uses: actions/setup-java@v2
+      with:
+        java-version: '15'
+        distribution: 'adopt'
+    - name: Change DNS to Cloudflare
+      run: /usr/bin/echo -e "nameserver 1.1.1.1\nnameserver 8.8.8.8" | sudo tee /etc/resolv.conf
+    - name: Build with Gradle
+      run: |
+        chmod +x ./cmd/gradlew
+        ./cmd/gradlew build -b ./lib/build.gradle
+        ./cmd/gradlew build -b ./cmd/build.gradle
+    - name: Test
+      run: ./test.sh

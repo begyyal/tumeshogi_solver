@@ -1,13 +1,4 @@
-- **品質担保**  
-[![sync-pr](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/sync-pr.yml)
-[![push-stg](https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-stg.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-stg.yml)  
-
-- **開発補助**  
-[![create-feature](https://github.com/begyyal/tumeshogi_solver/actions/workflows/create-feature.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solve/actions/workflows/create-feature.yml)
-[![delete-feature](https://github.com/begyyal/tumeshogi_solver/actions/workflows/delete-feature.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/delete-feature.yml)   
-
-- **その他**  
-[![push-tags](https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-tags.yml/badge.svg)](https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-tags.yml)  
+[![CI][ci-badge]][ci-url] [![push-tags][tags-badge]][tags-url]
 
 # 概要
 
@@ -61,3 +52,11 @@ Javaライブラリ版と、コマンド実行形式版があります。
     - 9手詰め : ◎
     - 11手詰め : △
     - 13手詰め以降 : ？
+
+# License
+[MIT-License](./LICENSE)
+
+[ci-url]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/ci.yml
+[ci-badge]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/ci.yml/badge.svg
+[tags-url]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-tags.yml
+[tags-badge]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-tags.yml/badge.svg
