@@ -5,25 +5,19 @@ on:
     tags: [ v* ]
 
 jobs:
-
   update-tag:
     runs-on: ubuntu-latest
-
     steps:
-
-    - uses: actions/checkout@v3
-
+    - uses: actions/checkout@v4
     - name: Set git configs
       run: |
         git config --global user.email "begyyal@gmail.com"
         git config --global user.name "begyyal-ghost"
-
     - name: Update tag
       run: |
         version=${{ github.ref_name }}
         git tag -a ${version%%.*} -m "BY-CI"
         git push origin ${version%%.*} -f
-
     - name: Post tweet
       run: |
         ./.github/workflows/sh/tweet_template.sh \

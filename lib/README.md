@@ -13,7 +13,7 @@ Mavenリポジトリのような公開はしていないため、ご利用に際
 # API
 
 `begyyal.shogi.TsSolver#calculate()`が計算処理となります。  
-注記付きの簡単な[サンプル](./test/sample/sample.java)があるのでご覧ください。
+注記付きの簡単な[サンプル](./test/src/sample/sample.java)があるのでご覧ください。
 
 ## 各種Enumのキー文字
 

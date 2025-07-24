@@ -6,7 +6,7 @@ import begyyal.commons.constant.Strs;
 import begyyal.commons.object.XBool;
 import begyyal.commons.object.collection.XGen;
 import begyyal.commons.object.collection.XList.XListGen;
-import begyyal.commons.util.function.XIntegers;
+import begyyal.commons.util.function.XNumbers;
 import begyyal.commons.util.function.XStrings;
 import begyyal.shogi.cmd.object.CmdArgs;
 import begyyal.shogi.def.common.Player;
@@ -53,7 +53,7 @@ public class CmdArgParser {
     }
 
     private int parseNumStr(String arg) {
-	if (!XIntegers.checkIfParsable(arg))
+	if (!XNumbers.checkIfParsable(arg, true))
 	    throw new IllegalArgumentException(
 		"The argument of number of moves must be number format.");
 	return Integer.parseInt(arg);
@@ -108,7 +108,7 @@ public class CmdArgParser {
 	    var count = arg.substring(i + 1, i + 2);
 	    if (i + 3 < arg.length()) { // 歩は保持数2桁があり得る
 		var count2dig = arg.substring(i + 1, i + 3);
-		if (XIntegers.checkIfParsable(count2dig) && ++i > 0)
+		if (XNumbers.checkIfParsable(count2dig, true) && ++i > 0)
 		    count = count2dig;
 	    }
 	    motigoma.add(new TsMotigomaState(p, koma, Integer.parseInt(count)));
