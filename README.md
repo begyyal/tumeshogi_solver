@@ -1,4 +1,4 @@
-[![CI][ci-badge]][ci-url] [![push-tags][tags-badge]][tags-url]
+[![CI/LIB][ci-lib-badge]][ci-lib-url] [![CI/CMD][ci-cmd-badge]][ci-cmd-url] [![push-tags][tags-badge]][tags-url]
 
 # 概要
 
@@ -56,7 +56,9 @@ Javaライブラリ版と、コマンド実行形式版があります。
 # License
 [MIT-License](./LICENSE)
 
-[ci-url]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/ci.yml
-[ci-badge]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/ci.yml/badge.svg
+[ci-lib-url]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/ci-lib.yml
+[ci-lib-badge]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/ci-lib.yml/badge.svg
+[ci-cmd-url]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/ci-cmd.yml
+[ci-cmd-badge]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/ci-cmd.yml/badge.svg
 [tags-url]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-tags.yml
 [tags-badge]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-tags.yml/badge.svg

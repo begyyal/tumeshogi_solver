@@ -1,11 +1,12 @@
-name: CI
+name: CI/CMD
 
 on:
   workflow_dispatch: 
   push:
-    paths-ignore:
-      - "**/README.md"
-      - "**/.gitignore"
+    paths:
+      - "cmd/**"
+      - "!cmd/README.md"
+      - "!cmd/.gitignore"
 
 jobs:
   main:
@@ -25,7 +26,6 @@ jobs:
     - name: Build with Gradle
       run: |
         chmod +x ./cmd/gradlew
-        ./cmd/gradlew build -b ./lib/build.gradle
         ./cmd/gradlew build -b ./cmd/build.gradle
     - name: Test
       run: ./test.sh

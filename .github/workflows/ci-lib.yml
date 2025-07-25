@@ -1,0 +1,29 @@
+name: CI/LIB
+
+on:
+  workflow_dispatch: 
+  push:
+    paths:
+      - "lib/**"
+      - "!lib/README.md"
+      - "!lib/.gitignore"
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: true
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '24'
+        distribution: 'oracle'
+        cache: 'gradle'
+    - name: Build with Gradle
+      run: |
+        chmod +x ./cmd/gradlew
+        ./cmd/gradlew build -b ./lib/build.gradle
