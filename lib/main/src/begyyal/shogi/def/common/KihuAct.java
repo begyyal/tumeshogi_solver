@@ -5,12 +5,10 @@ public enum KihuAct {
     Yoru("q", "寄"),
     Hiku("r", "引"),
     Sugu("s", "直");
-
     public final String key;
     public final String desc;
-
     private KihuAct(String key, String desc) {
-	this.key = key;
-	this.desc = desc;
+        this.key = key;
+        this.desc = desc;
     }
 }

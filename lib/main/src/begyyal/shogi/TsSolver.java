@@ -23,54 +23,48 @@ import begyyal.shogi.processor.ArgsValidator;
 import begyyal.shogi.processor.DerivationCalculator;
 
 public class TsSolver implements Closeable {
-
-    private final ExecutorService exe;
-
-    public TsSolver() {
-	this.exe = Executors.newCachedThreadPool();
-    }
-
-    public List<TsKihuRecord> calculate(
-	int numOfMoves,
-	Set<TsMasuState> ban,
-	Set<TsMotigomaState> motigoma)
-	throws InterruptedException, ExecutionException {
-	var context = this.preProcess(numOfMoves, ban, motigoma).ignite();
-	return context == null ? Collections.emptyList() : convertKihu(context.log);
-    }
-
-    private DerivationCalculator preProcess(
-	int numOfMoves,
-	Set<TsMasuState> ban,
-	Set<TsMotigomaState> motigoma) {
-	var args = new ArgConverter().exe(numOfMoves, ban, motigoma);
-	new ArgsValidator().validate(args);
-	return new DerivationCalculator(args, exe);
-    }
-
-    private List<TsKihuRecord> convertKihu(XList<KihuRecord> kihu) {
-	var result = XGen.<TsKihuRecord>newArrayList();
-	KihuRecord before = null;
-	for (int i = 0; i < kihu.size(); i++) {
-	    var rec = kihu.get(i);
-	    result.add(new TsKihuRecord(
-		i % 2 == 0 ? Player.Sente : Player.Gote,
-		rec.fsuzi > 9 ? -1 : rec.fsuzi,
-		rec.fdan > 9 ? -1 : rec.fdan,
-		rec.suzi, rec.dan,
-		before != null && before.suzi == rec.suzi && before.dan == rec.dan,
-		TsKoma.of(rec.koma.key, rec.koma.nari),
-		rec.rel,
-		rec.act,
-		rec.opt));
-	    before = rec;
+	private final ExecutorService exe;
+	public TsSolver() {
+		this.exe = Executors.newCachedThreadPool();
 	}
-	return result;
-    }
-
-    @Override
-    public void close() throws IOException {
-	this.exe.shutdown();
-	SimpleCacheResolver.clearAll();
-    }
+	public List<TsKihuRecord> calculate(
+		int numOfMoves,
+		Set<TsMasuState> ban,
+		Set<TsMotigomaState> motigoma)
+	throws InterruptedException, ExecutionException {
+		var context = this.preProcess(numOfMoves, ban, motigoma).ignite();
+		return context == null ? Collections.emptyList() : convertKihu(context.log);
+	}
+	private DerivationCalculator preProcess(
+		int numOfMoves,
+		Set<TsMasuState> ban,
+		Set<TsMotigomaState> motigoma) {
+		var args = new ArgConverter().exe(numOfMoves, ban, motigoma);
+		new ArgsValidator().validate(args);
+		return new DerivationCalculator(args, exe);
+	}
+	private List<TsKihuRecord> convertKihu(XList<KihuRecord> kihu) {
+		var result = XGen.<TsKihuRecord>newArrayList();
+		KihuRecord before = null;
+		for (int i = 0; i < kihu.size(); i ++) {
+			var rec = kihu.get(i);
+			result.add(new TsKihuRecord(
+				i % 2 == 0 ? Player.Sente : Player.Gote,
+				rec.fsuzi > 9 ? -1 : rec.fsuzi,
+				rec.fdan > 9 ? -1 : rec.fdan,
+				rec.suzi, rec.dan,
+				before != null && before.suzi == rec.suzi && before.dan == rec.dan,
+				TsKoma.of(rec.koma.key, rec.koma.nari),
+				rec.rel,
+				rec.act,
+				rec.opt));
+			before = rec;
+		}
+		return result;
+	}
+	@Override
+	public void close() throws IOException {
+		this.exe.shutdown();
+		SimpleCacheResolver.clearAll();
+	}
 }
