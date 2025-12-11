@@ -1,11 +1,12 @@
 package it;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.Test;
 
 import begyyal.commons.object.collection.XGen;
@@ -17,89 +18,82 @@ import begyyal.shogi.entity.TsMasuState;
 import begyyal.shogi.entity.TsMotigomaState;
 
 public class te5 {
-
-    @Test
-    public void p6_issue161() {
-
-	int numOfMoves = 5;
-
-	var ban = XGen.<TsMasuState>newHashSet();
-	ban.add(new TsMasuState(Player.Gote, TsKoma.Gin, 1, 1));
-	ban.add(new TsMasuState(Player.Gote, TsKoma.Hu, 1, 2));
-	ban.add(new TsMasuState(Player.Gote, TsKoma.Ou, 2, 1));
-	ban.add(new TsMasuState(Player.Gote, TsKoma.Hu, 3, 1));
-	ban.add(new TsMasuState(Player.Gote, TsKoma.Kin, 3, 2));
-	ban.add(new TsMasuState(Player.Sente, TsKoma.Kaku, 5, 4));
-
-	var motigoma = XGen.<TsMotigomaState>newHashSet();
-	motigoma.add(new TsMotigomaState(Player.Sente, TsKoma.Hisya, 1));
-	motigoma.add(new TsMotigomaState(Player.Sente, TsKoma.Kin, 1));
-	motigoma.add(new TsMotigomaState(Player.Sente, TsKoma.Keima, 1));
-	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Hu, 16));
-	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Kyousya, 4));
-	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Keima, 3));
-	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Gin, 3));
-	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Kin, 1));
-	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Kaku, 1));
-	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Hisya, 1));
-
-	List<TsKihuRecord> rec = null;
-	try (var solver = new TsSolver()) {
-	    rec = solver.calculate(numOfMoves, ban, motigoma);
-	} catch (Exception e) {
-	    e.printStackTrace();
-	    fail("Error occured.");
+	private static final Logger logger = Logger.getLogger("te5");
+	@Test
+	public void p6_issue161() {
+		int numOfMoves = 5;
+		var ban = XGen.<TsMasuState>newHashSet();
+		ban.add(new TsMasuState(Player.Gote, TsKoma.Gin, 1, 1));
+		ban.add(new TsMasuState(Player.Gote, TsKoma.Hu, 1, 2));
+		ban.add(new TsMasuState(Player.Gote, TsKoma.Ou, 2, 1));
+		ban.add(new TsMasuState(Player.Gote, TsKoma.Hu, 3, 1));
+		ban.add(new TsMasuState(Player.Gote, TsKoma.Kin, 3, 2));
+		ban.add(new TsMasuState(Player.Sente, TsKoma.Kaku, 5, 4));
+		var motigoma = XGen.<TsMotigomaState>newHashSet();
+		motigoma.add(new TsMotigomaState(Player.Sente, TsKoma.Hisya, 1));
+		motigoma.add(new TsMotigomaState(Player.Sente, TsKoma.Kin, 1));
+		motigoma.add(new TsMotigomaState(Player.Sente, TsKoma.Keima, 1));
+		motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Hu, 16));
+		motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Kyousya, 4));
+		motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Keima, 3));
+		motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Gin, 3));
+		motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Kin, 1));
+		motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Kaku, 1));
+		motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Hisya, 1));
+		List<TsKihuRecord> rec = null;
+		try(var solver = new TsSolver()) {
+			rec = solver.calculate(numOfMoves, ban, motigoma);
+		} catch(Exception e) {
+			te5.logger.log(Level.SEVERE, "failed to p6.", e);
+			fail("Error occured.");
+		}
+		Objects.requireNonNull(rec);
+		assertEquals(rec.size(), numOfMoves);
+		assertEquals(rec.get(0).toString(), "２３飛");
+		assertEquals(rec.get(1).toString(), "２２銀");
+		assertEquals(rec.get(2).toString(), "３３桂");
+		assertEquals(rec.get(3).toString(), "１１玉");
+		assertEquals(rec.get(4).toString(), "２１金");
 	}
-
-	Objects.requireNonNull(rec);
-	assertEquals(rec.size(), numOfMoves);
-
-	assertEquals(rec.get(0).toString(), "２３飛");
-	assertEquals(rec.get(1).toString(), "２２銀");
-	assertEquals(rec.get(2).toString(), "３３桂");
-	assertEquals(rec.get(3).toString(), "１１玉");
-	assertEquals(rec.get(4).toString(), "２１金");
-    }
     
-    @Test
-    public void p7_issue247() {
-
-	int numOfMoves = 5;
-
-	var ban = XGen.<TsMasuState>newHashSet();
-	ban.add(new TsMasuState(Player.Gote, TsKoma.Kyousya, 1, 2));
-	ban.add(new TsMasuState(Player.Gote, TsKoma.Uma, 3, 3));
-	ban.add(new TsMasuState(Player.Gote, TsKoma.Ou, 2, 3));
-	ban.add(new TsMasuState(Player.Gote, TsKoma.Hu, 1, 4));
-	ban.add(new TsMasuState(Player.Gote, TsKoma.Hu, 4, 5));
-	ban.add(new TsMasuState(Player.Sente, TsKoma.Ryuu, 4, 2));
-	ban.add(new TsMasuState(Player.Sente, TsKoma.Hu, 3, 6));
-
-	var motigoma = XGen.<TsMotigomaState>newHashSet();
-	motigoma.add(new TsMotigomaState(Player.Sente, TsKoma.Hisya, 1));
-	motigoma.add(new TsMotigomaState(Player.Sente, TsKoma.Gin, 1));
-	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Hu, 15));
-	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Kyousya, 3));
-	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Keima, 4));
-	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Gin, 3));
-	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Kin, 4));
-	motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Kaku, 1));
-
-	List<TsKihuRecord> rec = null;
-	try (var solver = new TsSolver()) {
-	    rec = solver.calculate(numOfMoves, ban, motigoma);
-	} catch (Exception e) {
-	    e.printStackTrace();
-	    fail("Error occured.");
+	@Test
+	public void p7_issue247() {
+		int numOfMoves = 5;
+		var ban = XGen.<TsMasuState>newHashSet();
+		ban.add(new TsMasuState(Player.Gote, TsKoma.Kyousya, 1, 2));
+		ban.add(new TsMasuState(Player.Gote, TsKoma.Uma, 3, 3));
+		ban.add(new TsMasuState(Player.Gote, TsKoma.Ou, 2, 3));
+		ban.add(new TsMasuState(Player.Gote, TsKoma.Hu, 1, 4));
+		ban.add(new TsMasuState(Player.Gote, TsKoma.Hu, 4, 5));
+		ban.add(new TsMasuState(Player.Sente, TsKoma.Ryuu, 4, 2));
+		ban.add(new TsMasuState(Player.Sente, TsKoma.Hu, 3, 6));
+		var motigoma = XGen.<TsMotigomaState>newHashSet();
+		motigoma.add(new TsMotigomaState(Player.Sente, TsKoma.Hisya, 1));
+		motigoma.add(new TsMotigomaState(Player.Sente, TsKoma.Gin, 1));
+		motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Hu, 15));
+		motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Kyousya, 3));
+		motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Keima, 4));
+		motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Gin, 3));
+		motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Kin, 4));
+		motigoma.add(new TsMotigomaState(Player.Gote, TsKoma.Kaku, 1));
+		List<TsKihuRecord> rec = null;
+		try(var solver = new TsSolver()) {
+			rec = solver.calculate(numOfMoves, ban, motigoma);
+		} catch(Exception e) {
+			te5.logger.log(Level.SEVERE, "failed to p7.", e);
+			fail("Error occured.");
+		}
+		Objects.requireNonNull(rec);
+		assertEquals(rec.size(), numOfMoves);
+		assertEquals(rec.get(0).toString(), "３４銀");
+		assertEquals(rec.get(1).toString(), "同玉");
+		assertEquals(rec.get(2).toString(), "３５飛");
+		assertEquals(rec.get(3).toString(), "２４玉");
+		assertEquals(rec.get(4).toString(), "３３龍");
+		// ※別解
+		// assertEquals(rec.get(1).toString(), "同馬");
+		// assertEquals(rec.get(2).toString(), "２１飛");
+		// assertEquals(rec.get(3).toString(), "１３玉");
+		// assertEquals(rec.get(4).toString(), "２２龍");
 	}
-
-	Objects.requireNonNull(rec);	
-	assertEquals(rec.size(), numOfMoves);
-
-	assertEquals(rec.get(0).toString(), "３４銀");
-	assertEquals(rec.get(1).toString(), "同馬");
-	assertEquals(rec.get(2).toString(), "２１飛");
-	assertEquals(rec.get(3).toString(), "１３玉");
-	assertEquals(rec.get(4).toString(), "２２龍");
-    }
 }

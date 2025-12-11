@@ -69,9 +69,9 @@ public class BanContext implements Comparable<BanContext> {
 		}
 		return new ContextCacheKey(key);
 	}
-	public ContextCache createCache(int offset, int depth) {
+	public ContextCache createCache(int depth) {
 		return new ContextCache(
-			this.log.createPartialList(offset, this.log.size()),
+			this.log.createPartialList(depth, this.log.size()),
 			this.motigoma,
 			this.ban,
 			depth);

@@ -45,22 +45,20 @@ public class DerivationCalculator {
 				? () -> this.selfProcessor.spread(b)
 				: () -> this.opponentProcessor.spread(b)));
 		BanContext result = null;
-		int depth = 0;
 		var i = futureMap.entrySet().stream()
 			.sorted((e1, e2) -> XUtils.compare(e1.getKey(), e2.getKey()))
 			.iterator();
-		int cd = this.numOfMoves - count;
 		while (i.hasNext()) {
 			var e = i.next();
 			var k = e.getKey();
 			var ck = k.generateCasheKey();
 			BanContext selected = null;
 			ContextCache cache = SimpleCacheResolver.getAsPublic(PublicCacheMapId.context, ck);
-			if (cache == null || cache.depth < cd) {
+			if (cache == null || cache.depth > count) {
 				selected = r4spread(k, e.getValue().get(), count + 1);
 				cache = selected == null
-					? ContextCache.createFailure(cd)
-					: selected.createCache(count, cd);
+					? ContextCache.createFailure(count)
+					: selected.createCache(count);
 				SimpleCacheResolver.putAsPublic(PublicCacheMapId.context, ck, cache);
 			} else if (cache.success) {
 				selected = cache.restoreContext(k.log);
@@ -72,7 +70,7 @@ public class DerivationCalculator {
 					result = selected;
 			} else if (selected == null) {
 				return null;
-			} else if (depth < (depth = selected.log.size()))
+			} else if (result == null || result.log.size() < selected.log.size())
 				result = selected;
 		}
 		return result;

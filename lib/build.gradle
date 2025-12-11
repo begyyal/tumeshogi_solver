@@ -12,6 +12,11 @@ tasks.withType(AbstractCopyTask) {
 tasks.withType(JavaCompile){
 	options.encoding = 'UTF-8'
 }
+tasks.withType(Test) {
+    testLogging {
+        showStandardStreams = true
+    }
+}
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(15)
