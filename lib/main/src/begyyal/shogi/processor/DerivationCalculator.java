@@ -40,10 +40,15 @@ public class DerivationCalculator {
 		} else if (count > numOfMoves)
 			return null;
 		var futureMap = XGen.<BanContext, Future<BanContext[]>>newHashMap();
-		for (var b : branches)
-			futureMap.put(b, this.exe.submit(count % 2 == 0
-				? () -> this.selfProcessor.spread(b)
-				: () -> this.opponentProcessor.spread(b)));
+		for (var b : branches) {
+			var ck = b.generateCasheKey();
+			ContextCache cache = SimpleCacheResolver.getAsPublic(PublicCacheMapId.context, ck);
+			if (cache == null || cache.depth > count) {
+				futureMap.put(b, this.exe.submit(count % 2 == 0
+					? () -> this.selfProcessor.spread(b)
+					: () -> this.opponentProcessor.spread(b)));
+			} else futureMap.put(b, null);
+		}
 		BanContext result = null;
 		var i = futureMap.entrySet().stream()
 			.sorted((e1, e2) -> XUtils.compare(e1.getKey(), e2.getKey()))
@@ -51,15 +56,14 @@ public class DerivationCalculator {
 		while (i.hasNext()) {
 			var e = i.next();
 			var k = e.getKey();
-			var ck = k.generateCasheKey();
 			BanContext selected = null;
-			ContextCache cache = SimpleCacheResolver.getAsPublic(PublicCacheMapId.context, ck);
+			ContextCache cache = SimpleCacheResolver.getAsPublic(PublicCacheMapId.context, k.ck);
 			if (cache == null || cache.depth > count) {
 				selected = r4spread(k, e.getValue().get(), count + 1);
 				cache = selected == null
 					? ContextCache.createFailure(count)
 					: selected.createCache(count);
-				SimpleCacheResolver.putAsPublic(PublicCacheMapId.context, ck, cache);
+				SimpleCacheResolver.putAsPublic(PublicCacheMapId.context, k.ck, cache);
 			} else if (cache.success) {
 				selected = cache.restoreContext(k.log);
 				if (selected.log.size() > numOfMoves)

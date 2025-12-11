@@ -15,6 +15,7 @@ public class BanContext implements Comparable<BanContext> {
 	public final XList<KihuRecord> log;
 	public final MotigomaState[] motigoma;
 	public final Ban ban;
+	public ContextCacheKey ck;
 	public BanContext(Ban initBan, MotigomaState[] motigoma) {
 		this(XListGen.newi(), initBan, motigoma);
 	}
@@ -67,7 +68,7 @@ public class BanContext implements Comparable<BanContext> {
 				m = 1;
 			}
 		}
-		return new ContextCacheKey(key);
+		return this.ck = new ContextCacheKey(key);
 	}
 	public ContextCache createCache(int depth) {
 		return new ContextCache(

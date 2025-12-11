@@ -54,7 +54,7 @@ public class sample {
 		}
 
 		// 結果は打ち順の棋譜のリスト(1手目~5手目)
-		for (var kihuRecord : kihu) {
+		for (@SuppressWarnings("unused") var kihuRecord : kihu) {
 			// kihuRecordの持つ情報は以下の通りです。
 
 			// public class TsKihuRecord {
