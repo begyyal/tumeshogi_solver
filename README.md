@@ -1,4 +1,4 @@
-[![CI/LIB][ci-lib-badge]][ci-lib-url] [![CI/CMD][ci-cmd-badge]][ci-cmd-url] [![push-tags][tags-badge]][tags-url]
+[![CI/LIB][ci-lib-badge]][ci-lib-url] [![CI/CMD][ci-cmd-badge]][ci-cmd-url] [![publish][publish-badge]][publish-url]
 
 # 概要
 
@@ -47,7 +47,7 @@ Javaライブラリ版と、コマンド実行形式版があります。
     - 〇 : 最遅でも1分以内
     - △ : 難度次第では1分を大幅に超過してしまう
     - ？ : 未検証
-  - [v3.0.3](https://github.com/begyyal/tumeshogi_solver/releases/tag/v3.0.3) 時点
+  - [v3.1.0](https://github.com/begyyal/tumeshogi_solver/releases/tag/v3.1.0) 時点
     - 7手詰め迄 : ◎
     - 9手詰め : ◎
     - 11手詰め : △
@@ -60,5 +60,5 @@ Javaライブラリ版と、コマンド実行形式版があります。
 [ci-lib-badge]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/ci-lib.yml/badge.svg
 [ci-cmd-url]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/ci-cmd.yml
 [ci-cmd-badge]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/ci-cmd.yml/badge.svg
-[tags-url]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-tags.yml
-[tags-badge]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/push-tags.yml/badge.svg
+[publish-url]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/publish.yml
+[publish-badge]: https://github.com/begyyal/tumeshogi_solver/actions/workflows/publish.yml/badge.svg

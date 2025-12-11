@@ -3,6 +3,7 @@ build/
 build_exe/
 .settings/
 
+.ghtoken
 .classpath
 .gradle
 .project

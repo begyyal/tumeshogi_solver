@@ -1,11 +1,13 @@
-name: push-tags
-
-on:
-  push:
-    tags: [ v* ]
-
+name: publish
+on: 
+  workflow_dispatch:
+    inputs:
+      version: 
+        description: 'package version.'
+        required: true
+        type: string
 jobs:
-  update-tag:
+  publish:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -13,17 +15,16 @@ jobs:
       run: |
         git config --global user.email "begyyal@gmail.com"
         git config --global user.name "begyyal-ghost"
-    - name: Update tag
+    - name: Push a git tag
       run: |
-        version=${{ github.ref_name }}
-        git tag -a ${version%%.*} -m "BY-CI"
-        git push origin ${version%%.*} -f
+        git tag ${{ inputs.version }}
+        git push origin ${{ inputs.version }} -f
     - name: Post tweet
       run: |
-        ./.github/workflows/sh/tweet_template.sh \
-        ${{ github.ref_name }} \
+        ./tool/tweet_template.sh \
+        ${{ inputs.version }} \
         ${{ github.event.repository.html_url }} > ./data_temp
-        ./.github/workflows/sh/tweet.sh \
+        ./tool/tweet.sh \
         ${{ secrets.TW_CONS_KEY }} \
         ${{ secrets.TW_CONS_SECRET }} \
         ${{ secrets.TW_OAUTH_TOKEN }} \
